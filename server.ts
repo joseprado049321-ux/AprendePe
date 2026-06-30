@@ -198,11 +198,16 @@ REGLAS ESTRICTAS:
 });
 
 if (process.env.NODE_ENV !== "production") {
-  const vite = await createViteServer({
+  createViteServer({
     server: { middlewareMode: true },
     appType: "spa",
-  });
-  app.use(vite.middlewares);
+  })
+    .then((vite) => {
+      app.use(vite.middlewares);
+    })
+    .catch((err) => {
+      console.error("Failed to create Vite server:", err);
+    });
 } else {
   const distPath = path.join(process.cwd(), 'dist');
   app.use(express.static(distPath));
