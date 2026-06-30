@@ -163,18 +163,13 @@ async function startServer() {
 
   app.post("/api/generate-diagnostic", async (req, res) => {
     try {
-      const { educationalStage, grade } = req.body;
+      const { educationalStage, grade, selfAssessedLevel } = req.body;
       
-      const prompt = `
-        You are an adaptive learning AI for AprendePe.
-        Create a diagnostic mini-test of exactly 5 questions to evaluate a student.
-        
-        TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.
-        
-        DIFICULTAD BASE: El estudiante está en el grado ${grade} de ${educationalStage}. Genera 5 preguntas variadas (Matemáticas, Comunicación, Ciencias) adecuadas para este grado específico para medir su nivel actual.
-        
-        Output only the final 5 validated questions following the exact schema.
-      `;
+      const prompt = `Actúa como un profesor experto de Perú. Genera una prueba diagnóstica de 5 preguntas de cultura general, razonamiento matemático y comprensión lectora para un estudiante de ${educationalStage}, en el grado ${grade}, que se considera de nivel ${selfAssessedLevel}. 
+  REGLAS ESTRICTAS:
+  - Si es 'Inicial', usa conceptos básicos (colores, formas, animales).
+  - Si es 'Secundaria' en nivel 'Avanzado', haz preguntas retadoras.
+  - Devuelve ÚNICAMENTE un arreglo JSON puro con 5 objetos. Cada objeto debe tener: 'text' (la pregunta), 'options' (arreglo de 4 opciones de texto), y 'correctAnswerIndex' (número del 0 al 3).`;
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -188,10 +183,9 @@ async function startServer() {
               properties: {
                 text: { type: Type.STRING, description: "The question text" },
                 options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Exactly 4 options" },
-                correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" },
-                explanation: { type: Type.STRING, description: "Brief explanation of the answer" }
+                correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" }
               },
-              required: ["text", "options", "correctAnswerIndex", "explanation"]
+              required: ["text", "options", "correctAnswerIndex"]
             }
           }
         }
@@ -200,7 +194,7 @@ async function startServer() {
       res.json({ questions: generatedQuestions });
     } catch (error: any) {
       console.warn("Diagnostic fallback triggered:", error?.message);
-      res.json({ questions: Array.from({ length: 5 }, (_, i) => ({ text: `Pregunta diagnóstica #${i + 1}`, options: ["A", "B", "C", "D"], correctAnswerIndex: 1, explanation: "Fallback" })) });
+      res.json({ questions: Array.from({ length: 5 }, (_, i) => ({ text: `Pregunta diagnóstica #${i + 1} (Modo sin conexión)`, options: ["Opción A", "Opción B", "Opción C", "Opción D"], correctAnswerIndex: 1 })) });
     }
   });
 

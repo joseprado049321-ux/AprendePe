@@ -41,7 +41,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
       const res = await fetch('/api/generate-diagnostic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ educationalStage: stage, grade })
+        body: JSON.stringify({ educationalStage: stage, grade, selfAssessedLevel: selectedSelfLevel })
       });
       const data = await res.json();
       setQuestions(data.questions || []);
@@ -205,7 +205,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {step === 4 && (
             <motion.div key="step4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center py-12">
               <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
-              <h2 className="text-2xl font-bold font-playful mb-2">Preparando tu diagnóstico...</h2>
+              <h2 className="text-2xl font-bold font-playful mb-2">Generando tu prueba personalizada...</h2>
               <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Nuestra IA está creando un test personalizado para {grade} de {stage}.</p>
             </motion.div>
           )}
