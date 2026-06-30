@@ -1,10 +1,9 @@
 {
-  "projectId": "temporal-carver-3dckx",
-  "appId": "1:1057975139210:web:c7e0a83f07b865d0186673",
-  "apiKey": "AIzaSyBlDuJJQQUBiGWGmBt0uuk4KCuLtdC-c60",
-  "authDomain": "temporal-carver-3dckx.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-b99d94db-5a95-4fa4-a802-a52cb794a344",
-  "storageBucket": "temporal-carver-3dckx.firebasestorage.app",
-  "messagingSenderId": "1057975139210",
-  "measurementId": ""
+  "projectId": "aprendepe-team",
+  "appId": "1:139342246545:web:6c5abf016e1a5f8f008530",
+  "apiKey": "AIzaSyDcnEOM4zjvplOwYqN52pDlkMo9H0mFdPw",
+  "authDomain": "aprendepe-team.firebaseapp.com",
+  "storageBucket": "aprendepe-team.firebasestorage.app",
+  "messagingSenderId": "139342246545",
+  "measurementId": "G-X5ZVBZXV14"
 }
