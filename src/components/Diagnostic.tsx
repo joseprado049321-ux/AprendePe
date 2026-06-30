@@ -7,11 +7,11 @@ import { useSound } from '../contexts/SoundContext';
 import confetti from 'canvas-confetti';
 
 interface DiagnosticProps {
-  profile: UserProfile;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  profile?: UserProfile;
+  updateProfile?: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
-export default function Diagnostic({ profile, updateProfile }: DiagnosticProps) {
+export default function Diagnostic({ profile, updateProfile }: DiagnosticProps = {}) {
   const [step, setStep] = useState(0); // 0: Welcome, 1: Stage, 2: Grade, 3: Self-eval, 4: Diagnostic Fetch, 5: Quiz
   
   // Collected data
@@ -83,15 +83,22 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps) 
       else if (stage === 'Primaria') calculatedLevel = 'Primaria';
 
       try {
-        await updateProfile({ 
+        const diagnosticData = {
           educationalStage: stage as any,
           grade,
           selfAssessedLevel: selfLevel,
           diagnosticScore: percentage,
           diagnosticLevel: calculatedLevel, 
           level: calculatedLevel 
-        });
-        navigate('/home');
+        };
+
+        if (updateProfile && profile) {
+          await updateProfile({ ...diagnosticData, hasCompletedDiagnostic: true });
+          navigate('/home');
+        } else {
+          localStorage.setItem('temp_onboarding', JSON.stringify(diagnosticData));
+          navigate('/login');
+        }
       } catch (err) {
         console.error('Error saving diagnostic', err);
         setIsSaving(false);

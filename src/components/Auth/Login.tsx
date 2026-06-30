@@ -13,6 +13,19 @@ export default function Login({ setIsGuest }: LoginProps) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const getTempOnboarding = () => {
+    const temp = localStorage.getItem('temp_onboarding');
+    if (temp) {
+      try {
+        return JSON.parse(temp);
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+    return null;
+  };
+
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -22,6 +35,8 @@ export default function Login({ setIsGuest }: LoginProps) {
       const userRef = doc(db, 'users', result.user.uid);
       const docSnap = await getDoc(userRef);
       
+      const onboardingData = getTempOnboarding();
+
       if (!docSnap.exists()) {
         const userProfile: UserProfile = {
           uid: result.user.uid,
@@ -33,9 +48,18 @@ export default function Login({ setIsGuest }: LoginProps) {
           xp: 0,
           unlockedAchievements: [],
           history: [],
-          level: 'Inicial',
+          level: onboardingData?.level || 'Inicial',
+          ...(onboardingData || {}),
+          hasCompletedDiagnostic: !!onboardingData,
         };
         await setDoc(userRef, userProfile);
+      } else if (onboardingData) {
+        // If user exists but just did onboarding, update their profile
+        await setDoc(userRef, { ...onboardingData, hasCompletedDiagnostic: true }, { merge: true });
+      }
+
+      if (onboardingData) {
+        localStorage.removeItem('temp_onboarding');
       }
       
       // Let onAuthStateChanged handle navigation
@@ -47,6 +71,29 @@ export default function Login({ setIsGuest }: LoginProps) {
 
   const handleGuestLogin = () => {
     localStorage.setItem('isGuest', 'true');
+    const onboardingData = getTempOnboarding();
+    
+    if (onboardingData) {
+      const guestProfile: UserProfile = {
+        uid: 'guest',
+        email: '',
+        displayName: 'Invitado',
+        streak: 0,
+        lastActive: new Date().toISOString(),
+        points: 0,
+        xp: 0,
+        unlockedAchievements: [],
+        history: [],
+        level: onboardingData.level || 'Inicial',
+        wallet: { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+        inventory: { streakProtectors: 0, xpMultipliers: 0 },
+        ...onboardingData,
+        hasCompletedDiagnostic: true
+      };
+      localStorage.setItem('guestProfile', JSON.stringify(guestProfile));
+      localStorage.removeItem('temp_onboarding');
+    }
+
     if (setIsGuest) setIsGuest(true);
     navigate('/home');
   };

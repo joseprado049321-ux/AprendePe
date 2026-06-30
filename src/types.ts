@@ -60,6 +60,7 @@ export interface UserProfile {
   selfAssessedLevel?: string;
   diagnosticScore?: number;
   diagnosticLevel?: Level;
+  hasCompletedDiagnostic?: boolean;
   theme?: 'light' | 'dark';
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };
   hasCompletedTour?: boolean;

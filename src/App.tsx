@@ -14,7 +14,6 @@ import Shop from './components/Shop';
 
 import Diagnostic from './components/Diagnostic';
 
-import Onboarding from './components/Onboarding';
 import Leaderboard from './components/Leaderboard';
 import Achievements from './components/Achievements';
 import { NotificationsProvider } from './contexts/NotificationsContext';
@@ -147,7 +146,7 @@ export default function App() {
     return <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>;
   }
 
-  const needsDiagnostic = isAuthenticated && profile && !profile.diagnosticLevel;
+  const needsDiagnostic = isAuthenticated && profile && !profile.hasCompletedDiagnostic;
 
   const stageTheme = profile?.educationalStage ? `theme-${profile.educationalStage.toLowerCase()}` : '';
 
@@ -156,13 +155,13 @@ export default function App() {
       <NotificationsProvider profile={profile}>
         <div className={`min-h-screen bg-[var(--bg,theme(colors.slate.50))] text-[var(--text,theme(colors.slate.900))] dark:bg-[var(--bg,theme(colors.slate.900))] dark:text-[var(--text,white)] transition-colors duration-300 ${stageTheme}`}>
           <Routes>
-            <Route path="/" element={!isAuthenticated ? <Onboarding /> : (needsDiagnostic ? <Navigate to="/diagnostic" /> : <Navigate to="/home" />)} />
-            <Route path="/login" element={!isAuthenticated ? <Login setIsGuest={setIsGuest} /> : (needsDiagnostic ? <Navigate to="/diagnostic" /> : <Navigate to="/home" />)} />
-            <Route path="/register" element={!isAuthenticated ? <Register /> : (needsDiagnostic ? <Navigate to="/diagnostic" /> : <Navigate to="/home" />)} />
-            <Route path="/diagnostic" element={isAuthenticated && profile ? (needsDiagnostic ? <Diagnostic profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/home" />) : <Navigate to="/login" />} />
-            <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/diagnostic" />) : <Navigate to="/login" />} />
-            <Route path="/shop" element={isAuthenticated && profile ? (!needsDiagnostic ? <Shop profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/diagnostic" />) : <Navigate to="/login" />} />
-            <Route path="/quiz" element={isAuthenticated && profile ? (!needsDiagnostic ? <Quiz profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/diagnostic" />) : <Navigate to="/login" />} />
+            <Route path="/" element={!isAuthenticated ? <Diagnostic /> : (needsDiagnostic ? <Diagnostic profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/home" />)} />
+            <Route path="/login" element={!isAuthenticated ? <Login setIsGuest={setIsGuest} /> : (needsDiagnostic ? <Navigate to="/" /> : <Navigate to="/home" />)} />
+            <Route path="/register" element={!isAuthenticated ? <Register /> : (needsDiagnostic ? <Navigate to="/" /> : <Navigate to="/home" />)} />
+            <Route path="/diagnostic" element={<Navigate to="/" replace />} />
+            <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
+            <Route path="/shop" element={isAuthenticated && profile ? (!needsDiagnostic ? <Shop profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
+            <Route path="/quiz" element={isAuthenticated && profile ? (!needsDiagnostic ? <Quiz profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/leaderboard" element={isAuthenticated && profile ? <Leaderboard currentUserId={profile.uid} /> : <Navigate to="/login" />} />
             <Route path="/achievements" element={isAuthenticated && profile ? <Achievements profile={profile} /> : <Navigate to="/login" />} />
