@@ -43,6 +43,9 @@ async function startServer() {
     try {
       const { subject, level, userId, userHistory, nodeId, lastAccuracy, lastLivesLost } = req.body;
       const diagnosticLevel = userHistory?.diagnosticLevel || level;
+      const educationalStage = userHistory?.educationalStage || "Primaria";
+      const grade = userHistory?.grade || "Desconocido";
+      const diagnosticScore = userHistory?.diagnosticScore || 0;
       const xp = userHistory?.xp || 0;
       const targetLevel = nodeId || 1;
 
@@ -70,11 +73,14 @@ async function startServer() {
         ddaInstruction = "IMPORTANTE: El estudiante está teniendo dificultades con este tema. Reduce silenciosamente la dificultad de las preguntas, utiliza un lenguaje más accesible y enfócate en los conceptos base para ayudarlo a recuperar la confianza, sin decírselo directamente.";
       }
 
-      // Call Gemini
       const prompt = `
         You are an adaptive learning AI for AprendePe.
         Create a new lesson of exactly 10 questions for the subject "${subject}".
         
+        TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.
+        
+        DIFICULTAD BASE: El estudiante está en el grado ${grade} de ${educationalStage}. Ajusta el rigor del currículo estrictamente a este nivel oficial. Además, su puntaje diagnóstico fue de ${diagnosticScore}%. Si el puntaje es bajo, inicia enseñando los fundamentos de este grado. Si es alto, dale problemas avanzados o de pensamiento crítico correspondientes a su edad.
+
         CRITICAL: Estás generando preguntas para el Nivel ${targetLevel}. A mayor nivel, mayor debe ser la complejidad analítica de la pregunta dentro de la misma categoría.
         The user has a diagnostic level of "${diagnosticLevel}" y ${xp} puntos de XP. 
         Evalúa su XP:
@@ -127,31 +133,22 @@ async function startServer() {
             }
           });
           generatedQuestions = JSON.parse(response.text || "[]");
-          break; // Success, exit loop
+          break;
         } catch (error: any) {
           attempts++;
           console.warn(`Attempt ${attempts} failed:`, error?.message || error);
-          if (attempts >= maxAttempts) {
-            throw error; // Re-throw to be caught by the outer catch
-          }
+          if (attempts >= maxAttempts) throw error;
           await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
+          delay *= 2;
         }
       }
 
-      // Save to Cache before returning
       if (db && userId && userId !== 'guest' && generatedQuestions.length > 0) {
         try {
           const docRef = db.collection('users').doc(userId).collection('preguntasGeneradas').doc(`${subject}_${targetLevel}`);
           await docRef.set({
-            userId,
-            theme: subject,
-            level: diagnosticLevel,
-            nodeId: targetLevel,
-            questions: generatedQuestions,
-            createdAt: new Date()
+            userId, theme: subject, level: diagnosticLevel, nodeId: targetLevel, questions: generatedQuestions, createdAt: new Date()
           });
-          console.log(`[Cache SAVED] Saved generated questions for ${userId} - ${subject} - Level ${targetLevel}`);
         } catch (cacheErr: any) {
           console.warn("CACHE SAVE ERR:", cacheErr?.message || cacheErr);
         }
@@ -159,16 +156,51 @@ async function startServer() {
 
       res.json({ questions: generatedQuestions, isNew: true });
     } catch (error: any) {
-      console.warn("Fallback triggered. Error generating questions:", error?.message || "Unknown error");
+      console.warn("Fallback triggered:", error?.message || "Unknown error");
+      res.json({ questions: Array.from({ length: 10 }, (_, i) => ({ text: `Pregunta de ${req.body.subject} #${i + 1}`, options: ["A", "B", "C", "D"], correctAnswerIndex: 1, explanation: "Fallback" })), isFallback: true });
+    }
+  });
+
+  app.post("/api/generate-diagnostic", async (req, res) => {
+    try {
+      const { educationalStage, grade } = req.body;
       
-      const fallbackQuestions = Array.from({ length: 10 }, (_, i) => ({
-        text: `Pregunta autómaticamente generada de ${req.body.subject} (Respaldo) #${i + 1}`,
-        options: ["Opción A", "Opción correcta", "Opción C", "Opción D"],
-        correctAnswerIndex: 1,
-        explanation: "Explicación de respaldo por límite de peticiones de IA o error."
-      }));
-      
-      res.json({ questions: fallbackQuestions, isFallback: true });
+      const prompt = `
+        You are an adaptive learning AI for AprendePe.
+        Create a diagnostic mini-test of exactly 5 questions to evaluate a student.
+        
+        TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.
+        
+        DIFICULTAD BASE: El estudiante está en el grado ${grade} de ${educationalStage}. Genera 5 preguntas variadas (Matemáticas, Comunicación, Ciencias) adecuadas para este grado específico para medir su nivel actual.
+        
+        Output only the final 5 validated questions following the exact schema.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                text: { type: Type.STRING, description: "The question text" },
+                options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Exactly 4 options" },
+                correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" },
+                explanation: { type: Type.STRING, description: "Brief explanation of the answer" }
+              },
+              required: ["text", "options", "correctAnswerIndex", "explanation"]
+            }
+          }
+        }
+      });
+      const generatedQuestions = JSON.parse(response.text || "[]");
+      res.json({ questions: generatedQuestions });
+    } catch (error: any) {
+      console.warn("Diagnostic fallback triggered:", error?.message);
+      res.json({ questions: Array.from({ length: 5 }, (_, i) => ({ text: `Pregunta diagnóstica #${i + 1}`, options: ["A", "B", "C", "D"], correctAnswerIndex: 1, explanation: "Fallback" })) });
     }
   });
 

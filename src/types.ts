@@ -55,6 +55,10 @@ export interface UserProfile {
   lastSelectedCourse?: string;
   unlockedAchievements: string[];
   level: Level;
+  educationalStage?: 'Inicial' | 'Primaria' | 'Secundaria';
+  grade?: string;
+  selfAssessedLevel?: string;
+  diagnosticScore?: number;
   diagnosticLevel?: Level;
   theme?: 'light' | 'dark';
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };

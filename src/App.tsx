@@ -149,10 +149,12 @@ export default function App() {
 
   const needsDiagnostic = isAuthenticated && profile && !profile.diagnosticLevel;
 
+  const stageTheme = profile?.educationalStage ? `theme-${profile.educationalStage.toLowerCase()}` : '';
+
   return (
     <ThemeProvider initialTheme={profile?.theme} onThemeChange={(t) => handleUpdateProfile({ theme: t })}>
       <NotificationsProvider profile={profile}>
-        <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white transition-colors duration-300">
+        <div className={`min-h-screen bg-[var(--bg,theme(colors.slate.50))] text-[var(--text,theme(colors.slate.900))] dark:bg-[var(--bg,theme(colors.slate.900))] dark:text-[var(--text,white)] transition-colors duration-300 ${stageTheme}`}>
           <Routes>
             <Route path="/" element={!isAuthenticated ? <Onboarding /> : (needsDiagnostic ? <Navigate to="/diagnostic" /> : <Navigate to="/home" />)} />
             <Route path="/login" element={!isAuthenticated ? <Login setIsGuest={setIsGuest} /> : (needsDiagnostic ? <Navigate to="/diagnostic" /> : <Navigate to="/home" />)} />

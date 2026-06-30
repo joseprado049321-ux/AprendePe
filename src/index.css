@@ -29,6 +29,41 @@
   --gray-s: #0f172a;
 }
 
+/* Educational Stage Themes */
+.theme-inicial {
+  --radius: 24px;
+  /* Colores más vivos y lúdicos */
+  --math: #00c6ff; --math-s: #00a4d8;
+  --comm: #ffb703; --comm-s: #e5a400;
+  --science: #7cb518; --science-s: #5c8a11;
+  --social: #fb8500; --social-s: #d97400;
+  --bg: #f0fdff; /* Fondo ligeramente celeste/claro */
+}
+
+.theme-primaria {
+  --radius: 12px;
+  /* Colores equilibrados */
+  --math: #3b82f6; --math-s: #2563eb;
+  --comm: #f59e0b; --comm-s: #d97706;
+  --science: #10b981; --science-s: #059669;
+  --social: #ef4444; --social-s: #dc2626;
+  --bg: #ffffff;
+}
+
+.theme-secundaria {
+  --radius: 6px;
+  /* Colores más serios, estilo dark mode con neones */
+  --bg: #111827; 
+  --text: #f3f4f6;
+  --muted: #9ca3af;
+  --gray: #374151; --gray-s: #1f2937;
+  
+  --math: #0ea5e9; --math-s: #0284c7;
+  --comm: #f59e0b; --comm-s: #d97706;
+  --science: #10b981; --science-s: #059669;
+  --social: #f43f5e; --social-s: #e11d48;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-playful: "Fredoka", "Inter", ui-sans-serif, system-ui, sans-serif;
