@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2 } from 'lucide-react';
+import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart } from 'lucide-react';
 import { Level, Subject, UserProfile } from '../types';
 import { getTheme } from '../lib/theme';
 import { getQuestions } from '../data';
@@ -35,7 +35,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const [sessionPoints, setSessionPoints] = useState(0);
   const [lives, setLives] = useState(5); 
 
-  const [showRescueModal, setShowRescueModal] = useState(false);
+  const [showOutOfLivesModal, setShowOutOfLivesModal] = useState(false);
   const [rescuing, setRescuing] = useState(false);
   const [reward, setReward] = useState<RewardDrop | null>(null);
 
@@ -55,24 +55,24 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
       setLives(newLives); 
-      if (newLives === 0 && level !== 'Secundaria') {
-         setTimeout(() => setShowRescueModal(true), 500);
+      if (newLives === 0) {
+         setTimeout(() => setShowOutOfLivesModal(true), 500);
       }
     }
   };
 
   const handleBuyLives = async () => {
-    const currentEsmeraldas = profile.wallet?.esmeralda || 0;
-    if (currentEsmeraldas < 10) return;
+    const currentOro = profile.wallet?.oro || 0;
+    if (currentOro < 50) return;
     
     await updateProfile({
         wallet: {
             ...profile.wallet!,
-            esmeralda: currentEsmeraldas - 10
+            oro: currentOro - 50
         }
     });
     setLives(3);
-    setShowRescueModal(false);
+    setShowOutOfLivesModal(false);
     setSelectedOption(null);
     setIsAnswered(false);
   };
@@ -82,10 +82,10 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     setTimeout(() => {
         setLives(1);
         setRescuing(false);
-        setShowRescueModal(false);
+        setShowOutOfLivesModal(false);
         setSelectedOption(null);
         setIsAnswered(false);
-    }, 5000);
+    }, 3000);
   };
 
   const handleContinue = async () => {
@@ -229,58 +229,63 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     <div className={`${theme.appBg} flex flex-col h-screen overflow-hidden relative`}>
       {/* Rescue Modal */}
       <AnimatePresence>
-          {showRescueModal && (
+          {showOutOfLivesModal && (
               <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+                  className="absolute inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center p-4"
               >
                   <motion.div 
                       initial={{ scale: 0.9, y: 20 }}
                       animate={{ scale: 1, y: 0 }}
-                      className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center"
+                      className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center"
                   >
-                      <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-4">
-                          <HeartPulse className="text-rose-500" size={32} />
+                      <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mb-6">
+                          <HeartPulse className="text-red-500" size={40} />
                       </div>
-                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">¡Te has quedado sin vidas!</h2>
+                      <h2 className="text-2xl font-bold text-white mb-3">¡Te has quedado sin vidas!</h2>
                       
                       {rescuing ? (
                           <div className="py-8 flex flex-col items-center gap-4">
-                              <Loader2 className="animate-spin text-indigo-500" size={40} />
-                              <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Viendo anuncio patrocinado...</p>
+                              <Loader2 className="animate-spin text-indigo-500" size={48} />
+                              <p className="text-slate-400 font-medium animate-pulse">Viendo anuncio patrocinado...</p>
                           </div>
                       ) : (
                           <>
-                              <p className="text-slate-600 dark:text-slate-400 mb-8">No te rindas ahora. Recupera vidas para continuar la lección.</p>
+                              <p className="text-slate-400 mb-8">No te rindas ahora. Recupera vidas para continuar tu racha de aprendizaje.</p>
                               
-                              <div className="w-full space-y-3">
+                              <div className="w-full space-y-4">
+                                  {(profile.wallet?.oro || 0) < 50 ? (
+                                      <div className="w-full text-red-400 text-sm font-semibold mb-2">
+                                          Saldo insuficiente (Necesitas 50 Oro)
+                                      </div>
+                                  ) : null}
                                   <button 
                                       onClick={handleBuyLives}
-                                      disabled={(profile.wallet?.esmeralda || 0) < 10}
-                                      className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:hover:bg-indigo-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-between"
+                                      disabled={(profile.wallet?.oro || 0) < 50}
+                                      className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-between"
                                   >
-                                      <span>Recuperar 3 Vidas</span>
-                                      <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg">
-                                          <Gem size={18} />
-                                          <span>10</span>
+                                      <span className="text-lg">Recuperar 3 Vidas</span>
+                                      <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
+                                          <Diamond size={18} className="text-amber-400 fill-current" />
+                                          <span>50</span>
                                       </div>
                                   </button>
                                   
                                   <button 
                                       onClick={handleWatchAd}
-                                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
+                                      className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-3"
                                   >
-                                      <Zap size={20} />
-                                      Ver Anuncio (1 Vida)
+                                      <Zap size={22} className="text-emerald-400" />
+                                      <span className="text-lg">Ver anuncio (1 Vida)</span>
                                   </button>
                                   
                                   <button 
                                       onClick={() => navigate('/home')}
-                                      className="w-full mt-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-bold py-3 transition-colors"
+                                      className="w-full mt-4 text-slate-500 hover:text-slate-300 font-bold py-4 transition-colors text-lg"
                                   >
-                                      Rendirse y salir
+                                      Salir al Mapa
                                   </button>
                               </div>
                           </>
@@ -342,12 +347,15 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         <div className={`grow ${theme.progressBg}`}>
           <div className={theme.progressFill} style={{ width: `${progress}%` }} />
         </div>
-        {level !== 'Secundaria' && (
-          <div className="flex items-center gap-1.5 text-rose-500 font-bold shrink-0">
-            <HeartPulse size={28} />
-            <span className="text-xl">{lives}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Heart 
+              key={i} 
+              size={24} 
+              className={i < lives ? "text-red-500 fill-current" : "text-slate-200 dark:text-slate-700"} 
+            />
+          ))}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-48">
