@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public profile and gamification state of the user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "streak": { "type": "number", "description": "Number of consecutive days active" },
+        "points": { "type": "number", "description": "Total XP points" },
+        "level": { "type": "string", "enum": ["Inicial", "Primaria", "Secundaria"] },
+        "unlockedAchievements": { "type": "array", "items": { "type": "string" } },
+        "lastActive": { "type": "string" }
+      },
+      "required": ["uid", "email", "streak", "points", "level"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores user profile data, gamification state and preferences"
+    }
+  }
+}
