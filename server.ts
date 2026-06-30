@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -205,17 +204,14 @@ REGLAS ESTRICTAS:
   }
 });
 
-if (process.env.NODE_ENV !== "production") {
-  createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  })
-    .then((vite) => {
-      app.use(vite.middlewares);
-    })
-    .catch((err) => {
-      console.error("Failed to create Vite server:", err);
+if (process.env.NODE_ENV !== 'production') {
+  import('vite').then(async (viteModule) => {
+    const viteServer = await viteModule.createServer({
+      server: { middlewareMode: true },
+      appType: 'spa'
     });
+    app.use(viteServer.middlewares);
+  }).catch((err) => console.error("Error cargando Vite dinámicamente:", err));
 } else {
   const distPath = path.join(process.cwd(), 'dist');
   app.use(express.static(distPath));
