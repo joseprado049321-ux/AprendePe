@@ -155,8 +155,8 @@ app.post("/api/generate-questions", async (req, res) => {
 
     res.json({ questions: generatedQuestions, isNew: true });
   } catch (error: any) {
-    console.warn("Fallback triggered:", error?.message || "Unknown error");
-    res.json({ questions: Array.from({ length: 10 }, (_, i) => ({ text: `Pregunta de ${req.body.subject} #${i + 1}`, options: ["A", "B", "C", "D"], correctAnswerIndex: 1, explanation: "Fallback" })), isFallback: true });
+    console.error("Error in Gemini API:", error);
+    res.status(500).json({ error: 'Failed to generate', details: error.message });
   }
 });
 
@@ -192,8 +192,8 @@ REGLAS ESTRICTAS:
     const generatedQuestions = JSON.parse(response.text || "[]");
     res.json({ questions: generatedQuestions });
   } catch (error: any) {
-    console.warn("Diagnostic fallback triggered:", error?.message);
-    res.json({ questions: Array.from({ length: 5 }, (_, i) => ({ text: `Pregunta diagnóstica #${i + 1} (Modo sin conexión)`, options: ["Opción A", "Opción B", "Opción C", "Opción D"], correctAnswerIndex: 1 })) });
+    console.error("Error in Gemini API:", error);
+    res.status(500).json({ error: 'Failed to generate', details: error.message });
   }
 });
 
