@@ -52,6 +52,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
       return;
     }
     
+    if ((profile.lives ?? 5) <= 0) {
+      playSound('fail');
+      alert('¡No tienes vidas! Ve a la Tienda para recargarlas y seguir aprendiendo.');
+      return;
+    }
+    
     playSound('click');
     setGeneratingState('checking');
     
@@ -204,54 +210,80 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           </div>
         </header>
 
-        {/* Level Path Map */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '60px', padding: '40px 0', width: '100%', position: 'relative', zIndex: 10 }}>
-          {pathNodes.map((node, i) => {
-            // Variado strict palette: alternate colors for nodes
-            let nodeBg = t.node;
-            if (subject === 'Variado' && node.unlocked) {
-               const colors = ['bg-red-500 shadow-[0_6px_0_#cc3c3c]', 'bg-yellow-500 shadow-[0_6px_0_#cc9f00]', 'bg-[var(--math)] shadow-[0_6px_0_var(--math-s)]', 'bg-[var(--science)] shadow-[0_6px_0_var(--science-s)]'];
-               nodeBg = colors[i % 4];
-               if(nodeBg.includes('yellow')) {
-                 nodeBg += ' text-slate-900';
-               } else {
-                 nodeBg += ' text-white';
-               }
-            } else if (node.unlocked) {
-               nodeBg = `bg-[var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'})] shadow-[0_6px_0_var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'}-s)] border-0 text-white hover:brightness-110`;
-               if (subject === 'Comunicación') {
-                   nodeBg += ' text-[#5a3e00]';
-               }
-            }
+        {/* Level Path Map & Global Lives Column */}
+        <div className="flex w-full relative z-10 px-4">
+          <div className="flex-1 flex flex-col items-center gap-[60px] py-10">
+            {pathNodes.map((node, i) => {
+              // Variado strict palette: alternate colors for nodes
+              let nodeBg = t.node;
+              if (subject === 'Variado' && node.unlocked) {
+                 const colors = ['bg-red-500 shadow-[0_6px_0_#cc3c3c]', 'bg-yellow-500 shadow-[0_6px_0_#cc9f00]', 'bg-[var(--math)] shadow-[0_6px_0_var(--math-s)]', 'bg-[var(--science)] shadow-[0_6px_0_var(--science-s)]'];
+                 nodeBg = colors[i % 4];
+                 if(nodeBg.includes('yellow')) {
+                   nodeBg += ' text-slate-900';
+                 } else {
+                   nodeBg += ' text-white';
+                 }
+              } else if (node.unlocked) {
+                 nodeBg = `bg-[var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'})] shadow-[0_6px_0_var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'}-s)] border-0 text-white hover:brightness-110`;
+                 if (subject === 'Comunicación') {
+                     nodeBg += ' text-[#5a3e00]';
+                 }
+              }
 
-            const currentWidth = levelWidths[i] || 'w-48';
+              const currentWidth = levelWidths[i] || 'w-48';
 
-            return (
-              <motion.div 
-                key={node.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="relative flex flex-col items-center justify-center z-10"
-              >
-                <button
-                  onClick={node.unlocked ? () => handleNodeClick(node.id, node.unlocked) : undefined}
-                  disabled={!node.unlocked}
-                  title={node.unlocked ? undefined : `🔒 Completa el Nivel ${node.id - 1} para desbloquear`}
-                  className={`${currentWidth} h-20 rounded-xl flex items-center justify-center transition-all duration-300 pointer-events-auto ${
-                    node.unlocked 
-                      ? `${nodeBg} hover:scale-105 hover:shadow-2xl active:scale-95` 
-                      : 'bg-[#e5e5e5] shadow-[0_6px_0_#c0c0c0] text-[#afafaf] opacity-60 cursor-not-allowed dark:bg-[var(--gray)] dark:shadow-[0_6px_0_var(--bg)] dark:text-[var(--muted)]'
-                  }`}
+              return (
+                <motion.div 
+                  key={node.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative flex flex-col items-center justify-center z-10"
                 >
-                  {node.unlocked ? <span className="text-[26px] font-bold">{node.id}</span> : <Lock size={28} />}
-                </button>
-                <span className="font-bold text-[12px] whitespace-nowrap absolute -bottom-[24px] text-[#afafaf]">
-                  Nivel {node.id}
-                </span>
-              </motion.div>
-            );
-          })}
+                  <button
+                    onClick={node.unlocked ? () => handleNodeClick(node.id, node.unlocked) : undefined}
+                    disabled={!node.unlocked}
+                    title={node.unlocked ? undefined : `🔒 Completa el Nivel ${node.id - 1} para desbloquear`}
+                    className={`${currentWidth} h-20 rounded-xl flex items-center justify-center transition-all duration-300 pointer-events-auto ${
+                      node.unlocked 
+                        ? `${nodeBg} hover:scale-105 hover:shadow-2xl active:scale-95` 
+                        : 'bg-[#e5e5e5] shadow-[0_6px_0_#c0c0c0] text-[#afafaf] opacity-60 cursor-not-allowed dark:bg-[var(--gray)] dark:shadow-[0_6px_0_var(--bg)] dark:text-[var(--muted)]'
+                    }`}
+                  >
+                    {node.unlocked ? <span className="text-[26px] font-bold">{node.id}</span> : <Lock size={28} />}
+                  </button>
+                  <span className="font-bold text-[12px] whitespace-nowrap absolute -bottom-[24px] text-[#afafaf]">
+                    Nivel {node.id}
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Global Lives Column */}
+          <div className="w-20 shrink-0 flex flex-col items-center pt-10">
+            <div className="sticky top-28 flex flex-col gap-3">
+              <span className="text-[11px] font-bold text-slate-400 text-center uppercase tracking-wider mb-2">Vidas</span>
+              {Array.from({ length: 5 }).map((_, i) => {
+                 const hasLife = i < (profile.lives ?? 5);
+                 return (
+                   <div 
+                     key={i} 
+                     className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-300 ${
+                       hasLife 
+                         ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-500 shadow-md shadow-rose-200/50 dark:shadow-rose-900/50' 
+                         : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600'
+                     }`}
+                   >
+                     <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                     </svg>
+                   </div>
+                 );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 

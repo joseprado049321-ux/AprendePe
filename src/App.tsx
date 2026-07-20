@@ -11,6 +11,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Profile from './components/Profile';
 import Shop from './components/Shop';
+import Settings from './components/Settings';
 
 import Diagnostic from './components/Diagnostic';
 
@@ -44,7 +45,9 @@ export default function App() {
           unlockedAchievements: [],
           history: [],
           level: 'Inicial',
-          wallet: { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+          lives: 5,
+          perfectLessonsStreak: 0,
+          wallet: { oro: 50, esmeralda: 0 },
           inventory: { streakProtectors: 0, xpMultipliers: 0 }
         };
         localStorage.setItem('guestProfile', JSON.stringify(guestProfile));
@@ -112,7 +115,9 @@ export default function App() {
           uid: result.user.uid,
           email: result.user.email || '',
           displayName: result.user.displayName || 'Usuario',
-          wallet: profile.wallet || { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+          lives: profile.lives ?? 5,
+          perfectLessonsStreak: profile.perfectLessonsStreak || 0,
+          wallet: profile.wallet || { oro: 50, esmeralda: 0 },
           inventory: profile.inventory || { streakProtectors: 0, xpMultipliers: 0 }
         };
         await setDoc(userRef, newProfile);
@@ -162,9 +167,10 @@ export default function App() {
             <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/shop" element={isAuthenticated && profile ? (!needsDiagnostic ? <Shop profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/quiz" element={isAuthenticated && profile ? (!needsDiagnostic ? <Quiz profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
-            <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
+            <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
+            <Route path="/settings" element={isAuthenticated && profile ? <Settings profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/leaderboard" element={isAuthenticated && profile ? <Leaderboard currentUserId={profile.uid} /> : <Navigate to="/login" />} />
-            <Route path="/achievements" element={isAuthenticated && profile ? <Achievements profile={profile} /> : <Navigate to="/login" />} />
+            <Route path="/achievements" element={isAuthenticated && profile ? <Achievements profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

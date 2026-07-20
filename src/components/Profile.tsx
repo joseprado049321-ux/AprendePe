@@ -1,66 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfile } from '../types';
-import { ACHIEVEMENTS } from '../lib/achievements';
 import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
-import { Moon, Sun, Volume2, VolumeX, BarChart3 } from 'lucide-react';
+import { BarChart3, Diamond, Gem, Zap, Flame, Edit2, Check, UserCircle2, Sparkles, Target } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSound } from '../contexts/SoundContext';
 import WeeklyGoals from './WeeklyGoals';
 import History from './History';
-import { useNotifications } from '../contexts/NotificationsContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { Bell, BellOff } from 'lucide-react';
+import { AVATARS, FRAMES } from '../data/cosmetics';
 
 interface ProfileProps {
   profile: UserProfile;
   updateProfile?: (updates: Partial<UserProfile>) => Promise<void>;
-  isGuest?: boolean;
-  linkGuestToGoogle?: () => void;
-  handleLogout: () => void;
 }
 
-export default function Profile({ profile, updateProfile, isGuest, linkGuestToGoogle, handleLogout }: ProfileProps) {
+export default function Profile({ profile, updateProfile }: ProfileProps) {
   const navigate = useNavigate();
-  const { isMuted, toggleMute, playSound } = useSound();
-  const { theme, toggleTheme } = useTheme();
+  const { playSound } = useSound();
+  const [equipModalOpen, setEquipModalOpen] = useState(false);
+  const [activeEquipTab, setActiveEquipTab] = useState<'avatares' | 'marcos'>('avatares');
 
-  const handleThemeToggle = () => {
-    playSound('click');
-    toggleTheme();
-  };
-
-  const { requestPermission, permissionStatus } = useNotifications();
-
-  const toggleNotifications = async () => {
-    playSound('click');
-    if (!profile.notificationsEnabled) {
-      if (permissionStatus !== 'granted') {
-        const granted = await requestPermission();
-        if (granted && updateProfile) {
-          updateProfile({ notificationsEnabled: true, dailyReminderTime: profile.dailyReminderTime || '18:00' });
-        }
-      } else if (updateProfile) {
-        updateProfile({ notificationsEnabled: true, dailyReminderTime: profile.dailyReminderTime || '18:00' });
-      }
-    } else {
-      if (updateProfile) {
-        updateProfile({ notificationsEnabled: false });
-      }
-    }
-  };
-
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (updateProfile) {
-      updateProfile({ dailyReminderTime: e.target.value });
-    }
-  };
-
+  const wallet = profile.wallet || { oro: 0, esmeralda: 0 };
+  
   // Calculate next XP milestone
   const calculateProgress = (xp: number) => {
     const milestones = [0, 100, 300, 600, 1000, 1500, 2500, 5000, 10000];
     let currentXp = xp || 0;
-    
     let nextMilestone = milestones[milestones.length - 1];
     let prevMilestone = 0;
     let currentLevelNum = milestones.length;
@@ -73,171 +38,196 @@ export default function Profile({ profile, updateProfile, isGuest, linkGuestToGo
         break;
       }
     }
-    
     const progressXP = currentXp - prevMilestone;
     const requiredXP = nextMilestone - prevMilestone;
     const progressPercent = Math.min(100, Math.max(0, (progressXP / requiredXP) * 100));
-
     return { prevMilestone, nextMilestone, currentLevelNum, progressPercent, currentXp };
   };
 
   const { nextMilestone, currentLevelNum, progressPercent, currentXp } = calculateProgress(profile.xp);
 
+  const currentAvatar = AVATARS.find(a => a.id === profile.avatar) || { emoji: '👤', id: 'default' };
+  const currentFrame = FRAMES.find(f => f.id === profile.avatarFrame) || { cssClass: 'ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg', id: 'default' };
+
+  const handleEquip = async (type: 'avatar' | 'frame', id: string) => {
+    playSound('click');
+    if (updateProfile) {
+      if (type === 'avatar') {
+        await updateProfile({ avatar: id === 'default' ? '' : id });
+      } else {
+        await updateProfile({ avatarFrame: id === 'default' ? '' : id });
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-4 py-8 sm:p-8 font-sans pb-24 transition-colors">
-      <div className="w-full max-w-4xl mx-auto space-y-12">
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-light text-slate-900 dark:text-white mb-2">Perfil de {profile.displayName}</h1>
-            <p className="text-slate-600 dark:text-slate-400">Categoría actual: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{profile.level}</span></p>
-          </div>
-          <div className="flex flex-wrap border-t sm:border-0 border-slate-200 dark:border-slate-800 pt-4 sm:pt-0 items-center justify-start sm:justify-end gap-4 transition-colors">
-            <button
-              onClick={toggleMute}
-              className="p-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
-              title={isMuted ? 'Activar sonido' : 'Silenciar sonido'}
-            >
-              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-            </button>
-            <button
-              onClick={handleThemeToggle}
-              className="p-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
-              title={`Cambiar a modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <Link to="/home" className="px-6 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-xl transition-colors">
-              Volver
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans pb-24 transition-colors">
+      
+      {/* Header Profile Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+        {/* Abstract Background Element */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
+
+        <div className="w-full max-w-4xl mx-auto p-6 md:p-8 relative z-10">
+          <div className="flex justify-end mb-4">
+            <Link to="/settings" className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl transition-colors" title="Configuración">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </Link>
-            
-            <button onClick={handleLogout} className="px-6 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-xl transition-colors">
-              Cerrar sesión
-            </button>
           </div>
-        </header>
 
-        {isGuest && (
-          <div className="bg-indigo-50 border border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/30 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 transition-colors">
-            <div>
-              <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-300 mb-2">Guarda tu progreso</h3>
-              <p className="text-indigo-800/80 dark:text-indigo-200/80 text-sm">
-                Estás usando una cuenta de invitado. Si cambias de dispositivo podrías perder tu progreso. Inicia sesión con Google para guardarlo de forma segura.
-              </p>
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="relative group cursor-pointer shrink-0" onClick={() => setEquipModalOpen(true)}>
+              <div className={`w-32 h-32 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-6xl transition-transform duration-300 group-hover:scale-105 ${currentFrame.cssClass}`}>
+                <span className="inline-block animate-bounce" style={{ animationDuration: '3s' }}>
+                  {currentAvatar.emoji}
+                </span>
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-indigo-600 text-white p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Edit2 size={18} />
+              </div>
             </div>
-            <button 
-              onClick={linkGuestToGoogle}
-              className="w-full sm:w-auto shrink-0 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-6 rounded-xl transition-transform active:scale-95 flex items-center justify-center gap-3 shadow-lg"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              Conectar Google
-            </button>
-          </div>
-        )}
 
-        <section className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl transition-colors shadow-sm dark:shadow-none">
+            <div className="text-center md:text-left flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">{profile.displayName}</h1>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-bold tracking-wide">
+                  {profile.level}
+                </span>
+                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-sm font-medium">
+                  Rango {currentLevelNum}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+              <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+                <Zap className="text-amber-500" size={24} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">XP Total</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{profile.xp || 0}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+                <Flame className="text-orange-500" size={24} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Racha</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{profile.streak} <span className="text-sm font-medium text-slate-500">días</span></p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
+                <Diamond className="text-yellow-600 dark:text-yellow-400" size={24} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Oro</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{wallet.oro}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+              <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                <Gem className="text-emerald-500" size={24} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Esmeraldas</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{wallet.esmeralda}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+        
+        {/* XP Progress */}
+        <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Progreso XP - Rango {currentLevelNum}</h3>
-              <p className="text-3xl font-light text-emerald-600 dark:text-emerald-400">{currentXp} <span className="text-xl text-emerald-500 dark:text-emerald-600">/ {nextMilestone} XP</span></p>
+              <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Progreso al Rango {currentLevelNum + 1}</h3>
+              <p className="text-3xl font-light text-indigo-600 dark:text-indigo-400">{currentXp} <span className="text-xl text-indigo-500/50 dark:text-indigo-600">/ {nextMilestone} XP</span></p>
             </div>
             <div className="text-right">
               <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{Math.round(progressPercent)}% completado</span>
             </div>
           </div>
           
-          <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-6 overflow-hidden shadow-inner relative transition-colors">
+          <div className="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-6 overflow-hidden relative">
             <motion.div 
-              className="bg-emerald-500 h-full rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+              className="bg-indigo-500 h-full rounded-full relative"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
-            />
-            {/* Glossy overlay effect for the progress bar */}
-            <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/10 rounded-t-full pointer-events-none"></div>
+              transition={{ duration: 1, ease: 'easeOut' }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full"></div>
+            </motion.div>
           </div>
         </section>
 
-         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex items-center justify-between transition-colors shadow-sm dark:shadow-none">
-             <div>
-               <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">XP Total</h3>
-               <p className="text-4xl font-light text-[var(--math)]">{profile.xp || 0}</p>
-             </div>
-             <div className="text-5xl">⚡</div>
-           </div>
-           <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex items-center justify-between transition-colors shadow-sm dark:shadow-none">
-             <div>
-               <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Racha Actual</h3>
-               <p className="text-4xl font-light text-orange-500 dark:text-orange-400">{profile.streak} días</p>
-             </div>
-             <div className="text-5xl">🔥</div>
-           </div>
-        </section>
+        {/* Diagnóstico Inicial */}
+        {profile.hasCompletedDiagnostic && profile.diagnosticScore !== undefined && (() => {
+            const percentage = profile.diagnosticScore;
+            let letter = 'C'; 
+            let message = ''; 
+            let colorClass = '';
 
-         <section className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-colors shadow-sm dark:shadow-none">
-           <div>
-             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-               Recordatorio de Estudio
-             </h3>
-             <p className="text-slate-600 dark:text-slate-400 text-sm">
-               Configura un recordatorio diario para que no olvides avanzar con tus metas y mantener tu racha.
-             </p>
-           </div>
-           
-           <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
-             {profile.notificationsEnabled && (
-               <input
-                 type="time"
-                 value={profile.dailyReminderTime || '18:00'}
-                 onChange={handleTimeChange}
-                 className="px-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
-               />
-             )}
-             <button
-               onClick={toggleNotifications}
-               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors ${
-                 profile.notificationsEnabled 
-                   ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-                   : 'bg-indigo-500 hover:bg-indigo-600 text-white'
-               }`}
-             >
-               {profile.notificationsEnabled ? (
-                 <>
-                   <Bell size={20} />
-                   <span>Activado</span>
-                 </>
-               ) : (
-                 <>
-                   <BellOff size={20} />
-                   <span>Activar</span>
-                 </>
-               )}
-             </button>
-           </div>
-         </section>
+            if (percentage >= 90) { 
+              letter = 'AD'; 
+              message = 'Logro Destacado'; 
+              colorClass = 'text-indigo-500'; 
+            } else if (percentage >= 75) { 
+              letter = 'A'; 
+              message = 'Logro Esperado'; 
+              colorClass = 'text-emerald-500'; 
+            } else if (percentage >= 50) { 
+              letter = 'B'; 
+              message = 'En Proceso'; 
+              colorClass = 'text-amber-500'; 
+            } else { 
+              letter = 'C'; 
+              message = 'En Inicio'; 
+              colorClass = 'text-rose-500'; 
+            }
+            return (
+              <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm flex flex-col md:flex-row items-center gap-6">
+                <div className={`p-4 rounded-2xl shrink-0 flex items-center justify-center w-24 h-24 ${colorClass.replace('text-', 'bg-').replace('500', '50')} dark:bg-slate-900/50`}>
+                  <span className={`text-5xl font-bold font-playful ${colorClass}`}>{letter}</span>
+                </div>
+                <div className="flex-1 w-full text-center md:text-left">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Resultado del Diagnóstico Inicial</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">
+                    El punto de partida de tu aprendizaje en el nivel {profile.diagnosticLevel || profile.educationalStage}.
+                  </p>
+                  <div className="inline-block px-3 py-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
+                    <span className={`font-bold ${colorClass}`}>{message}</span>
+                  </div>
+                </div>
+              </section>
+            );
+        })()}
 
         <WeeklyGoals profile={profile} updateProfile={updateProfile} />
 
-        <section className="bg-white dark:bg-slate-800/80 backdrop-blur-xl border border-indigo-200 dark:border-indigo-500/30 p-8 rounded-3xl transition-colors shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 22h20L12 2zm0 3.8l7.1 14.2H4.9L12 5.8z"/></svg>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 relative z-10 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
              <span className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
-               <BarChart3 size={24} />
+               <BarChart3 size={20} />
              </span>
              Reporte para Docentes/Padres
           </h2>
           
           {(!profile.history || profile.history.length === 0) ? (
-            <p className="text-slate-500 dark:text-slate-400">Aún no hay datos suficientes para generar un reporte. ¡Completa algunas lecciones primero!</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Aún no hay datos suficientes para generar un reporte. ¡Completa lecciones!</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {(() => {
                 const history = profile.history;
                 const totalAccuracy = history.reduce((sum, h) => sum + (h.accuracyPercentage || 0), 0);
@@ -248,7 +238,7 @@ export default function Profile({ profile, updateProfile, isGuest, linkGuestToGo
                     acc[h.subject] = { correct: 0, total: 0 };
                   }
                   acc[h.subject].correct += (h.accuracyPercentage || 0);
-                  acc[h.subject].total += 100; // assuming each out of 100
+                  acc[h.subject].total += 100;
                   return acc;
                 }, {} as Record<string, { correct: number, total: number }>);
 
@@ -263,23 +253,17 @@ export default function Profile({ profile, updateProfile, isGuest, linkGuestToGo
 
                 return (
                   <>
-                    <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
-                      <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Precisión Media</p>
-                      <p className="text-3xl font-light text-slate-900 dark:text-white">
-                         {avgAccuracy}%
-                      </p>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Precisión Media</p>
+                      <p className="text-2xl font-light text-slate-900 dark:text-white">{avgAccuracy}%</p>
                     </div>
-                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                      <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-2">Fortaleza</p>
-                      <p className="text-xl font-medium text-slate-900 dark:text-white">
-                         {strongest.subject}
-                      </p>
+                    <div className="bg-emerald-50 dark:bg-emerald-900/10 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">Fortaleza</p>
+                      <p className="text-lg font-medium text-slate-900 dark:text-white">{strongest.subject}</p>
                     </div>
-                    <div className="bg-rose-50 dark:bg-rose-900/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/30">
-                      <p className="text-sm font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-2">Área de Mejora</p>
-                      <p className="text-xl font-medium text-slate-900 dark:text-white">
-                         {weakest.subject}
-                      </p>
+                    <div className="bg-rose-50 dark:bg-rose-900/10 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/30">
+                      <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1">Área de Mejora</p>
+                      <p className="text-lg font-medium text-slate-900 dark:text-white">{weakest.subject}</p>
                     </div>
                   </>
                 );
@@ -289,9 +273,121 @@ export default function Profile({ profile, updateProfile, isGuest, linkGuestToGo
         </section>
 
         <History profile={profile} />
-
       </div>
-      
+
+      {/* Equip Modal */}
+      {equipModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-800 w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10 sm:rounded-t-3xl rounded-t-3xl">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Vestidor</h2>
+              <button onClick={() => setEquipModalOpen(false)} className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors">
+                <svg className="w-6 h-6 text-slate-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-4 flex gap-2 overflow-x-auto border-b border-slate-100 dark:border-slate-700">
+               <button 
+                  onClick={() => setActiveEquipTab('avatares')}
+                  className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-colors ${activeEquipTab === 'avatares' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
+               >
+                 <UserCircle2 size={18} /> Avatares
+               </button>
+               <button 
+                  onClick={() => setActiveEquipTab('marcos')}
+                  className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-colors ${activeEquipTab === 'marcos' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
+               >
+                 <Sparkles size={18} /> Marcos
+               </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              {activeEquipTab === 'avatares' && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                  {/* Default Avatar */}
+                  <div 
+                    onClick={() => handleEquip('avatar', 'default')}
+                    className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center gap-2 ${!profile.avatar || profile.avatar === 'default' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}
+                  >
+                    <div className="text-4xl">👤</div>
+                    <span className="text-xs font-bold text-slate-500">Por Defecto</span>
+                  </div>
+                  
+                  {profile.unlockedAvatars?.map(id => {
+                    const av = AVATARS.find(a => a.id === id);
+                    if (!av) return null;
+                    const isEquipped = profile.avatar === id;
+                    return (
+                      <div 
+                        key={id}
+                        onClick={() => handleEquip('avatar', id)}
+                        className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center text-center gap-2 ${isEquipped ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-md transform scale-105' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}
+                      >
+                        <div className="text-4xl">{av.emoji}</div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 line-clamp-1">{av.name}</span>
+                        {isEquipped && <Check size={14} className="text-indigo-600 mt-1" />}
+                      </div>
+                    )
+                  })}
+                  
+                  {(!profile.unlockedAvatars || profile.unlockedAvatars.length === 0) && (
+                    <div className="col-span-full py-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
+                      <Diamond size={32} className="mb-2 opacity-50" />
+                      <p>Aún no has comprado ningún Avatar.</p>
+                      <Link to="/shop" onClick={() => setEquipModalOpen(false)} className="text-indigo-500 hover:underline mt-2">Ir a la Tienda</Link>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeEquipTab === 'marcos' && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {/* Default Frame */}
+                  <div 
+                    onClick={() => handleEquip('frame', 'default')}
+                    className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center gap-3 ${!profile.avatarFrame || profile.avatarFrame === 'default' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                    <span className="text-xs font-bold text-slate-500">Ninguno</span>
+                  </div>
+                  
+                  {profile.unlockedFrames?.map(id => {
+                    const fr = FRAMES.find(f => f.id === id);
+                    if (!fr) return null;
+                    const isEquipped = profile.avatarFrame === id;
+                    return (
+                      <div 
+                        key={id}
+                        onClick={() => handleEquip('frame', id)}
+                        className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center text-center gap-3 ${isEquipped ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-md transform scale-105' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}
+                      >
+                        <div className={`w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 ${fr.cssClass}`}></div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 line-clamp-1">{fr.name}</span>
+                        {isEquipped && <Check size={14} className="text-indigo-600" />}
+                      </div>
+                    )
+                  })}
+                  
+                  {(!profile.unlockedFrames || profile.unlockedFrames.length === 0) && (
+                    <div className="col-span-full py-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
+                      <Gem size={32} className="mb-2 opacity-50" />
+                      <p>Aún no has comprado ningún Marco.</p>
+                      <Link to="/shop" onClick={() => setEquipModalOpen(false)} className="text-indigo-500 hover:underline mt-2">Ir a la Tienda</Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 sm:rounded-b-3xl">
+               <button onClick={() => setEquipModalOpen(false)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-lg">
+                 ¡Listo!
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav activeTab="/profile" onChangeTab={(tab) => navigate(tab)} />
     </div>
   );

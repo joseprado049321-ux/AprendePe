@@ -33,7 +33,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   
   const [errors, setErrors] = useState(0);
   const [sessionPoints, setSessionPoints] = useState(0);
-  const [lives, setLives] = useState(5); 
+  const lives = profile.lives ?? 5; 
 
   const [showOutOfLivesModal, setShowOutOfLivesModal] = useState(false);
   const [rescuing, setRescuing] = useState(false);
@@ -42,7 +42,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const question = questions[currentIndex];
   const progress = questions.length > 0 ? ((currentIndex) / questions.length) * 100 : 0;
 
-  const handleSelect = (index: number) => {
+  const handleSelect = async (index: number) => {
     if (isAnswered || lives <= 0) return;
     setSelectedOption(index);
     setIsAnswered(true);
@@ -54,7 +54,8 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       playSound('fail');
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
-      setLives(newLives); 
+      await updateProfile({ lives: newLives });
+      
       if (newLives === 0) {
          setTimeout(() => setShowOutOfLivesModal(true), 500);
       }
@@ -62,16 +63,16 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   };
 
   const handleBuyLives = async () => {
-    const currentOro = profile.wallet?.oro || 0;
-    if (currentOro < 50) return;
+    const currentEsmeralda = profile.wallet?.esmeralda || 0;
+    if (currentEsmeralda < 5) return;
     
     await updateProfile({
         wallet: {
             ...profile.wallet!,
-            oro: currentOro - 50
-        }
+            esmeralda: currentEsmeralda - 5
+        },
+        lives: lives + 1
     });
-    setLives(3);
     setShowOutOfLivesModal(false);
     setSelectedOption(null);
     setIsAnswered(false);
@@ -79,8 +80,8 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
   const handleWatchAd = () => {
     setRescuing(true);
-    setTimeout(() => {
-        setLives(1);
+    setTimeout(async () => {
+        await updateProfile({ lives: lives + 1 });
         setRescuing(false);
         setShowOutOfLivesModal(false);
         setSelectedOption(null);
@@ -136,12 +137,25 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       }
       
       const isPerfectLesson = errors === 0;
+      let newPerfectStreak = profile.perfectLessonsStreak || 0;
+      let earnedEmeraldFromStreak = false;
+
+      if (isPerfectLesson) {
+        newPerfectStreak += 1;
+        if (newPerfectStreak >= 3) {
+          earnedEmeraldFromStreak = true;
+          newPerfectStreak = 0;
+        }
+      } else {
+        newPerfectStreak = 0;
+      }
       
-      const newAchievements = checkAchievements(profile.unlockedAchievements, {
+      const newAchievements = checkAchievements(profile.unlockedAchievements || [], {
         points: newPoints,
         streak: newStreak,
         isPerfectLesson,
-        isFirstLesson: profile.unlockedAchievements.length === 0
+        isFirstLesson: !profile.unlockedAchievements || profile.unlockedAchievements.length === 0,
+        livesLeft: lives
       });
       
       const updatedAchievements = [...profile.unlockedAchievements, ...newAchievements];
@@ -173,18 +187,28 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       
       if (rewardDrop.type === 'oro') updatedWallet.oro += rewardDrop.amount;
       if (rewardDrop.type === 'esmeralda') updatedWallet.esmeralda += rewardDrop.amount;
-      if (rewardDrop.type === 'rubi') updatedWallet.rubi += rewardDrop.amount;
-      if (rewardDrop.type === 'diamante') updatedWallet.diamante += rewardDrop.amount;
       if (rewardDrop.type === 'xpMultiplier') updatedInventory.xpMultipliers += rewardDrop.amount;
       if (rewardDrop.type === 'streakProtector') updatedInventory.streakProtectors += rewardDrop.amount;
       
-      setReward(rewardDrop);
+      if (earnedEmeraldFromStreak) {
+        updatedWallet.esmeralda += 1;
+        if (rewardDrop.type === 'esmeralda') {
+           setReward({ type: 'esmeralda', amount: rewardDrop.amount + 1 });
+        } else if (rewardDrop.type === 'none') {
+           setReward({ type: 'esmeralda', amount: 1 });
+        } else {
+           setReward(rewardDrop);
+        }
+      } else {
+        setReward(rewardDrop);
+      }
 
       try {
         await updateProfile({
           points: newPoints,
           xp: newXp,
           streak: newStreak,
+          perfectLessonsStreak: newPerfectStreak,
           unlockedLevels: newUnlockedLevels,
           unlockedAchievements: updatedAchievements,
           lastActive: new Date().toISOString(),
@@ -205,8 +229,6 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       switch(type) {
           case 'oro': return <Diamond className="text-amber-400" size={48} />;
           case 'esmeralda': return <Gem className="text-emerald-400" size={48} />;
-          case 'rubi': return <Diamond className="text-rose-500" size={48} />;
-          case 'diamante': return <Diamond className="text-cyan-400" size={48} />;
           case 'streakProtector': return <Shield className="text-indigo-400" size={48} />;
           case 'xpMultiplier': return <Zap className="text-amber-500" size={48} />;
           default: return null;
@@ -215,10 +237,8 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
   const getRewardName = (type: string) => {
       switch(type) {
-          case 'oro': return 'Gemas de Oro';
+          case 'oro': return 'Oro';
           case 'esmeralda': return 'Esmeraldas';
-          case 'rubi': return 'Rubíes';
-          case 'diamante': return 'Diamantes';
           case 'streakProtector': return 'Protector de Racha';
           case 'xpMultiplier': return 'Multiplicador XP';
           default: return '';
@@ -256,20 +276,20 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                               <p className="text-slate-400 mb-8">No te rindas ahora. Recupera vidas para continuar tu racha de aprendizaje.</p>
                               
                               <div className="w-full space-y-4">
-                                  {(profile.wallet?.oro || 0) < 50 ? (
+                                  {(profile.wallet?.esmeralda || 0) < 5 ? (
                                       <div className="w-full text-red-400 text-sm font-semibold mb-2">
-                                          Saldo insuficiente (Necesitas 50 Oro)
+                                          Saldo insuficiente (Necesitas 5 Esmeraldas)
                                       </div>
                                   ) : null}
                                   <button 
                                       onClick={handleBuyLives}
-                                      disabled={(profile.wallet?.oro || 0) < 50}
+                                      disabled={(profile.wallet?.esmeralda || 0) < 5}
                                       className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-between"
                                   >
-                                      <span className="text-lg">Recuperar 3 Vidas</span>
+                                      <span className="text-lg">Recuperar 1 Vida</span>
                                       <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
-                                          <Diamond size={18} className="text-amber-400 fill-current" />
-                                          <span>50</span>
+                                          <Gem size={18} className="text-emerald-400 fill-current" />
+                                          <span>5</span>
                                       </div>
                                   </button>
                                   

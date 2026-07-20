@@ -30,8 +30,17 @@ export interface Achievement {
   title: string;
   description: string;
   icon: string;
-  conditionType: 'streak' | 'points' | 'perfect_lesson' | 'first_lesson';
+  conditionType: 'streak' | 'points' | 'perfect_lesson' | 'first_lesson' | 'survivor';
   conditionValue: number;
+  difficulty: 'Fácil' | 'Medio' | 'Difícil' | 'Épico';
+  rewardType: 'oro' | 'esmeralda';
+  rewardAmount: number;
+}
+
+export interface UnlockedAchievement {
+  id: string;
+  unlockedAt: string;
+  isClaimed: boolean;
 }
 
 export interface LessonHistory {
@@ -48,12 +57,18 @@ export interface UserProfile {
   email: string;
   displayName: string;
   streak: number;
+  perfectLessonsStreak?: number;
+  lives?: number;
   lastActive: string | null;
   points: number;
   xp: number;
   unlockedLevels?: Record<string, number>;
   lastSelectedCourse?: string;
-  unlockedAchievements: string[];
+  unlockedAchievements: (UnlockedAchievement | string)[];
+  avatar?: string;
+  avatarFrame?: string;
+  unlockedAvatars?: string[];
+  unlockedFrames?: string[];
   level: Level;
   educationalStage?: 'Inicial' | 'Primaria' | 'Secundaria';
   grade?: string;
@@ -62,6 +77,8 @@ export interface UserProfile {
   diagnosticLevel?: Level;
   hasCompletedDiagnostic?: boolean;
   theme?: 'light' | 'dark';
+  parentalPin?: string;
+  parentalEmail?: string;
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };
   hasCompletedTour?: boolean;
   notificationsEnabled?: boolean;
@@ -70,8 +87,6 @@ export interface UserProfile {
   wallet?: {
     oro: number;
     esmeralda: number;
-    rubi: number;
-    diamante: number;
   };
   inventory?: {
     streakProtectors: number;

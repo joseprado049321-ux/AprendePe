@@ -29,7 +29,9 @@ export default function Register() {
           unlockedAchievements: [],
           history: [],
           level: 'Inicial',
-          wallet: { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+          lives: 5,
+          perfectLessonsStreak: 0,
+          wallet: { oro: 50, esmeralda: 0 },
           inventory: { streakProtectors: 0, xpMultipliers: 0 }
         };
         await setDoc(userRef, userProfile);
