@@ -56,6 +56,10 @@ export interface UserProfile {
   unlockedLevels?: Record<string, number>;
   lastSelectedCourse?: string;
   unlockedAchievements: string[];
+  avatar?: string;
+  avatarFrame?: string;
+  unlockedAvatars?: string[];
+  unlockedFrames?: string[];
   level: Level;
   educationalStage?: 'Inicial' | 'Primaria' | 'Secundaria';
   grade?: string;
