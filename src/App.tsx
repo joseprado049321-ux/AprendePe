@@ -44,7 +44,9 @@ export default function App() {
           unlockedAchievements: [],
           history: [],
           level: 'Inicial',
-          wallet: { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+          lives: 5,
+          perfectLessonsStreak: 0,
+          wallet: { oro: 50, esmeralda: 0 },
           inventory: { streakProtectors: 0, xpMultipliers: 0 }
         };
         localStorage.setItem('guestProfile', JSON.stringify(guestProfile));
@@ -112,7 +114,9 @@ export default function App() {
           uid: result.user.uid,
           email: result.user.email || '',
           displayName: result.user.displayName || 'Usuario',
-          wallet: profile.wallet || { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+          lives: profile.lives ?? 5,
+          perfectLessonsStreak: profile.perfectLessonsStreak || 0,
+          wallet: profile.wallet || { oro: 50, esmeralda: 0 },
           inventory: profile.inventory || { streakProtectors: 0, xpMultipliers: 0 }
         };
         await setDoc(userRef, newProfile);

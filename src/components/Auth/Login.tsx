@@ -49,6 +49,8 @@ export default function Login({ setIsGuest }: LoginProps) {
           unlockedAchievements: [],
           history: [],
           level: onboardingData?.level || 'Inicial',
+          lives: 5,
+          perfectLessonsStreak: 0,
           ...(onboardingData || {}),
           hasCompletedDiagnostic: !!onboardingData,
         };
@@ -85,7 +87,9 @@ export default function Login({ setIsGuest }: LoginProps) {
         unlockedAchievements: [],
         history: [],
         level: onboardingData.level || 'Inicial',
-        wallet: { oro: 50, esmeralda: 0, rubi: 0, diamante: 0 },
+        lives: 5,
+        perfectLessonsStreak: 0,
+        wallet: { oro: 50, esmeralda: 0 },
         inventory: { streakProtectors: 0, xpMultipliers: 0 },
         ...onboardingData,
         hasCompletedDiagnostic: true

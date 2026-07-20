@@ -48,6 +48,8 @@ export interface UserProfile {
   email: string;
   displayName: string;
   streak: number;
+  perfectLessonsStreak?: number;
+  lives?: number;
   lastActive: string | null;
   points: number;
   xp: number;
@@ -70,8 +72,6 @@ export interface UserProfile {
   wallet?: {
     oro: number;
     esmeralda: number;
-    rubi: number;
-    diamante: number;
   };
   inventory?: {
     streakProtectors: number;

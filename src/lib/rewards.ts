@@ -1,4 +1,4 @@
-export type RewardType = 'oro' | 'esmeralda' | 'rubi' | 'diamante' | 'xpMultiplier' | 'streakProtector' | 'none';
+export type RewardType = 'oro' | 'esmeralda' | 'xpMultiplier' | 'streakProtector' | 'none';
 
 export interface RewardDrop {
   type: RewardType;
@@ -15,22 +15,14 @@ export function calculateDrop(): RewardDrop {
       amount: Math.floor(Math.random() * 21) + 10 
     };
   } 
-  // 25%: Esmeralda (5 to 15)
-  else if (rand < 85) {
+  // 30%: Esmeralda (1 to 3)
+  else if (rand < 90) {
     return {
       type: 'esmeralda',
-      amount: Math.floor(Math.random() * 11) + 5
+      amount: Math.floor(Math.random() * 3) + 1
     };
   } 
-  // 10%: Rubi o Diamante (1 to 5)
-  else if (rand < 95) {
-    const isRubi = Math.random() > 0.5;
-    return {
-      type: isRubi ? 'rubi' : 'diamante',
-      amount: Math.floor(Math.random() * 5) + 1
-    };
-  } 
-  // 5%: Item Especial (1)
+  // 10%: Item Especial (1)
   else {
     const isMultiplier = Math.random() > 0.5;
     return {
