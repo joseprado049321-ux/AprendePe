@@ -64,6 +64,8 @@ export interface UserProfile {
   diagnosticLevel?: Level;
   hasCompletedDiagnostic?: boolean;
   theme?: 'light' | 'dark';
+  parentalPin?: string;
+  parentalEmail?: string;
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };
   hasCompletedTour?: boolean;
   notificationsEnabled?: boolean;
