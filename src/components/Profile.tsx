@@ -173,30 +173,46 @@ export default function Profile({ profile, updateProfile }: ProfileProps) {
         </section>
 
         {/* Diagnóstico Inicial */}
-        {profile.hasCompletedDiagnostic && profile.diagnosticScore !== undefined && (
-          <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm flex flex-col md:flex-row items-center gap-6">
-            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl shrink-0">
-              <Target className="text-emerald-500 w-12 h-12" />
-            </div>
-            <div className="flex-1 w-full text-center md:text-left">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Resultado del Diagnóstico Inicial</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                El punto de partida de tu aprendizaje en el nivel {profile.diagnosticLevel || profile.educationalStage}.
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="flex-1 bg-slate-100 dark:bg-slate-900 rounded-full h-4 overflow-hidden relative">
-                  <motion.div 
-                    className="bg-emerald-500 h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${profile.diagnosticScore}%` }}
-                    transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
-                  />
+        {profile.hasCompletedDiagnostic && profile.diagnosticScore !== undefined && (() => {
+            const percentage = profile.diagnosticScore;
+            let letter = 'C'; 
+            let message = ''; 
+            let colorClass = '';
+
+            if (percentage >= 90) { 
+              letter = 'AD'; 
+              message = 'Logro Destacado'; 
+              colorClass = 'text-indigo-500'; 
+            } else if (percentage >= 75) { 
+              letter = 'A'; 
+              message = 'Logro Esperado'; 
+              colorClass = 'text-emerald-500'; 
+            } else if (percentage >= 50) { 
+              letter = 'B'; 
+              message = 'En Proceso'; 
+              colorClass = 'text-amber-500'; 
+            } else { 
+              letter = 'C'; 
+              message = 'En Inicio'; 
+              colorClass = 'text-rose-500'; 
+            }
+            return (
+              <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm flex flex-col md:flex-row items-center gap-6">
+                <div className={`p-4 rounded-2xl shrink-0 flex items-center justify-center w-24 h-24 ${colorClass.replace('text-', 'bg-').replace('500', '50')} dark:bg-slate-900/50`}>
+                  <span className={`text-5xl font-bold font-playful ${colorClass}`}>{letter}</span>
                 </div>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">{profile.diagnosticScore}/100</span>
-              </div>
-            </div>
-          </section>
-        )}
+                <div className="flex-1 w-full text-center md:text-left">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Resultado del Diagnóstico Inicial</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">
+                    El punto de partida de tu aprendizaje en el nivel {profile.diagnosticLevel || profile.educationalStage}.
+                  </p>
+                  <div className="inline-block px-3 py-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
+                    <span className={`font-bold ${colorClass}`}>{message}</span>
+                  </div>
+                </div>
+              </section>
+            );
+        })()}
 
         <WeeklyGoals profile={profile} updateProfile={updateProfile} />
 

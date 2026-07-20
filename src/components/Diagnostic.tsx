@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile, Level } from '../types';
-import { Brain, ArrowRight, Loader2, Sparkles, User as UserIcon, BookOpen, Target } from 'lucide-react';
+import { Brain, ArrowRight, Loader2, Sparkles, Target, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSound } from '../contexts/SoundContext';
 import confetti from 'canvas-confetti';
@@ -12,7 +12,7 @@ interface DiagnosticProps {
 }
 
 export default function Diagnostic({ profile, updateProfile }: DiagnosticProps = {}) {
-  const [step, setStep] = useState(0); // 0: Welcome, 1: Stage, 2: Grade, 3: Self-eval, 4: Diagnostic Fetch, 5: Quiz
+  const [step, setStep] = useState(0); // 0: Welcome, 1: Stage, 2: Grade, 3: Self-eval, 4: Diagnostic Fetch, 5: Quiz, 6: Results
   
   // Collected data
   const [stage, setStage] = useState<'Inicial' | 'Primaria' | 'Secundaria' | ''>('');
@@ -48,8 +48,8 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
       setStep(5);
     } catch (err) {
       console.error(err);
-      // Fallback in case of error
-      setQuestions(Array.from({ length: 5 }, (_, i) => ({
+      // Fallback in case of error (10 questions instead of 5)
+      setQuestions(Array.from({ length: 10 }, (_, i) => ({
         text: `Pregunta diagnóstica #${i + 1} (Modo sin conexión)`,
         options: ["A", "B", "C", "D"],
         correctAnswerIndex: 0,
@@ -75,34 +75,40 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
         origin: { y: 0.6 },
         colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
       });
+      setStep(6);
+    }
+  };
 
-      setIsSaving(true);
-      const percentage = Math.round((newScore / questions.length) * 100);
-      let calculatedLevel: Level = 'Inicial';
-      if (stage === 'Secundaria') calculatedLevel = 'Secundaria';
-      else if (stage === 'Primaria') calculatedLevel = 'Primaria';
+  const finishDiagnostic = async () => {
+    playSound('click');
+    setIsSaving(true);
+    const percentage = Math.round((score / questions.length) * 100);
+    let calculatedLevel: Level = 'Inicial';
+    if (stage === 'Secundaria') calculatedLevel = 'Secundaria';
+    else if (stage === 'Primaria') calculatedLevel = 'Primaria';
 
-      try {
-        const diagnosticData = {
-          educationalStage: stage as any,
-          grade,
-          selfAssessedLevel: selfLevel,
-          diagnosticScore: percentage,
-          diagnosticLevel: calculatedLevel, 
-          level: calculatedLevel 
-        };
+    try {
+      const currentXp = profile?.xp || 0;
+      const diagnosticData = {
+        educationalStage: stage as any,
+        grade,
+        selfAssessedLevel: selfLevel,
+        diagnosticScore: percentage,
+        diagnosticLevel: calculatedLevel, 
+        level: calculatedLevel,
+        xp: currentXp + 100 // +100 XP por completar el diagnóstico
+      };
 
-        if (updateProfile && profile) {
-          await updateProfile({ ...diagnosticData, hasCompletedDiagnostic: true });
-          navigate('/home');
-        } else {
-          localStorage.setItem('temp_onboarding', JSON.stringify(diagnosticData));
-          navigate('/login');
-        }
-      } catch (err) {
-        console.error('Error saving diagnostic', err);
-        setIsSaving(false);
+      if (updateProfile && profile) {
+        await updateProfile({ ...diagnosticData, hasCompletedDiagnostic: true });
+        navigate('/home');
+      } else {
+        localStorage.setItem('temp_onboarding', JSON.stringify(diagnosticData));
+        navigate('/login');
       }
+    } catch (err) {
+      console.error('Error saving diagnostic', err);
+      setIsSaving(false);
     }
   };
 
@@ -112,7 +118,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
     <div className={`min-h-screen bg-[var(--bg,theme(colors.slate.900))] text-[var(--text,white)] transition-colors duration-500 flex flex-col items-center justify-center p-4 sm:p-8 ${themeClass}`}>
       <div className="max-w-xl w-full bg-[var(--gray,theme(colors.slate.800))] p-8 rounded-[var(--radius,24px)] border border-[var(--muted,theme(colors.slate.700))] shadow-2xl relative overflow-hidden">
         
-        {/* Progreso del Onboarding (Oculto en quiz) */}
+        {/* Progreso del Onboarding (Oculto en quiz y resultados) */}
         {step < 5 && (
           <div className="flex gap-2 justify-center mb-8">
             {[0, 1, 2, 3].map(i => (
@@ -206,13 +212,13 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
             <motion.div key="step4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center py-12">
               <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
               <h2 className="text-2xl font-bold font-playful mb-2">Generando tu prueba personalizada...</h2>
-              <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Nuestra IA está creando un test personalizado para {grade} de {stage}.</p>
+              <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Nuestra IA está creando un test personalizado de 10 preguntas para {grade} de {stage} basado en el CNEB.</p>
             </motion.div>
           )}
 
           {/* PASO 5: Quiz Activo */}
-          {step === 5 && questions.length > 0 && !isSaving && (
-            <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col w-full">
+          {step === 5 && questions.length > 0 && (
+            <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col w-full">
               <header className="flex items-center gap-4 mb-8">
                 <div className="bg-[var(--math,theme(colors.indigo.500))] text-[var(--bg,white)] p-3 rounded-2xl">
                   <Brain size={32} />
@@ -250,12 +256,70 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
             </motion.div>
           )}
 
+          {/* PASO 6: Resultados Literal (MINEDU) */}
+          {step === 6 && !isSaving && (() => {
+            const percentage = Math.round((score / questions.length) * 100);
+            let letter = 'C'; 
+            let message = ''; 
+            let colorClass = '';
+
+            if (percentage >= 90) { 
+              letter = 'AD'; 
+              message = '¡Excepcional! Tu conocimiento es sobresaliente.'; 
+              colorClass = 'text-indigo-500'; 
+            } else if (percentage >= 75) { 
+              letter = 'A'; 
+              message = '¡Gran trabajo! Tienes bases muy sólidas.'; 
+              colorClass = 'text-emerald-500'; 
+            } else if (percentage >= 50) { 
+              letter = 'B'; 
+              message = '¡Buen esfuerzo! Estás en camino a dominar estos temas.'; 
+              colorClass = 'text-amber-500'; 
+            } else { 
+              letter = 'C'; 
+              message = '¡Punto de partida establecido! Tu aventura para mejorar comienza aquí.'; 
+              colorClass = 'text-rose-500'; 
+            }
+
+            return (
+              <motion.div key="step6" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center py-6 text-center">
+                <div className="mb-6 flex justify-center">
+                   <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
+                     <Award size={48} className="text-indigo-500" />
+                   </div>
+                </div>
+                
+                <h2 className="text-xl font-medium text-slate-400 mb-2 uppercase tracking-widest">Resultado Oficial</h2>
+                <div className={`text-8xl md:text-9xl font-bold font-playful mb-6 ${colorClass} drop-shadow-sm`}>
+                  {letter}
+                </div>
+                
+                <p className="text-2xl font-bold text-[var(--text,white)] mb-4 px-4">{message}</p>
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-full mb-10">
+                  {score}/{questions.length} respuestas correctas
+                </p>
+                
+                <div className="w-full flex flex-col gap-3">
+                  <div className="flex items-center justify-center gap-2 text-indigo-500 font-bold mb-2">
+                    <Sparkles size={20} /> +100 XP ganados
+                  </div>
+                  <button 
+                    onClick={finishDiagnostic}
+                    className="w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]"
+                  >
+                    Continuar a AprendePe
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })()}
+
           {/* Saving Status */}
           {isSaving && (
              <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-12">
                <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
-               <h2 className="text-2xl font-bold font-playful mb-2">Evaluando nivel...</h2>
-               <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Analizando tus respuestas para personalizar tu experiencia en AprendePe.</p>
+               <h2 className="text-2xl font-bold font-playful mb-2">Guardando perfil...</h2>
+               <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Configurando AprendePe con tu nuevo nivel.</p>
              </motion.div>
           )}
 
