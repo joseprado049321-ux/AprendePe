@@ -107,7 +107,7 @@ app.post("/api/generate-questions", async (req, res) => {
     while (attempts < maxAttempts) {
       try {
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-2.0-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -174,7 +174,7 @@ REGLAS ESTRICTAS:
 - Devuelve ÚNICAMENTE un arreglo JSON puro con 5 objetos. Cada objeto debe tener: 'text' (la pregunta), 'options' (arreglo de 4 opciones de texto), y 'correctAnswerIndex' (número del 0 al 3).`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
