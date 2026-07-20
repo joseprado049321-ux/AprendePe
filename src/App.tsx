@@ -170,7 +170,7 @@ export default function App() {
             <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
             <Route path="/settings" element={isAuthenticated && profile ? <Settings profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/leaderboard" element={isAuthenticated && profile ? <Leaderboard currentUserId={profile.uid} /> : <Navigate to="/login" />} />
-            <Route path="/achievements" element={isAuthenticated && profile ? <Achievements profile={profile} /> : <Navigate to="/login" />} />
+            <Route path="/achievements" element={isAuthenticated && profile ? <Achievements profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

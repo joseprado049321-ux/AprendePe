@@ -150,11 +150,12 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         newPerfectStreak = 0;
       }
       
-      const newAchievements = checkAchievements(profile.unlockedAchievements, {
+      const newAchievements = checkAchievements(profile.unlockedAchievements || [], {
         points: newPoints,
         streak: newStreak,
         isPerfectLesson,
-        isFirstLesson: profile.unlockedAchievements.length === 0
+        isFirstLesson: !profile.unlockedAchievements || profile.unlockedAchievements.length === 0,
+        livesLeft: lives
       });
       
       const updatedAchievements = [...profile.unlockedAchievements, ...newAchievements];

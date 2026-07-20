@@ -30,8 +30,17 @@ export interface Achievement {
   title: string;
   description: string;
   icon: string;
-  conditionType: 'streak' | 'points' | 'perfect_lesson' | 'first_lesson';
+  conditionType: 'streak' | 'points' | 'perfect_lesson' | 'first_lesson' | 'survivor';
   conditionValue: number;
+  difficulty: 'Fácil' | 'Medio' | 'Difícil' | 'Épico';
+  rewardType: 'oro' | 'esmeralda';
+  rewardAmount: number;
+}
+
+export interface UnlockedAchievement {
+  id: string;
+  unlockedAt: string;
+  isClaimed: boolean;
 }
 
 export interface LessonHistory {
@@ -55,7 +64,7 @@ export interface UserProfile {
   xp: number;
   unlockedLevels?: Record<string, number>;
   lastSelectedCourse?: string;
-  unlockedAchievements: string[];
+  unlockedAchievements: (UnlockedAchievement | string)[];
   avatar?: string;
   avatarFrame?: string;
   unlockedAvatars?: string[];
