@@ -225,7 +225,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold font-playful">Prueba Diagnóstica</h1>
-                  <p className="text-[var(--muted,theme(colors.slate.400))] font-medium">Pregunta {currentQ + 1} de {questions.length}</p>
+                  <p className="text-[var(--muted,theme(colors.slate.400))] font-medium">Pregunta <span>{currentQ + 1}</span> de <span>{questions.length}</span></p>
                 </div>
               </header>
 
@@ -290,7 +290,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
                 </div>
                 
                 <h2 className="text-xl font-medium text-slate-400 mb-2 uppercase tracking-widest">Resultado Oficial</h2>
-                <div className={`text-8xl md:text-9xl font-bold font-playful mb-6 ${colorClass} drop-shadow-sm`}>
+                <div translate="no" className={`text-8xl md:text-9xl font-bold font-playful mb-6 ${colorClass} drop-shadow-sm`}>
                   {letter}
                 </div>
                 
