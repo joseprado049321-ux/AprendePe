@@ -64,6 +64,15 @@
   --social: #f43f5e; --social-s: #e11d48;
 }
 
+/* Dark mode overrides for specific themes */
+.dark .theme-inicial, .dark.theme-inicial {
+  --bg: #0f172a;
+}
+
+.dark .theme-primaria, .dark.theme-primaria {
+  --bg: #0f172a;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-playful: "Fredoka", "Inter", ui-sans-serif, system-ui, sans-serif;

@@ -47,8 +47,8 @@ export const getTheme = (level: Level): ThemeSetup => {
         progressFill: 'bg-green-600 dark:bg-green-500 h-full rounded-full transition-all duration-500 ease-out',
         panelCorrect: 'bg-green-600 dark:bg-green-500 text-white px-6 py-8 flex flex-col sm:flex-row gap-6 justify-between items-center',
         panelIncorrect: 'bg-red-600 dark:bg-red-500 text-white px-6 py-8 flex flex-col sm:flex-row gap-6 justify-between items-center',
-        panelButtonCorrect: 'bg-white text-green-700 dark:text-green-600 rounded-[1.5rem] py-4 px-10 text-2xl font-bold border-4 border-b-[8px] border-green-100 active:translate-y-[4px] active:border-b-4 w-full sm:w-auto',
-        panelButtonIncorrect: 'bg-white text-red-700 dark:text-red-600 rounded-[1.5rem] py-4 px-10 text-2xl font-bold border-4 border-b-[8px] border-red-100 active:translate-y-[4px] active:border-b-4 w-full sm:w-auto',
+        panelButtonCorrect: 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 rounded-[1.5rem] py-4 px-10 text-2xl font-bold border-4 border-b-[8px] border-green-100 dark:border-slate-700 active:translate-y-[4px] active:border-b-4 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-700',
+        panelButtonIncorrect: 'bg-white dark:bg-slate-800 text-red-700 dark:text-red-500 rounded-[1.5rem] py-4 px-10 text-2xl font-bold border-4 border-b-[8px] border-red-100 dark:border-slate-700 active:translate-y-[4px] active:border-b-4 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-700',
         iconColor: 'text-amber-400',
       };
     case 'Primaria':
@@ -66,8 +66,8 @@ export const getTheme = (level: Level): ThemeSetup => {
         progressFill: 'bg-indigo-500 h-full transition-all duration-300 ease-out',
         panelCorrect: 'bg-green-600 dark:bg-green-500 text-white px-6 py-6 shadow-lg flex flex-col sm:flex-row gap-4 justify-between items-center',
         panelIncorrect: 'bg-red-600 dark:bg-red-500 text-white px-6 py-6 shadow-lg flex flex-col sm:flex-row gap-4 justify-between items-center',
-        panelButtonCorrect: 'bg-white text-green-700 dark:text-green-600 rounded-xl py-3 px-8 text-lg font-bold border-2 border-b-4 border-green-100 active:translate-y-[2px] active:border-b-2 w-full sm:w-auto hover:bg-slate-50',
-        panelButtonIncorrect: 'bg-white text-red-700 dark:text-red-600 rounded-xl py-3 px-8 text-lg font-bold border-2 border-b-4 border-red-100 active:translate-y-[2px] active:border-b-2 w-full sm:w-auto hover:bg-slate-50',
+        panelButtonCorrect: 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 rounded-xl py-3 px-8 text-lg font-bold border-2 border-b-4 border-green-100 dark:border-slate-700 active:translate-y-[2px] active:border-b-2 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-700',
+        panelButtonIncorrect: 'bg-white dark:bg-slate-800 text-red-700 dark:text-red-500 rounded-xl py-3 px-8 text-lg font-bold border-2 border-b-4 border-red-100 dark:border-slate-700 active:translate-y-[2px] active:border-b-2 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-700',
         iconColor: 'text-indigo-500',
       };
     case 'Secundaria':
@@ -85,8 +85,8 @@ export const getTheme = (level: Level): ThemeSetup => {
         progressFill: 'bg-indigo-500 h-full shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300 ease-out',
         panelCorrect: 'bg-green-600 dark:bg-green-500 text-white backdrop-blur-xl border-t border-emerald-500/30 px-6 sm:px-10 py-8 flex flex-col sm:flex-row gap-6 justify-between items-center relative z-50',
         panelIncorrect: 'bg-red-600 dark:bg-red-500 text-white backdrop-blur-xl border-t border-rose-500/30 px-6 sm:px-10 py-8 flex flex-col sm:flex-row gap-6 justify-between items-center relative z-50',
-        panelButtonCorrect: 'px-10 py-4 bg-white text-green-700 dark:text-green-600 hover:bg-slate-50 font-bold rounded-2xl shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 active:scale-95 text-lg cursor-pointer w-full sm:w-auto',
-        panelButtonIncorrect: 'px-10 py-4 bg-white text-red-700 dark:text-red-600 hover:bg-slate-50 font-bold rounded-2xl shadow-lg shadow-rose-500/30 transition-all transform hover:scale-105 active:scale-95 text-lg cursor-pointer w-full sm:w-auto',
+        panelButtonCorrect: 'px-10 py-4 bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold rounded-2xl shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 active:scale-95 text-lg cursor-pointer w-full sm:w-auto',
+        panelButtonIncorrect: 'px-10 py-4 bg-white dark:bg-slate-800 text-red-700 dark:text-red-500 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold rounded-2xl shadow-lg shadow-rose-500/30 transition-all transform hover:scale-105 active:scale-95 text-lg cursor-pointer w-full sm:w-auto',
         iconColor: 'text-indigo-400',
       };
   }

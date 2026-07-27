@@ -171,17 +171,17 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
               <h2 className="text-3xl font-bold font-playful mb-2">¿Qué grado de {stage}?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {stage === 'Inicial' && ['3 años', '4 años', '5 años'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-lg shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
                     {g}
                   </button>
                 ))}
                 {stage === 'Primaria' && ['1ero', '2do', '3ero', '4to', '5to', '6to'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--science,theme(colors.emerald.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-lg shadow-[0_6px_0_var(--science-s,theme(colors.emerald.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--science,theme(colors.emerald.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--science-s,theme(colors.emerald.700))]">
                     {g}
                   </button>
                 ))}
                 {stage === 'Secundaria' && ['1ero', '2do', '3ero', '4to', '5to'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-lg shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
                     {g}
                   </button>
                 ))}
@@ -194,13 +194,13 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
             <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center flex flex-col gap-6">
               <h2 className="text-3xl font-bold font-playful mb-2">¿Cómo consideras tu nivel actual?</h2>
               <div className="flex flex-col gap-4">
-                <button onClick={() => startDiagnostic('Principiante')} className="p-5 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]">
+                <button onClick={() => startDiagnostic('Principiante')} className="p-5 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]">
                   🌱 Principiante
                 </button>
-                <button onClick={() => startDiagnostic('Intermedio')} className="p-5 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-xl shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
+                <button onClick={() => startDiagnostic('Intermedio')} className="p-5 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
                   ⚡ Intermedio
                 </button>
-                <button onClick={() => startDiagnostic('Avanzado')} className="p-5 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-[var(--bg,white)] font-bold text-xl shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
+                <button onClick={() => startDiagnostic('Avanzado')} className="p-5 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
                   🔥 Avanzado
                 </button>
               </div>
