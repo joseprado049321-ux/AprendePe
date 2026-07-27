@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { UserProfile } from '../../types';
@@ -64,10 +64,20 @@ export default function Login({ setIsGuest }: LoginProps) {
         localStorage.removeItem('temp_onboarding');
       }
       
+      // Clean up guest profile if it exists to avoid conflicts
+      localStorage.removeItem('isGuest');
+      localStorage.removeItem('guestProfile');
+      if (setIsGuest) setIsGuest(false);
+      
       // Let onAuthStateChanged handle navigation
     } catch (err: any) {
       console.error(err);
-      setError('Error al iniciar sesión con Google.');
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+        const provider = new GoogleAuthProvider();
+        signInWithRedirect(auth, provider);
+      } else {
+        setError('Error al iniciar sesión con Google.');
+      }
     }
   };
 

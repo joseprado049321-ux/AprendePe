@@ -121,6 +121,23 @@ export default function App() {
           inventory: profile.inventory || { streakProtectors: 0, xpMultipliers: 0 }
         };
         await setDoc(userRef, newProfile);
+      } else if (docSnap.exists() && profile) {
+        // Fusionar el progreso del invitado con el perfil viejo
+        const oldProfile = docSnap.data() as UserProfile;
+        const newProfile: Partial<UserProfile> = {
+          xp: (oldProfile.xp || 0) + (profile.xp || 0),
+          points: (oldProfile.points || 0) + (profile.points || 0),
+          streak: Math.max(oldProfile.streak || 0, profile.streak || 0),
+          wallet: {
+            oro: (oldProfile.wallet?.oro || 0) + (profile.wallet?.oro || 0),
+            esmeralda: (oldProfile.wallet?.esmeralda || 0) + (profile.wallet?.esmeralda || 0)
+          },
+          inventory: {
+            streakProtectors: (oldProfile.inventory?.streakProtectors || 0) + (profile.inventory?.streakProtectors || 0),
+            xpMultipliers: (oldProfile.inventory?.xpMultipliers || 0) + (profile.inventory?.xpMultipliers || 0)
+          }
+        };
+        await setDoc(userRef, newProfile, { merge: true });
       }
       
       setIsGuest(false);

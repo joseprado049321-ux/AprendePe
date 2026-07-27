@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { UserProfile } from '../../types';
@@ -36,9 +36,17 @@ export default function Register() {
         };
         await setDoc(userRef, userProfile);
       }
+      // Clean up guest profile if it exists
+      localStorage.removeItem('isGuest');
+      localStorage.removeItem('guestProfile');
       // Wait for onAuthStateChanged to pick up the app loading
     } catch (err: any) {
-      setError('Error al registrar con Google.');
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+        const provider = new GoogleAuthProvider();
+        signInWithRedirect(auth, provider);
+      } else {
+        setError('Error al registrar con Google.');
+      }
     }
   };
 
