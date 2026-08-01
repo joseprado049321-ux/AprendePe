@@ -56,7 +56,7 @@ app.post("/api/generate-questions", async (req, res) => {
       try {
         const docRef = db.collection('users').doc(userId).collection('preguntasGeneradas').doc(`${subject}_${targetLevel}`);
         const docSnap = await docRef.get();
-        
+
         if (docSnap.exists) {
           console.log(`[Cache HIT] Returning cached questions for ${userId} - ${subject} - Level ${targetLevel}`);
           const cachedData = docSnap.data();
@@ -156,10 +156,10 @@ app.post("/api/generate-questions", async (req, res) => {
     res.json({ questions: generatedQuestions, isNew: true });
   } catch (error: any) {
     console.error("Error crítico en la API:", error);
-    res.status(500).json({ 
-      error: "Error interno del servidor", 
+    res.status(500).json({
+      error: "Error interno del servidor",
       details: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
   }
 });
@@ -167,7 +167,7 @@ app.post("/api/generate-questions", async (req, res) => {
 app.post("/api/generate-diagnostic", async (req, res) => {
   try {
     const { educationalStage, grade, selfAssessedLevel } = req.body;
-    
+
     const prompt = `Actúa como un profesor experto de Perú evaluando bajo los estándares del Currículo Nacional de Educación Básica (CNEB). Genera una prueba diagnóstica de exactamente 10 preguntas que integren cultura general, resolución de problemas (matemáticas) y comprensión lectora para un estudiante de ${educationalStage}, en el grado ${grade}, que se considera de nivel ${selfAssessedLevel}. 
 REGLAS ESTRICTAS:
 - Asegúrate de evaluar competencias clave adaptadas a los lineamientos de la RVM N.° 094-2020-MINEDU.
@@ -198,10 +198,10 @@ REGLAS ESTRICTAS:
     res.json({ questions: generatedQuestions });
   } catch (error: any) {
     console.error("Error crítico en la API:", error);
-    res.status(500).json({ 
-      error: "Error interno del servidor", 
+    res.status(500).json({
+      error: "Error interno del servidor",
       details: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
   }
 });
@@ -229,3 +229,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Exportar la app para Vercel Serverless Functions
 export default app;
+
