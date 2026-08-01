@@ -1,3 +1,4 @@
+// @ts-ignore
 import express from "express";
 import path from "path";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -72,7 +73,7 @@ app.post("/api/generate-questions", async (req, res) => {
     }
 
     const prompt = `
-      You are an adaptive learning AI for AprendePe.
+      You are an adaptive learning AI for Negros.
       Create a new lesson of exactly 10 questions for the subject "${subject}".
       
       TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.

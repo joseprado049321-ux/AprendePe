@@ -17,7 +17,7 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
 
   const steps = [
     {
-      title: '¡Bienvenido a AprendePe!',
+      title: '¡Bienvenido a Negros!',
       description: 'Acabas de completar tu diagnóstico inicial. Ahora te daremos un breve recorrido.',
       targetId: null,
     },

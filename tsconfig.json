@@ -11,6 +11,8 @@
     ],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
@@ -21,6 +23,8 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["src/**/*", "server.ts", "vite.config.ts", "*.ts"]
 }
