@@ -73,7 +73,7 @@ app.post("/api/generate-questions", async (req, res) => {
     }
 
     const prompt = `
-      You are an adaptive learning AI for Negros.
+      You are an adaptive learning AI for HAGS.
       Create a new lesson of exactly 10 questions for the subject "${subject}".
       
       TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.

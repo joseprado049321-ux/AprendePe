@@ -45,7 +45,7 @@ export function NotificationsProvider({ children, profile }: { children: React.R
           localStorage.setItem('lastNotifiedDate', today);
           try {
             new Notification('¡Es hora de aprender!', {
-              body: 'Tu meta diaria te está esperando. ¡Continúa tu progreso en Negros!',
+              body: 'Tu meta diaria te está esperando. ¡Continúa tu progreso en HAGS!',
               icon: '/vite.svg'
             });
           } catch (error) {
