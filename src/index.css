@@ -1,32 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @layer base {
   html, body, #root {
-    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white min-h-screen w-full m-0 p-0 overflow-x-hidden;
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen w-full m-0 p-0 overflow-x-hidden transition-colors;
   }
 }
 
 :root {
-  --bg: #ffffff;
-  --text: #3c3c3c;
-  --muted: #afafaf;
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
   --math:    #1cb0f6; --math-s:    #1899d6;
-  --comm:    #ffc800; --comm-s:    #cc9f00;
-  --social:  #ff4b4b; --social-s:  #cc3c3c;
-  --science: #58cc02; --science-s: #46a302;
-  --danger:  #ff4b4b; --danger-s:  #cc3c3c;
-  --gray:    #e5e5e5; --gray-s:    #c0c0c0;
+  --comm:    #f59e0b; --comm-s:    #d97706;
+  --social:  #ef4444; --social-s:  #dc2626;
+  --science: #10b981; --science-s: #059669;
+  --danger:  #ef4444; --danger-s:  #dc2626;
+  --gray:    #f1f5f9; --gray-s:    #e2e8f0;
   --radius: 16px;
 }
 
 .dark {
   --bg: #0f172a;
-  --text: #f1f5f9;
-  --muted: #64748b;
+  --text: #f8fafc;
+  --muted: #94a3b8;
   --gray: #1e293b;
-  --gray-s: #0f172a;
+  --gray-s: #334155;
+  --danger:  #f43f5e;
+  --danger-s: #be123c;
 }
 
 /* Educational Stage Themes */
@@ -37,40 +39,24 @@
   --comm: #ffb703; --comm-s: #e5a400;
   --science: #7cb518; --science-s: #5c8a11;
   --social: #fb8500; --social-s: #d97400;
-  --bg: #f0fdff; /* Fondo ligeramente celeste/claro */
 }
 
 .theme-primaria {
-  --radius: 12px;
+  --radius: 16px;
   /* Colores equilibrados */
   --math: #3b82f6; --math-s: #2563eb;
   --comm: #f59e0b; --comm-s: #d97706;
   --science: #10b981; --science-s: #059669;
   --social: #ef4444; --social-s: #dc2626;
-  --bg: #ffffff;
 }
 
 .theme-secundaria {
-  --radius: 6px;
-  /* Colores más serios, estilo dark mode con neones */
-  --bg: #111827; 
-  --text: #f3f4f6;
-  --muted: #9ca3af;
-  --gray: #374151; --gray-s: #1f2937;
-  
+  --radius: 10px;
+  /* Neones y estilo moderno */
   --math: #0ea5e9; --math-s: #0284c7;
   --comm: #f59e0b; --comm-s: #d97706;
   --science: #10b981; --science-s: #059669;
   --social: #f43f5e; --social-s: #e11d48;
-}
-
-/* Dark mode overrides for specific themes */
-.dark .theme-inicial, .dark.theme-inicial {
-  --bg: #0f172a;
-}
-
-.dark .theme-primaria, .dark.theme-primaria {
-  --bg: #0f172a;
 }
 
 @theme {

@@ -115,14 +115,14 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
   const themeClass = stage ? `theme-${stage.toLowerCase()}` : '';
 
   return (
-    <div className={`min-h-screen bg-[var(--bg,theme(colors.slate.900))] text-[var(--text,white)] transition-colors duration-500 flex flex-col items-center justify-center p-4 sm:p-8 ${themeClass}`}>
-      <div className="max-w-xl w-full bg-[var(--gray,theme(colors.slate.800))] p-8 rounded-[var(--radius,24px)] border border-[var(--muted,theme(colors.slate.700))] shadow-2xl relative overflow-hidden">
+    <div className={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors duration-500 flex flex-col items-center justify-center p-4 sm:p-8 ${themeClass}`}>
+      <div className="max-w-xl w-full bg-white dark:bg-slate-800/90 p-8 rounded-[var(--radius,24px)] border border-slate-200 dark:border-slate-700 shadow-2xl relative overflow-hidden">
         
         {/* Progreso del Onboarding (Oculto en quiz y resultados) */}
         {step < 5 && (
           <div className="flex gap-2 justify-center mb-8">
             {[0, 1, 2, 3].map(i => (
-              <div key={i} className={`h-2 rounded-full transition-all duration-300 ${step >= i ? 'w-8 bg-[var(--math,theme(colors.indigo.500))]' : 'w-2 bg-[var(--gray-s,theme(colors.slate.600))]'}`} />
+              <div key={i} className={`h-2 rounded-full transition-all duration-300 ${step >= i ? 'w-8 bg-[var(--math,theme(colors.indigo.500))]' : 'w-2 bg-slate-200 dark:bg-slate-700'}`} />
             ))}
           </div>
         )}
@@ -131,14 +131,14 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {/* PASO 0: Bienvenida */}
           {step === 0 && (
             <motion.div key="step0" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center flex flex-col items-center gap-6">
-              <div className="w-24 h-24 bg-[var(--math,theme(colors.indigo.500))] rounded-full flex items-center justify-center shadow-[0_8px_0_var(--math-s,theme(colors.indigo.700))] text-5xl mb-4">
+              <div className="w-24 h-24 bg-[var(--math,theme(colors.indigo.500))] rounded-full flex items-center justify-center shadow-[0_8px_0_var(--math-s,theme(colors.indigo.700))] text-5xl mb-4 text-white">
                 👋
               </div>
-              <h1 className="text-3xl font-bold font-playful text-[var(--text,white)]">¡Hola! Soy tu tutor virtual de HAGS</h1>
-              <p className="text-lg text-[var(--muted,theme(colors.slate.400))] leading-relaxed">
+              <h1 className="text-3xl font-bold font-playful text-slate-900 dark:text-white">¡Hola! Soy tu tutor virtual de HAGS</h1>
+              <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
                 Estoy aquí para adaptarme a tu ritmo de aprendizaje. Primero, cuéntame un poco sobre ti para personalizar tu experiencia.
               </p>
-              <button onClick={() => handleNextStep(1)} className="mt-4 w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]">
+              <button onClick={() => handleNextStep(1)} className="mt-4 w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))] cursor-pointer">
                 ¡Empezar!
               </button>
             </motion.div>
@@ -147,15 +147,15 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {/* PASO 1: Etapa Escolar */}
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center flex flex-col gap-6">
-              <h2 className="text-3xl font-bold font-playful mb-2">¿En qué etapa escolar estás?</h2>
-              <p className="text-[var(--muted,theme(colors.slate.400))] mb-4">Esto cambiará el diseño y los ejercicios para ti.</p>
+              <h2 className="text-3xl font-bold font-playful mb-2 text-slate-900 dark:text-white">¿En qué etapa escolar estás?</h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">Esto cambiará el diseño y los ejercicios para ti.</p>
               
               <div className="flex flex-col gap-4">
                 {(['Inicial', 'Primaria', 'Secundaria'] as const).map(s => (
                   <button 
                     key={s} 
                     onClick={() => { setStage(s); handleNextStep(2); }} 
-                    className="p-6 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl flex items-center justify-between shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]"
+                    className="p-6 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl flex items-center justify-between shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))] cursor-pointer"
                   >
                     <span>{s === 'Inicial' ? '🧸' : s === 'Primaria' ? '🏫' : '🎓'} {s}</span>
                     <ArrowRight />
@@ -168,20 +168,20 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {/* PASO 2: Grado */}
           {step === 2 && (
             <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center flex flex-col gap-6">
-              <h2 className="text-3xl font-bold font-playful mb-2">¿Qué grado de {stage}?</h2>
+              <h2 className="text-3xl font-bold font-playful mb-2 text-slate-900 dark:text-white">¿Qué grado de {stage}?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {stage === 'Inicial' && ['3 años', '4 años', '5 años'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))] cursor-pointer">
                     {g}
                   </button>
                 ))}
                 {stage === 'Primaria' && ['1ero', '2do', '3ero', '4to', '5to', '6to'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--science,theme(colors.emerald.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--science-s,theme(colors.emerald.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--science,theme(colors.emerald.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--science-s,theme(colors.emerald.700))] cursor-pointer">
                     {g}
                   </button>
                 ))}
                 {stage === 'Secundaria' && ['1ero', '2do', '3ero', '4to', '5to'].map(g => (
-                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
+                  <button key={g} onClick={() => { setGrade(g); handleNextStep(3); }} className="p-4 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-lg shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))] cursor-pointer">
                     {g}
                   </button>
                 ))}
@@ -192,15 +192,15 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {/* PASO 3: Autoevaluación */}
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center flex flex-col gap-6">
-              <h2 className="text-3xl font-bold font-playful mb-2">¿Cómo consideras tu nivel actual?</h2>
+              <h2 className="text-3xl font-bold font-playful mb-2 text-slate-900 dark:text-white">¿Cómo consideras tu nivel actual?</h2>
               <div className="flex flex-col gap-4">
-                <button onClick={() => startDiagnostic('Principiante')} className="p-5 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]">
+                <button onClick={() => startDiagnostic('Principiante')} className="p-5 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))] cursor-pointer">
                   🌱 Principiante
                 </button>
-                <button onClick={() => startDiagnostic('Intermedio')} className="p-5 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))]">
+                <button onClick={() => startDiagnostic('Intermedio')} className="p-5 bg-[var(--comm,theme(colors.amber.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--comm-s,theme(colors.amber.700))] cursor-pointer">
                   ⚡ Intermedio
                 </button>
-                <button onClick={() => startDiagnostic('Avanzado')} className="p-5 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))]">
+                <button onClick={() => startDiagnostic('Avanzado')} className="p-5 bg-[var(--social,theme(colors.rose.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-[var(--radius,24px)] text-white font-bold text-xl shadow-[0_6px_0_var(--social-s,theme(colors.rose.700))] cursor-pointer">
                   🔥 Avanzado
                 </button>
               </div>
@@ -211,8 +211,8 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {step === 4 && (
             <motion.div key="step4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center py-12">
               <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
-              <h2 className="text-2xl font-bold font-playful mb-2">Generando tu prueba personalizada...</h2>
-              <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Nuestra IA está creando un test personalizado de 10 preguntas para {grade} de {stage} basado en el CNEB.</p>
+              <h2 className="text-2xl font-bold font-playful mb-2 text-slate-900 dark:text-white">Generando tu prueba personalizada...</h2>
+              <p className="text-slate-600 dark:text-slate-400 text-center">Nuestra IA está creando un test personalizado de 10 preguntas para {grade} de {stage} basado en el CNEB.</p>
             </motion.div>
           )}
 
@@ -220,16 +220,16 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {step === 5 && questions.length > 0 && (
             <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col w-full">
               <header className="flex items-center gap-4 mb-8">
-                <div className="bg-[var(--math,theme(colors.indigo.500))] text-[var(--bg,white)] p-3 rounded-2xl">
+                <div className="bg-[var(--math,theme(colors.indigo.500))] text-white p-3 rounded-2xl">
                   <Brain size={32} />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold font-playful">Prueba Diagnóstica</h1>
-                  <p className="text-[var(--muted,theme(colors.slate.400))] font-medium">Pregunta <span>{currentQ + 1}</span> de <span>{questions.length}</span></p>
+                  <h1 className="text-2xl font-bold font-playful text-slate-900 dark:text-white">Prueba Diagnóstica</h1>
+                  <p className="text-slate-600 dark:text-slate-400 font-medium">Pregunta <span>{currentQ + 1}</span> de <span>{questions.length}</span></p>
                 </div>
               </header>
 
-              <div className="w-full bg-[var(--gray-s,theme(colors.slate.700))] rounded-full h-3 mb-8 overflow-hidden">
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mb-8 overflow-hidden">
                 <div 
                   className="bg-[var(--math,theme(colors.indigo.500))] h-full rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${(currentQ / questions.length) * 100}%` }}
@@ -238,15 +238,15 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
 
               <AnimatePresence mode="wait">
                 <motion.div key={currentQ} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
-                  <h2 className="text-2xl font-semibold leading-relaxed">{questions[currentQ].text}</h2>
+                  <h2 className="text-2xl font-semibold leading-relaxed text-slate-900 dark:text-white">{questions[currentQ].text}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {questions[currentQ].options.map((opt: string, idx: number) => (
                       <button
                         key={idx}
                         onClick={() => handleAnswer(idx)}
-                        className="bg-[var(--gray-s,theme(colors.slate.700))] hover:bg-[var(--math,theme(colors.indigo.500))] hover:text-white text-[var(--text,white)] font-medium p-5 rounded-2xl text-left transition-all flex items-center justify-between group active:scale-95 border-2 border-transparent hover:border-[var(--math-s,theme(colors.indigo.600))]"
+                        className="bg-slate-100 dark:bg-slate-700/60 hover:bg-[var(--math,theme(colors.indigo.500))] hover:text-white text-slate-800 dark:text-white font-medium p-5 rounded-2xl text-left transition-all flex items-center justify-between group active:scale-95 border-2 border-transparent hover:border-[var(--math-s,theme(colors.indigo.600))] cursor-pointer shadow-sm"
                       >
-                        {opt}
+                        <span>{opt}</span>
                         <ArrowRight size={20} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
@@ -289,13 +289,13 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
                    </div>
                 </div>
                 
-                <h2 className="text-xl font-medium text-slate-400 mb-2 uppercase tracking-widest">Resultado Oficial</h2>
+                <h2 className="text-xl font-medium text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">Resultado Oficial</h2>
                 <div translate="no" className={`text-8xl md:text-9xl font-bold font-playful mb-6 ${colorClass} drop-shadow-sm`}>
                   {letter}
                 </div>
                 
-                <p className="text-2xl font-bold text-[var(--text,white)] mb-4 px-4">{message}</p>
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-full mb-10">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mb-4 px-4">{message}</p>
+                <p className="text-sm font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-4 py-2 rounded-full mb-10">
                   {score}/{questions.length} respuestas correctas
                 </p>
                 
@@ -305,7 +305,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
                   </div>
                   <button 
                     onClick={finishDiagnostic}
-                    className="w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))]"
+                    className="w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))] cursor-pointer"
                   >
                     Continuar a HAGS
                   </button>
@@ -318,8 +318,8 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
           {isSaving && (
              <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-12">
                <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
-               <h2 className="text-2xl font-bold font-playful mb-2">Guardando perfil...</h2>
-               <p className="text-[var(--muted,theme(colors.slate.400))] text-center">Configurando HAGS con tu nuevo nivel.</p>
+               <h2 className="text-2xl font-bold font-playful mb-2 text-slate-900 dark:text-white">Guardando perfil...</h2>
+               <p className="text-slate-600 dark:text-slate-400 text-center">Configurando HAGS con tu nuevo nivel.</p>
              </motion.div>
           )}
 

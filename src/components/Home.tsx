@@ -157,20 +157,19 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   return (
     <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative`}>
       <div className="w-full max-w-md mx-auto px-4 pt-8 pb-24 min-h-screen flex flex-col relative z-0">
-        
-        <header className="flex justify-between items-center mb-6 sticky top-0 bg-[var(--bg)]/90 backdrop-blur pb-4 z-40 pt-2 border-b-2 border-[var(--gray)] transition-colors duration-500">
+             <header className="flex justify-between items-center mb-6 sticky top-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur pb-4 z-40 pt-2 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500">
           <div className="flex items-center gap-2">
              <div className={`p-2 rounded-full ${t.iconBg}`}>
                 <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : ''} />
              </div>
-             <h1 className={`${t.text} font-bold mb-0 mt-0 text-xl`}>HAGS</h1>
+             <h1 className="text-slate-900 dark:text-white font-bold mb-0 mt-0 text-xl">HAGS</h1>
           </div>
           
           <div className="flex items-center gap-2">
              <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-1 bg-[var(--gray)] px-3 py-1.5 rounded-lg font-bold text-sm text-[var(--text)] hover:bg-[var(--gray-s)] transition-colors"
+                  className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl font-bold text-sm text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors"
                 >
                   {subject} <ChevronDown size={16} />
                 </button>
@@ -200,11 +199,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                   )}
                 </AnimatePresence>
              </div>
-             <div className={`flex items-center gap-1 text-[var(--muted)] px-3 py-1.5 font-bold text-sm`}>
-                <Flame size={18} className="animate-pulse text-orange-400" />
+             <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 px-3 py-1.5 font-bold text-sm">
+                <Flame size={18} className="animate-pulse text-amber-500" />
                 <span>{profile.streak}</span>
              </div>
-             <Link to="/profile" className={`p-2 rounded-full border-2 border-[var(--gray)] text-[var(--text)] hover:bg-[var(--gray)] transition-colors`}>
+             <Link to="/profile" className="p-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors">
                 <User size={18} />
              </Link>
           </div>
@@ -217,9 +216,9 @@ export default function Home({ profile, updateProfile }: HomeProps) {
               // Variado strict palette: alternate colors for nodes
               let nodeBg = t.node;
               if (subject === 'Variado' && node.unlocked) {
-                 const colors = ['bg-red-500 shadow-[0_6px_0_#cc3c3c]', 'bg-yellow-500 shadow-[0_6px_0_#cc9f00]', 'bg-[var(--math)] shadow-[0_6px_0_var(--math-s)]', 'bg-[var(--science)] shadow-[0_6px_0_var(--science-s)]'];
+                 const colors = ['bg-rose-500 shadow-[0_6px_0_#be123c]', 'bg-amber-500 shadow-[0_6px_0_#b45309]', 'bg-sky-500 shadow-[0_6px_0_#0369a1]', 'bg-emerald-500 shadow-[0_6px_0_#047857]'];
                  nodeBg = colors[i % 4];
-                 if(nodeBg.includes('yellow')) {
+                 if(nodeBg.includes('amber')) {
                    nodeBg += ' text-slate-900';
                  } else {
                    nodeBg += ' text-white';
@@ -235,7 +234,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
               return (
                 <motion.div 
-                  key={node.id}
+                  key={node.id} 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
@@ -248,12 +247,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                     className={`${currentWidth} h-20 rounded-xl flex items-center justify-center transition-all duration-300 pointer-events-auto ${
                       node.unlocked 
                         ? `${nodeBg} hover:scale-105 hover:shadow-2xl active:scale-95` 
-                        : 'bg-[#e5e5e5] shadow-[0_6px_0_#c0c0c0] text-[#afafaf] opacity-60 cursor-not-allowed dark:bg-[var(--gray)] dark:shadow-[0_6px_0_var(--bg)] dark:text-[var(--muted)]'
+                        : 'bg-slate-200 dark:bg-slate-800 shadow-[0_6px_0_#cbd5e1] dark:shadow-[0_6px_0_#0f172a] text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed'
                     }`}
                   >
                     {node.unlocked ? <span className="text-[26px] font-bold">{node.id}</span> : <Lock size={28} />}
                   </button>
-                  <span className="font-bold text-[12px] whitespace-nowrap absolute -bottom-[24px] text-[#afafaf]">
+                  <span className="font-bold text-[12px] whitespace-nowrap absolute -bottom-[24px] text-slate-400 dark:text-slate-500">
                     Nivel {node.id}
                   </span>
                 </motion.div>
@@ -264,7 +263,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           {/* Global Lives Column */}
           <div className="w-20 shrink-0 flex flex-col items-center pt-10">
             <div className="sticky top-28 flex flex-col gap-3">
-              <span className="text-[11px] font-bold text-slate-400 text-center uppercase tracking-wider mb-2">Vidas</span>
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-wider mb-2">Vidas</span>
               {Array.from({ length: 5 }).map((_, i) => {
                  const hasLife = i < (profile.lives ?? 5);
                  return (
@@ -272,8 +271,8 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                      key={i} 
                      className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-300 ${
                        hasLife 
-                         ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-500 shadow-md shadow-rose-200/50 dark:shadow-rose-900/50' 
-                         : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600'
+                         ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-800/40 shadow-sm shadow-rose-200/50 dark:shadow-rose-900/30' 
+                         : 'bg-slate-100 dark:bg-slate-800/50 text-slate-300 dark:text-slate-600 border border-slate-200 dark:border-slate-800'
                      }`}
                    >
                      <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">

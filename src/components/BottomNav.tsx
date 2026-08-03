@@ -24,8 +24,8 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t-[2px] border-[#e5e5e5] dark:border-slate-800 z-50 pb-safe transition-colors">
-      <div className="flex justify-around items-center w-full px-2 py-[12px] min-h-[68px]">
+    <nav className="fixed bottom-0 left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50 pb-safe transition-colors shadow-sm">
+      <div className="flex justify-around items-center w-full max-w-lg mx-auto px-2 py-2 min-h-[64px]">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id || (activeTab === '/' && tab.id === '/home');
           const IconComponent = tab.icon;
@@ -35,15 +35,17 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
               key={tab.id}
               id={`nav-tab-${tab.id.replace('/', '')}`}
               onClick={() => handleTabClick(tab.id)}
-              className={`flex items-center justify-center transition-all duration-300 ease-in-out px-4 py-2 rounded-2xl ${
-                isActive ? 'flex-row gap-2 text-[#1cb0f6] bg-[#1cb0f6]/10' : 'flex-col gap-1 text-[#afafaf] dark:text-slate-400 bg-transparent'
+              className={`flex items-center justify-center transition-all duration-300 ease-in-out px-3.5 py-1.5 rounded-2xl ${
+                isActive 
+                  ? 'flex-row gap-2 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 font-bold' 
+                  : 'flex-col gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 font-medium'
               }`}
             >
               <IconComponent 
-                size={24} 
-                className={`transition-all duration-300 ${isActive ? 'scale-110 stroke-[2.5px]' : 'scale-100 stroke-[2px]'}`}
+                size={22} 
+                className={`transition-transform duration-300 ${isActive ? 'scale-110 stroke-[2.5px]' : 'scale-100 stroke-[2px]'}`}
               />
-              <span className={`text-[12px] transition-all duration-300 leading-none ${isActive ? 'font-bold' : 'font-medium'}`}>
+              <span className="text-[12px] leading-none">
                 {tab.label}
               </span>
             </button>

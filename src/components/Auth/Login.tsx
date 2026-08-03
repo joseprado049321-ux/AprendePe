@@ -113,21 +113,21 @@ export default function Login({ setIsGuest }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white/5 backdrop-blur-xl border border-slate-800 p-8 rounded-3xl w-full max-w-md shadow-2xl flex flex-col items-center">
-        <h2 className="text-3xl font-light text-white mb-6 text-center">Inicia sesión</h2>
-        {error && <p className="text-rose-400 bg-rose-500/10 border border-rose-500/30 p-3 rounded-lg text-sm mb-6 w-full text-center">{error}</p>}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4 transition-colors">
+      <div className="bg-white dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 p-8 rounded-3xl w-full max-w-md shadow-xl dark:shadow-2xl flex flex-col items-center">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 text-center">Inicia sesión</h2>
+        {error && <p className="text-rose-500 bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-sm mb-6 w-full text-center font-medium">{error}</p>}
         
-        <p className="text-slate-400 text-center mb-8">
+        <p className="text-slate-600 dark:text-slate-400 text-center mb-8">
           Usa tu cuenta de Google para acceder fácil y rápido, o entra como invitado.
         </p>
 
         <div className="w-full space-y-4">
           <button 
             onClick={handleGoogleLogin} 
-            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-3"
+            className="w-full bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white font-bold py-3.5 px-4 rounded-xl shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -151,13 +151,13 @@ export default function Login({ setIsGuest }: LoginProps) {
 
           <button 
             onClick={handleGuestLogin} 
-            className="w-full bg-slate-800/50 hover:bg-slate-700/50 text-white font-medium py-3 px-4 rounded-xl shadow border border-slate-700 transition-colors"
+            className="w-full bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
           >
             Continuar como invitado
           </button>
         </div>
 
-        <p className="mt-8 text-center text-slate-500 text-sm">
+        <p className="mt-8 text-center text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
           Al entrar como invitado, tus datos solo se guardarán temporalmente en este dispositivo.
         </p>
       </div>

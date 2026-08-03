@@ -51,20 +51,20 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white/5 backdrop-blur-xl border border-slate-800 p-8 rounded-3xl w-full max-w-md shadow-2xl flex flex-col items-center">
-        <h2 className="text-3xl font-light text-white mb-6 text-center">Crear cuenta</h2>
-        {error && <p className="text-rose-400 bg-rose-500/10 border border-rose-500/30 p-3 rounded-lg text-sm mb-6 w-full text-center">{error}</p>}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4 transition-colors">
+      <div className="bg-white dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 p-8 rounded-3xl w-full max-w-md shadow-xl dark:shadow-2xl flex flex-col items-center">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 text-center">Crear cuenta</h2>
+        {error && <p className="text-rose-500 bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-sm mb-6 w-full text-center font-medium">{error}</p>}
         
-        <p className="text-slate-400 text-center mb-8">
+        <p className="text-slate-600 dark:text-slate-400 text-center mb-8">
           Regístrate usando tu cuenta de Google de forma segura.
         </p>
 
         <button 
           onClick={handleGoogleRegister} 
-          className="w-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-3"
+          className="w-full bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-white font-bold py-3.5 px-4 rounded-xl shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
         >
-          <svg className="w-6 h-6" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 shrink-0" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
