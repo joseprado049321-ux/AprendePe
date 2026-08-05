@@ -52,6 +52,16 @@ export interface LessonHistory {
   livesLost?: number;
 }
 
+export interface MistakeItem {
+  id: string;
+  question: Question;
+  subject: Subject;
+  level: Level;
+  failedAt: string;
+  userAnswerIndex: number;
+  mastered: boolean;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -84,6 +94,7 @@ export interface UserProfile {
   notificationsEnabled?: boolean;
   dailyReminderTime?: string;
   history?: LessonHistory[];
+  mistakeBank?: MistakeItem[];
   wallet?: {
     oro: number;
     esmeralda: number;

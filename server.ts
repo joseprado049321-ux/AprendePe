@@ -206,6 +206,72 @@ REGLAS ESTRICTAS:
   }
 });
 
+app.post("/api/explain-mistake", async (req, res) => {
+  try {
+    const { questionText, options, userAnswer, correctAnswer, subject, stage } = req.body;
+    const studentStage = stage || "Primaria";
+
+    let toneInstruction = "Usa un tono alentador, pedagógico y comprensivo con ejemplos sencillos.";
+    if (studentStage === "Inicial") {
+      toneInstruction = "Usa un tono muy tierno y comprensible para niños de 3 a 5 años, usando metáforas con animalitos, colores o juegos.";
+    } else if (studentStage === "Secundaria") {
+      toneInstruction = "Usa un tono académico pero didáctico, explicando el principio lógico o científico de fondo de manera clara y directa.";
+    }
+
+    const prompt = `
+      Actúa como el tutor pedagógico de IA de AprendePe (una plataforma educativa del Perú).
+      El estudiante respondió incorrectamente a esta pregunta y necesita una explicación para aprender de su error:
+
+      Materia: ${subject || "General"}
+      Nivel escolar: ${studentStage}
+      Pregunta: "${questionText}"
+      Opciones disponibles: ${JSON.stringify(options || [])}
+      Respuesta elegida por el estudiante: "${userAnswer}"
+      Respuesta correcta: "${correctAnswer}"
+
+      ${toneInstruction}
+
+      Genera una respuesta JSON con la siguiente estructura:
+      1. 'explanation': Explicación clara y paso a paso de por qué "${correctAnswer}" es la respuesta correcta y por qué "${userAnswer}" no lo es (sin hacerlo sentir mal, felicitándolo por su esfuerzo).
+      2. 'tip': Un consejo breve o truco de memoria para no olvidar este concepto.
+      3. 'keyConcept': El concepto o tema central (ej. "Suma con llevada", "Ecosistemas", "Cultura Paracas").
+    `;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-flash-lite",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            explanation: { type: Type.STRING, description: "Detailed pedagogical explanation" },
+            tip: { type: Type.STRING, description: "Quick memory tip or advice" },
+            keyConcept: { type: Type.STRING, description: "Central topic or concept name" }
+          },
+          required: ["explanation", "tip", "keyConcept"]
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json({
+      explanation: result.explanation || `La respuesta correcta es "${correctAnswer}". Recuerda repasar este tema con calma.`,
+      tip: result.tip || "¡La práctica constante hace al maestro!",
+      keyConcept: result.keyConcept || subject || "Concepto clave"
+    });
+  } catch (error: any) {
+    console.error("Error en /api/explain-mistake:", error);
+    // Fallback amigable si la IA falla
+    const { correctAnswer, userAnswer } = req.body;
+    res.json({
+      explanation: `La respuesta correcta es "${correctAnswer}". Tu opción fue "${userAnswer}". ¡No te desanimes, equivocarse es parte fundamental de aprender!`,
+      tip: "Lee atentamente cada alternativa antes de seleccionar tu respuesta.",
+      keyConcept: "Refuerzo pedagógico"
+    });
+  }
+});
+
 if (process.env.NODE_ENV !== 'production') {
   import('vite').then(async (viteModule) => {
     const viteServer = await viteModule.createServer({

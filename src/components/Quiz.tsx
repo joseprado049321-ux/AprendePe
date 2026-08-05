@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart } from 'lucide-react';
-import { Level, Subject, UserProfile } from '../types';
+import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart, Sparkles, Lightbulb, HelpCircle, BookOpen } from 'lucide-react';
+import { Level, Subject, UserProfile, MistakeItem } from '../types';
 import { getTheme } from '../lib/theme';
 import { getQuestions } from '../data';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -39,6 +39,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const [rescuing, setRescuing] = useState(false);
   const [reward, setReward] = useState<RewardDrop | null>(null);
 
+  // AI Explanation State
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState<{ explanation: string; tip: string; keyConcept: string } | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+
   const question = questions[currentIndex];
   const progress = questions.length > 0 ? ((currentIndex) / questions.length) * 100 : 0;
 
@@ -54,11 +59,77 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       playSound('fail');
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
-      await updateProfile({ lives: newLives });
+
+      // Guardar en el Baúl de Errores (mistakeBank)
+      const existingMistakes = profile.mistakeBank || [];
+      const exists = existingMistakes.some(m => m.question.text === question.text);
+      let updatedMistakeBank: MistakeItem[];
+
+      if (exists) {
+        updatedMistakeBank = existingMistakes.map(m => 
+          m.question.text === question.text
+            ? { ...m, failedAt: new Date().toISOString(), userAnswerIndex: index, mastered: false }
+            : m
+        );
+      } else {
+        const newMistake: MistakeItem = {
+          id: `mistake_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          question: { ...question, subject },
+          subject,
+          level,
+          failedAt: new Date().toISOString(),
+          userAnswerIndex: index,
+          mastered: false
+        };
+        updatedMistakeBank = [newMistake, ...existingMistakes];
+      }
+
+      await updateProfile({ lives: newLives, mistakeBank: updatedMistakeBank });
       
       if (newLives === 0) {
          setTimeout(() => setShowOutOfLivesModal(true), 500);
       }
+    }
+  };
+
+  const handleOpenAiExplanation = async () => {
+    playSound('click');
+    setShowAiModal(true);
+    if (aiExplanation) return;
+    setLoadingAi(true);
+
+    try {
+      const res = await fetch('/api/explain-mistake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionText: question.text,
+          options: question.options,
+          userAnswer: selectedOption !== null ? question.options[selectedOption] : '',
+          correctAnswer: question.options[question.correctAnswerIndex],
+          subject,
+          stage: profile.educationalStage || profile.level || 'Primaria'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiExplanation(data);
+      } else {
+        setAiExplanation({
+          explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
+          tip: '¡Sigue practicando para dominar este concepto!',
+          keyConcept: subject
+        });
+      }
+    } catch (err) {
+      setAiExplanation({
+        explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
+        tip: '¡Sigue practicando para dominar este concepto!',
+        keyConcept: subject
+      });
+    } finally {
+      setLoadingAi(false);
     }
   };
 
@@ -76,6 +147,9 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     setShowOutOfLivesModal(false);
     setSelectedOption(null);
     setIsAnswered(false);
+    setShowAiModal(false);
+    setAiExplanation(null);
+    setLoadingAi(false);
   };
 
   const handleWatchAd = () => {
@@ -86,10 +160,17 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         setShowOutOfLivesModal(false);
         setSelectedOption(null);
         setIsAnswered(false);
+        setShowAiModal(false);
+        setAiExplanation(null);
+        setLoadingAi(false);
     }, 3000);
   };
 
   const handleContinue = async () => {
+    setShowAiModal(false);
+    setAiExplanation(null);
+    setLoadingAi(false);
+
     if (currentIndex < questions.length - 1) {
       playSound('click');
       setCurrentIndex(currentIndex + 1);
@@ -351,12 +432,92 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
                       <button 
                           onClick={() => navigate('/home')}
-                          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform active:scale-95"
+                          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
                       >
                           Continuar
                       </button>
                   </motion.div>
               </motion.div>
+          )}
+
+          {/* AI Explanation Modal */}
+          {showAiModal && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[70] bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col relative max-h-[90vh] overflow-y-auto"
+              >
+                <button 
+                  onClick={() => setShowAiModal(false)}
+                  className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <Sparkles size={24} className="animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tutor de IA AprendePe</h3>
+                    <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 mt-0.5">
+                      {aiExplanation?.keyConcept || subject}
+                    </span>
+                  </div>
+                </div>
+
+                {loadingAi ? (
+                  <div className="py-12 flex flex-col items-center justify-center gap-4 text-center">
+                    <Loader2 className="animate-spin text-indigo-500" size={44} />
+                    <p className="text-slate-600 dark:text-slate-300 font-medium animate-pulse text-sm sm:text-base">
+                      Analizando tu respuesta y preparando una explicación personalizada...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 text-left">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                        <BookOpen size={18} />
+                        <span>Explicación Paso a Paso</span>
+                      </div>
+                      <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                        {aiExplanation?.explanation || question.explanation}
+                      </p>
+                    </div>
+
+                    {aiExplanation?.tip && (
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-900/50">
+                        <div className="flex items-center gap-2 mb-1.5 text-amber-700 dark:text-amber-400 font-bold text-sm">
+                          <Lightbulb size={18} />
+                          <span>Consejo de Memoria</span>
+                        </div>
+                        <p className="text-amber-900 dark:text-amber-200 text-sm font-medium">
+                          {aiExplanation.tip}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
+                      <span>🎒 Esta pregunta se guardó en tu <strong>Baúl de Errores</strong> para que puedas repasarla sin perder vidas.</span>
+                    </div>
+
+                    <button 
+                      onClick={() => setShowAiModal(false)}
+                      className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
+                    >
+                      ¡Entendido, sigamos!
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
           )}
       </AnimatePresence>
 
@@ -463,6 +624,16 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                     <p className="text-base sm:text-lg text-white opacity-90">
                        {question.explanation}
                     </p>
+                    {!isCorrect && (
+                      <button
+                        type="button"
+                        onClick={handleOpenAiExplanation}
+                        className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl backdrop-blur-sm border border-white/30 transition-all shadow-sm cursor-pointer"
+                      >
+                        <Sparkles size={15} className="text-amber-300 animate-pulse" />
+                        <span>¿Por qué me equivoqué? (Explicar con IA)</span>
+                      </button>
+                    )}
                   </div>
                 </div>
                 <button 

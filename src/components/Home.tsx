@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Flame, Brain, User, Lock, Play, Loader2, Calculator, BookOpen, MessageCircle, FlaskConical, Shuffle, ChevronDown } from 'lucide-react';
+import { Flame, Brain, User, Lock, Play, Loader2, Calculator, BookOpen, MessageCircle, FlaskConical, Shuffle, ChevronDown, Sparkles, ChevronRight } from 'lucide-react';
 import { Level, Subject, UserProfile } from '../types';
 import { collection, query, where, limit, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -24,6 +24,8 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
   const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
   const t = getSubjectTheme(subject);
+
+  const pendingMistakesCount = (profile.mistakeBank || []).filter(m => !m.mastered).length;
 
   const currentUnlocked = profile.unlockedLevels?.[subject] || 1;
 
@@ -208,6 +210,43 @@ export default function Home({ profile, updateProfile }: HomeProps) {
              </Link>
           </div>
         </header>
+
+        {/* Baúl de Errores Quick Banner */}
+        {pendingMistakesCount > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
+          >
+            <Link 
+              to="/review"
+              className="block p-3.5 bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-purple-500/15 dark:from-amber-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 border border-amber-300/60 dark:border-amber-700/50 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform">
+                    <Sparkles size={20} className="animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">Baúl de Errores</span>
+                      <span className="bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                        {pendingMistakesCount}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Repasa sin perder vidas y gana +5 XP
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
+                  <span>Repasar</span>
+                  <ChevronRight size={16} />
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        )}
 
         {/* Level Path Map & Global Lives Column */}
         <div className="flex w-full relative z-10 px-4">

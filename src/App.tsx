@@ -7,6 +7,7 @@ import { UserProfile, Level, Subject } from './types';
 
 import Home from './components/Home';
 import Quiz from './components/Quiz';
+import Review from './components/Review';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Profile from './components/Profile';
@@ -184,6 +185,7 @@ export default function App() {
             <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/shop" element={isAuthenticated && profile ? (!needsDiagnostic ? <Shop profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/quiz" element={isAuthenticated && profile ? (!needsDiagnostic ? <Quiz profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
+            <Route path="/review" element={isAuthenticated && profile ? (!needsDiagnostic ? <Review profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
             <Route path="/settings" element={isAuthenticated && profile ? <Settings profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/leaderboard" element={isAuthenticated && profile ? <Leaderboard currentUserId={profile.uid} /> : <Navigate to="/login" />} />
