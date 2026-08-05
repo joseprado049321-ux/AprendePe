@@ -47,6 +47,45 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const question = questions[currentIndex];
   const progress = questions.length > 0 ? ((currentIndex) / questions.length) * 100 : 0;
 
+  const fetchAiExplanation = async (selectedIdx: number) => {
+    setLoadingAi(true);
+    setAiExplanation(null);
+
+    try {
+      const res = await fetch('/api/explain-mistake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionText: question.text,
+          options: question.options,
+          userAnswer: question.options[selectedIdx] || '',
+          correctAnswer: question.options[question.correctAnswerIndex],
+          subject,
+          stage: profile.educationalStage || profile.level || 'Primaria'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiExplanation(data);
+      } else {
+        setAiExplanation({
+          explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
+          tip: '¡Sigue practicando para dominar este concepto!',
+          keyConcept: subject
+        });
+      }
+    } catch (err) {
+      setAiExplanation({
+        explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
+        tip: '¡Sigue practicando para dominar este concepto!',
+        keyConcept: subject
+      });
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
   const handleSelect = async (index: number) => {
     if (isAnswered || lives <= 0) return;
     setSelectedOption(index);
@@ -59,6 +98,9 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       playSound('fail');
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
+
+      // Disparar explicación de IA directamente
+      fetchAiExplanation(index);
 
       // Guardar en el Baúl de Errores (mistakeBank)
       const existingMistakes = profile.mistakeBank || [];
@@ -92,44 +134,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     }
   };
 
-  const handleOpenAiExplanation = async () => {
+  const handleOpenAiExplanation = () => {
     playSound('click');
     setShowAiModal(true);
-    if (aiExplanation) return;
-    setLoadingAi(true);
-
-    try {
-      const res = await fetch('/api/explain-mistake', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questionText: question.text,
-          options: question.options,
-          userAnswer: selectedOption !== null ? question.options[selectedOption] : '',
-          correctAnswer: question.options[question.correctAnswerIndex],
-          subject,
-          stage: profile.educationalStage || profile.level || 'Primaria'
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAiExplanation(data);
-      } else {
-        setAiExplanation({
-          explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
-          tip: '¡Sigue practicando para dominar este concepto!',
-          keyConcept: subject
-        });
-      }
-    } catch (err) {
-      setAiExplanation({
-        explanation: question.explanation || `La respuesta correcta es "${question.options[question.correctAnswerIndex]}".`,
-        tip: '¡Sigue practicando para dominar este concepto!',
-        keyConcept: subject
-      });
-    } finally {
-      setLoadingAi(false);
+    if (!aiExplanation && selectedOption !== null) {
+      fetchAiExplanation(selectedOption);
     }
   };
 
@@ -607,41 +616,90 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed bottom-0 left-0 right-0 z-40 bg-inherit"
           >
-            <div className={`${isCorrect ? theme.panelCorrect : theme.panelIncorrect}`}>
-              <div className="max-w-4xl mx-auto w-full flex flex-col sm:flex-row gap-6 justify-between items-center sm:items-end">
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 shrink-0">
-                    {isCorrect ? (
-                      <CheckCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
-                    ) : (
-                      <XCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
-                    )}
+            <div className={`${isCorrect ? theme.panelCorrect : theme.panelIncorrect} max-h-[85vh] overflow-y-auto`}>
+              <div className="max-w-4xl mx-auto w-full flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 shrink-0">
+                      {isCorrect ? (
+                        <CheckCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
+                      ) : (
+                        <XCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
+                      )}
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-xl sm:text-2xl mb-1 text-white">
+                        {isCorrect ? '¡Excelente!' : 'Casi lo logras'}
+                      </h2>
+                      {isCorrect && (
+                        <p className="text-base sm:text-lg text-white opacity-90">
+                           {question.explanation}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="font-bold text-xl sm:text-2xl mb-1 text-white">
-                      {isCorrect ? '¡Excelente!' : 'Casi lo logras'}
-                    </h2>
-                    <p className="text-base sm:text-lg text-white opacity-90">
-                       {question.explanation}
-                    </p>
-                    {!isCorrect && (
-                      <button
-                        type="button"
-                        onClick={handleOpenAiExplanation}
-                        className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl backdrop-blur-sm border border-white/30 transition-all shadow-sm cursor-pointer"
-                      >
-                        <Sparkles size={15} className="text-amber-300 animate-pulse" />
-                        <span>¿Por qué me equivoqué? (Explicar con IA)</span>
-                      </button>
-                    )}
-                  </div>
+                  <button 
+                    onClick={handleContinue}
+                    className={`${isCorrect ? theme.panelButtonCorrect : theme.panelButtonIncorrect} shrink-0 self-end sm:self-auto`}
+                  >
+                    Continuar
+                  </button>
                 </div>
-                <button 
-                  onClick={handleContinue}
-                  className={`${isCorrect ? theme.panelButtonCorrect : theme.panelButtonIncorrect} shrink-0`}
-                >
-                  Continuar
-                </button>
+
+                {/* Explicación Detallada de IA Directa */}
+                {!isCorrect && (
+                  <div className="bg-black/20 dark:bg-slate-950/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 text-white shadow-lg space-y-3">
+                    <div className="flex items-center justify-between gap-2 border-b border-white/15 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-amber-300 animate-pulse" />
+                        <span className="font-extrabold text-sm sm:text-base tracking-wide">
+                          Explicación Detallada de tu Tutor IA
+                        </span>
+                      </div>
+                      {aiExplanation?.keyConcept && (
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-amber-200 border border-white/20">
+                          {aiExplanation.keyConcept}
+                        </span>
+                      )}
+                    </div>
+
+                    {loadingAi ? (
+                      <div className="py-4 flex items-center gap-3 text-white/90">
+                        <Loader2 className="animate-spin text-amber-300 shrink-0" size={24} />
+                        <span className="text-sm font-medium animate-pulse">
+                          Tu Tutor de IA está analizando tu respuesta para explicarte con máxima claridad...
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 text-sm sm:text-base text-white/95">
+                        <p className="leading-relaxed whitespace-pre-line bg-black/15 p-3 rounded-xl border border-white/10">
+                          {aiExplanation?.explanation || question.explanation}
+                        </p>
+
+                        {aiExplanation?.tip && (
+                          <div className="flex items-start gap-2.5 bg-amber-500/20 border border-amber-300/40 p-3 rounded-xl text-amber-100 text-xs sm:text-sm font-medium">
+                            <Lightbulb size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-amber-200 block mb-0.5">Truco para recordar:</strong>
+                              <span>{aiExplanation.tip}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-white/80 flex items-center justify-between pt-1">
+                          <span>🎒 Guardado en tu <strong>Baúl de Errores</strong> para repasar sin perder vidas.</span>
+                          <button
+                            type="button"
+                            onClick={handleOpenAiExplanation}
+                            className="text-amber-200 underline font-bold hover:text-white cursor-pointer ml-2"
+                          >
+                            Ver en modal
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

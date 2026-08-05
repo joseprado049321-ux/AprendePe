@@ -105,6 +105,50 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
       });
     } else {
       playSound('fail');
+      // Obtener explicación de IA directamente
+      handleFetchAiInline(currentMistake, optionIdx);
+    }
+  };
+
+  const handleFetchAiInline = async (item: MistakeItem, chosenAnswerIdx?: number) => {
+    setLoadingAi(true);
+    setAiExplanation(null);
+    const q = item.question;
+    const ansIdx = chosenAnswerIdx !== undefined ? chosenAnswerIdx : item.userAnswerIndex;
+    const userAns = ansIdx !== undefined && q.options[ansIdx] ? q.options[ansIdx] : 'Respuesta errónea';
+
+    try {
+      const res = await fetch('/api/explain-mistake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionText: q.text,
+          options: q.options,
+          userAnswer: userAns,
+          correctAnswer: q.options[q.correctAnswerIndex],
+          subject: item.subject,
+          stage: profile.educationalStage || profile.level || 'Primaria'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiExplanation(data);
+      } else {
+        setAiExplanation({
+          explanation: q.explanation || `La respuesta correcta es "${q.options[q.correctAnswerIndex]}".`,
+          tip: '¡Sigue practicando para consolidar este aprendizaje!',
+          keyConcept: item.subject
+        });
+      }
+    } catch {
+      setAiExplanation({
+        explanation: q.explanation || `La respuesta correcta es "${q.options[q.correctAnswerIndex]}".`,
+        tip: '¡Sigue practicando para consolidar este aprendizaje!',
+        keyConcept: item.subject
+      });
+    } finally {
+      setLoadingAi(false);
     }
   };
 
@@ -338,43 +382,82 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
-                className="mt-auto bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4"
+                className="mt-auto bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col gap-4"
               >
-                <div className="flex items-start gap-3 w-full sm:w-auto">
-                  {selectedOption === currentQ.correctAnswerIndex ? (
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                      <Award size={24} />
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                      <HelpCircle size={24} />
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
-                      {selectedOption === currentQ.correctAnswerIndex ? '¡Concepto Dominado! 🎉 (+5 XP)' : 'Casi, ¡revisa la explicación!'}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                      {currentQ.explanation}
-                    </p>
-                    {selectedOption !== currentQ.correctAnswerIndex && (
-                      <button
-                        onClick={() => handleFetchAiForCurrent(currentMistake, selectedOption ?? undefined)}
-                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                      >
-                        <Sparkles size={14} className="text-amber-400 animate-pulse" />
-                        <span>Ver explicación detallada con IA</span>
-                      </button>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    {selectedOption === currentQ.correctAnswerIndex ? (
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <Award size={24} />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <HelpCircle size={24} />
+                      </div>
                     )}
+                    <div>
+                      <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                        {selectedOption === currentQ.correctAnswerIndex ? '¡Concepto Dominado! 🎉 (+5 XP)' : 'Casi, ¡revisa la explicación!'}
+                      </h4>
+                      {selectedOption === currentQ.correctAnswerIndex && (
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                          {currentQ.explanation}
+                        </p>
+                      )}
+                    </div>
                   </div>
+
+                  <button
+                    onClick={handleNextPracticeQuestion}
+                    className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 cursor-pointer shrink-0 self-end sm:self-auto"
+                  >
+                    {currentIndex < practiceQueue.length - 1 ? 'Siguiente Pregunta' : 'Terminar Repaso'}
+                  </button>
                 </div>
 
-                <button
-                  onClick={handleNextPracticeQuestion}
-                  className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 cursor-pointer shrink-0"
-                >
-                  {currentIndex < practiceQueue.length - 1 ? 'Siguiente Pregunta' : 'Terminar Repaso'}
-                </button>
+                {/* Direct AI Explanation Card for Practice Mistake */}
+                {selectedOption !== currentQ.correctAnswerIndex && (
+                  <div className="bg-slate-50 dark:bg-slate-900/80 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700/80 shadow-inner space-y-3">
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-amber-500 animate-pulse" />
+                        <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                          Explicación Detallada de tu Tutor IA
+                        </span>
+                      </div>
+                      {aiExplanation?.keyConcept && (
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                          {aiExplanation.keyConcept}
+                        </span>
+                      )}
+                    </div>
+
+                    {loadingAi ? (
+                      <div className="py-4 flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                        <Loader2 className="animate-spin text-indigo-500 shrink-0" size={22} />
+                        <span className="text-sm font-medium animate-pulse">
+                          Tu Tutor de IA está analizando tu respuesta para explicarte con total claridad...
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 text-sm sm:text-base">
+                        <p className="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-white dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                          {aiExplanation?.explanation || currentQ.explanation}
+                        </p>
+
+                        {aiExplanation?.tip && (
+                          <div className="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-3 rounded-xl text-amber-900 dark:text-amber-200 text-xs sm:text-sm font-medium">
+                            <Lightbulb size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-amber-800 dark:text-amber-300 block mb-0.5">Truco para recordar:</strong>
+                              <span>{aiExplanation.tip}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -635,7 +718,7 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
       )}
 
       {/* Bottom Navigation */}
-      {!isPracticing && <BottomNav activeTab="/home" onChangeTab={(tab) => navigate(tab)} />}
+      {!isPracticing && <BottomNav activeTab="/review" onChangeTab={(tab) => navigate(tab)} />}
     </div>
   );
 }

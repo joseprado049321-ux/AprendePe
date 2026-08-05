@@ -219,22 +219,29 @@ app.post("/api/explain-mistake", async (req, res) => {
     }
 
     const prompt = `
-      Actúa como el tutor pedagógico de IA de AprendePe (una plataforma educativa del Perú).
-      El estudiante respondió incorrectamente a esta pregunta y necesita una explicación para aprender de su error:
+      Actúa como el tutor pedagógico inteligente y empático de AprendePe (plataforma educativa del Perú).
+      Un estudiante se ha equivocado al responder esta pregunta y necesita una EXPLICACIÓN DETALLADA, DIDÁCTICA Y MUY FÁCIL DE ENTENDER para dominar el concepto.
 
-      Materia: ${subject || "General"}
-      Nivel escolar: ${studentStage}
-      Pregunta: "${questionText}"
-      Opciones disponibles: ${JSON.stringify(options || [])}
-      Respuesta elegida por el estudiante: "${userAnswer}"
-      Respuesta correcta: "${correctAnswer}"
+      DATOS DE LA PREGUNTA:
+      - Materia: ${subject || "General"}
+      - Nivel escolar: ${studentStage}
+      - Pregunta planteada: "${questionText}"
+      - Opciones disponibles: ${JSON.stringify(options || [])}
+      - Respuesta que seleccionó el estudiante: "${userAnswer}"
+      - Respuesta correcta: "${correctAnswer}"
 
+      PAUTAS PEDAGÓGICAS CLAVE:
       ${toneInstruction}
+      - La explicación debe ser MUY FÁCIL DE COMPRENDER y amena (adecuada a la edad del estudiante). Usa ejemplos cotidianos si aplica.
+      - Desglosa el razonamiento con claridad:
+        1. ¿Por qué la alternativa "${userAnswer}" no era la correcta (con empatía y ánimo)?
+        2. ¿Por qué "${correctAnswer}" sí es la correcta, explicado paso a paso?
+      - El consejo/tip debe ser un truco práctico o mnemotécnico memorable para resolver preguntas similares en el futuro.
 
       Genera una respuesta JSON con la siguiente estructura:
-      1. 'explanation': Explicación clara y paso a paso de por qué "${correctAnswer}" es la respuesta correcta y por qué "${userAnswer}" no lo es (sin hacerlo sentir mal, felicitándolo por su esfuerzo).
-      2. 'tip': Un consejo breve o truco de memoria para no olvidar este concepto.
-      3. 'keyConcept': El concepto o tema central (ej. "Suma con llevada", "Ecosistemas", "Cultura Paracas").
+      1. 'explanation': Explicación detallada, clara, motivadora y paso a paso.
+      2. 'tip': Consejo o truco práctico fácil de recordar.
+      3. 'keyConcept': Tema o concepto principal en 2-4 palabras.
     `;
 
     const response = await ai.models.generateContent({
@@ -245,8 +252,8 @@ app.post("/api/explain-mistake", async (req, res) => {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            explanation: { type: Type.STRING, description: "Detailed pedagogical explanation" },
-            tip: { type: Type.STRING, description: "Quick memory tip or advice" },
+            explanation: { type: Type.STRING, description: "Detailed and clear pedagogical explanation" },
+            tip: { type: Type.STRING, description: "Quick memory tip or practical advice" },
             keyConcept: { type: Type.STRING, description: "Central topic or concept name" }
           },
           required: ["explanation", "tip", "keyConcept"]
