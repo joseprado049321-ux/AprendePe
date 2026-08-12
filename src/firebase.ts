@@ -3,13 +3,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDcnEOM4zjvplOwYqN52pDlkMo9H0mFdPw",
-    authDomain: "aprendepe-team.firebaseapp.com",
-    projectId: "aprendepe-team",
-    storageBucket: "aprendepe-team.firebasestorage.app",
-    messagingSenderId: "139342246545",
-    appId: "1:139342246545:web:6c5abf016e1a5f8f008530",
-    measurementId: "G-X5ZVBZXV14"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
