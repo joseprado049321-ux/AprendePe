@@ -9,13 +9,8 @@ import fs from 'fs';
 // Initialize Firebase Admin SDK
 let db: FirebaseFirestore.Firestore | null = null;
 try {
-  const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
-  const firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-
-  // En AI Studio, a menudo podemos inicializar admin sin credenciales explícitas si el contenedor tiene ADC
-  // o podemos usar el projectId
   initializeApp({
-    projectId: firebaseConfig.projectId
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID || 'aprendepe-team'
   });
   db = getFirestore();
   db.settings({ ignoreUndefinedProperties: true });
