@@ -9,6 +9,7 @@ import { checkAchievements } from '../lib/achievements';
 import { useSound } from '../contexts/SoundContext';
 import confetti from 'canvas-confetti';
 import { calculateDrop, RewardDrop } from '../lib/rewards';
+import { useLives } from '../hooks/useLives';
 
 interface QuizProps {
   profile: UserProfile;
@@ -33,7 +34,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   
   const [errors, setErrors] = useState(0);
   const [sessionPoints, setSessionPoints] = useState(0);
-  const lives = profile.lives ?? 5; 
+  const { currentLives: lives } = useLives(profile, updateProfile);
 
   const [showOutOfLivesModal, setShowOutOfLivesModal] = useState(false);
   const [rescuing, setRescuing] = useState(false);
@@ -126,7 +127,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         updatedMistakeBank = [newMistake, ...existingMistakes];
       }
 
-      await updateProfile({ lives: newLives, mistakeBank: updatedMistakeBank });
+      const updates: Partial<UserProfile> = { lives: newLives, mistakeBank: updatedMistakeBank };
+      if (lives === 5 && newLives < 5) {
+        updates.livesUpdatedAt = new Date().toISOString();
+      }
+      await updateProfile(updates);
       
       if (newLives === 0) {
          setTimeout(() => setShowOutOfLivesModal(true), 500);

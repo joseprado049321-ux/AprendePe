@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import { useSound } from '../contexts/SoundContext';
 import Tour from './Tour';
+import { useLives } from '../hooks/useLives';
 
 interface HomeProps {
   profile: UserProfile;
@@ -21,6 +22,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { playSound } = useSound();
+  const { currentLives, timeUntilNext, justGainedLife } = useLives(profile, updateProfile);
 
   const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
   const t = getSubjectTheme(subject);
@@ -54,7 +56,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
       return;
     }
     
-    if ((profile.lives ?? 5) <= 0) {
+    if (currentLives <= 0) {
       playSound('fail');
       alert('¡No tienes vidas! Ve a la Tienda para recargarlas y seguir aprendiendo.');
       return;
@@ -304,10 +306,14 @@ export default function Home({ profile, updateProfile }: HomeProps) {
             <div className="sticky top-28 flex flex-col gap-3">
               <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-wider mb-2">Vidas</span>
               {Array.from({ length: 5 }).map((_, i) => {
-                 const hasLife = i < (profile.lives ?? 5);
+                 const hasLife = i < currentLives;
+                 const isJustGained = justGainedLife && i === currentLives - 1;
+                 
                  return (
-                   <div 
+                   <motion.div 
                      key={i} 
+                     animate={isJustGained ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : {}}
+                     transition={{ duration: 0.5 }}
                      className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-300 ${
                        hasLife 
                          ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-800/40 shadow-sm shadow-rose-200/50 dark:shadow-rose-900/30' 
@@ -317,9 +323,15 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                      <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                      </svg>
-                   </div>
+                   </motion.div>
                  );
               })}
+              {currentLives < 5 && timeUntilNext !== null && (
+                <div className="mt-1 text-center text-rose-500 font-bold font-mono text-sm bg-rose-100 dark:bg-rose-950/40 px-2 py-1 rounded-lg border border-rose-200 dark:border-rose-800/40">
+                  {Math.floor(timeUntilNext / 60000).toString().padStart(2, '0')}:
+                  {Math.floor((timeUntilNext % 60000) / 1000).toString().padStart(2, '0')}
+                </div>
+              )}
             </div>
           </div>
         </div>

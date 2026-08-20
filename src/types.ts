@@ -69,6 +69,7 @@ export interface UserProfile {
   streak: number;
   perfectLessonsStreak?: number;
   lives?: number;
+  livesUpdatedAt?: string;
   lastActive: string | null;
   points: number;
   xp: number;

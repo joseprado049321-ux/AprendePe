@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 import BottomNav from './BottomNav';
 import { useNavigate } from 'react-router-dom';
 import { AVATARS, FRAMES } from '../data/cosmetics';
+import { useLives } from '../hooks/useLives';
 
 interface ShopProps {
   profile: UserProfile;
@@ -12,6 +13,7 @@ interface ShopProps {
 
 export default function Shop({ profile, updateProfile }: ShopProps) {
   const navigate = useNavigate();
+  const { currentLives } = useLives(profile, updateProfile);
   const wallet = profile.wallet || { oro: 0, esmeralda: 0 };
   const inventory = profile.inventory || { streakProtectors: 0, xpMultipliers: 0 };
   const unlockedAvatars = profile.unlockedAvatars || [];
@@ -58,7 +60,6 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
         showToast('No tienes suficiente Oro.', 'error');
       }
     } else if (item === 'buyLife') {
-      const currentLives = profile.lives ?? 5;
       if (currentLives >= 5) {
         showToast('¡Ya tienes el máximo de vidas (5)!', 'error');
         return;
@@ -105,7 +106,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
   const canBuyStreak = wallet.esmeralda >= 3;
   const canBuyMultiplier = wallet.esmeralda >= 50;
   const canBuyEmerald = wallet.oro >= 100;
-  const isLivesMax = (profile.lives ?? 5) >= 5;
+  const isLivesMax = currentLives >= 5;
   const canBuyLife = wallet.esmeralda >= 5 && !isLivesMax;
   const notEnoughForLife = !isLivesMax && wallet.esmeralda < 5;
 
@@ -301,7 +302,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                 </div>
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">Recargar 1 Vida</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                  Recarga una vida global para continuar tu aprendizaje. Vidas actuales: {profile.lives ?? 5}/5.
+                  Recarga una vida global para continuar tu aprendizaje. Vidas actuales: {currentLives}/5.
                 </p>
               </div>
 
