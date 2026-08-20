@@ -134,7 +134,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
               <div className="w-24 h-24 bg-[var(--math,theme(colors.indigo.500))] rounded-full flex items-center justify-center shadow-[0_8px_0_var(--math-s,theme(colors.indigo.700))] text-5xl mb-4 text-white">
                 👋
               </div>
-              <h1 className="text-3xl font-bold font-playful text-slate-900 dark:text-white">¡Hola! Soy tu tutor virtual de HAGS</h1>
+              <h1 className="text-3xl font-bold font-playful text-slate-900 dark:text-white">¡Hola! Soy tu tutor virtual de AprendePe</h1>
               <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
                 Estoy aquí para adaptarme a tu ritmo de aprendizaje. Primero, cuéntame un poco sobre ti para personalizar tu experiencia.
               </p>
@@ -307,7 +307,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
                     onClick={finishDiagnostic}
                     className="w-full py-4 bg-[var(--math,theme(colors.indigo.500))] hover:brightness-110 active:translate-y-1 transition-all rounded-2xl text-white font-bold text-xl shadow-[0_6px_0_var(--math-s,theme(colors.indigo.700))] cursor-pointer"
                   >
-                    Continuar a HAGS
+                    Continuar a AprendePe
                   </button>
                 </div>
               </motion.div>
@@ -319,7 +319,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
              <motion.div key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-12">
                <Loader2 size={64} className="text-[var(--math,theme(colors.indigo.500))] animate-spin mb-6" />
                <h2 className="text-2xl font-bold font-playful mb-2 text-slate-900 dark:text-white">Guardando perfil...</h2>
-               <p className="text-slate-600 dark:text-slate-400 text-center">Configurando HAGS con tu nuevo nivel.</p>
+               <p className="text-slate-600 dark:text-slate-400 text-center">Configurando AprendePe con tu nuevo nivel.</p>
              </motion.div>
           )}
 

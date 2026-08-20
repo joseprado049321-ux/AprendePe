@@ -1,5 +1,5 @@
 {
-  "name": "HAGS",
+  "name": "AprendePe",
   "description": "Prototipo de aplicación educativa gamificada con temas dinámicos según nivel, inspirado en Duolingo.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

@@ -164,7 +164,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
              <div className={`p-2 rounded-full ${t.iconBg}`}>
                 <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : ''} />
              </div>
-             <h1 className="text-slate-900 dark:text-white font-bold mb-0 mt-0 text-xl">HAGS</h1>
+             <h1 className="text-slate-900 dark:text-white font-bold mb-0 mt-0 text-xl">AprendePe</h1>
           </div>
           
           <div className="flex items-center gap-2">
