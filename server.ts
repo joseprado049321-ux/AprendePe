@@ -73,24 +73,26 @@ app.post("/api/generate-questions", async (req, res) => {
       
       TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.
       
-      DIFICULTAD BASE: El estudiante está en el grado ${grade} de ${educationalStage}. Ajusta el rigor del currículo estrictamente a este nivel oficial. Además, su puntaje diagnóstico fue de ${diagnosticScore}%. Si el puntaje es bajo, inicia enseñando los fundamentos de este grado. Si es alto, dale problemas avanzados o de pensamiento crítico correspondientes a su edad.
+      DIFICULTAD BASE Y CNEB: El estudiante está en el grado ${grade} de ${educationalStage}. Ajusta el rigor del currículo estrictamente a este nivel oficial basándote en el Currículo Nacional de la Educación Básica (CNEB) del Perú. 
+      Asigna una "cnebCompetence" (Competencia del CNEB) oficial y específica a cada pregunta (ej. "Resuelve problemas de cantidad", "Lee diversos tipos de textos escritos", etc.) adecuada para el Nivel ${targetLevel}.
+      Además, su puntaje diagnóstico fue de ${diagnosticScore}%. Si el puntaje es bajo, inicia enseñando los fundamentos de este grado. Si es alto, dale problemas avanzados.
 
-      CRITICAL: Estás generando preguntas para el Nivel ${targetLevel}. A mayor nivel, mayor debe ser la complejidad analítica de la pregunta dentro de la misma categoría.
+      FORMATOS DE PREGUNTA: Para hacer la lección interactiva, debes generar una mezcla de los siguientes tipos de pregunta (type):
+      1. 'multiple_choice': Pregunta estándar con 4 opciones.
+      2. 'true_false': Pregunta de verdadero o falso. Debes proveer exactamente 2 opciones ("Verdadero", "Falso").
+      3. 'fill_in_the_blanks': Una oración con un espacio en blanco. Debes proveer 'blankSentence' (ej. "El perro ___ rápido.") y 'correctWords' (ej. ["corre"]). Las 'options' pueden estar vacías o tener distractores.
+
+      CRITICAL: Estás generando preguntas para el Nivel ${targetLevel}. A mayor nivel, mayor debe ser la complejidad analítica.
       The user has a diagnostic level of "${diagnosticLevel}" y ${xp} puntos de XP. 
-      Evalúa su XP:
-      - Si el XP es menor a 500, genera preguntas estándar para su nivel.
-      - Si el XP es entre 500 y 2000, aumenta la dificultad con problemas de pensamiento crítico.
-      - Si el XP es mayor a 2000, genera preguntas de alta dificultad, nivel olimpiada o análisis profundo.
+      Evalúa su XP para ajustar la dificultad:
+      - < 500 XP: estándar.
+      - 500-2000 XP: problemas de pensamiento crítico.
+      - > 2000 XP: nivel avanzado/olimpiada.
 
       ${ddaInstruction}
 
-      Context of the user's past performance (strengths and weaknesses):
+      Context of the user's past performance:
       ${JSON.stringify(userHistory || {})}
-
-      Follow a 3-step validation process internally before providing the final result:
-      1) Generate 10 tailored questions covering the subject.
-      2) Review them to ensure the difficulty perfectly matches the "${diagnosticLevel}" profile and the XP rules.
-      3) Validate the logic, spell-check, and ensure there is only one correct answer per question.
 
       Output only the final 10 validated questions following the exact schema.
     `;
@@ -112,16 +114,20 @@ app.post("/api/generate-questions", async (req, res) => {
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  text: { type: Type.STRING, description: "The question text" },
+                  type: { type: Type.STRING, description: "One of: 'multiple_choice', 'true_false', 'fill_in_the_blanks'" },
+                  text: { type: Type.STRING, description: "The question text or instruction" },
                   options: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
-                    description: "Exactly 4 options"
+                    description: "Options to choose from (4 for multiple_choice, 2 for true_false)"
                   },
-                  correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" },
-                  explanation: { type: Type.STRING, description: "Brief explanation of the answer" }
+                  correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option (use 0 for fill_in_the_blanks if not applicable)" },
+                  explanation: { type: Type.STRING, description: "Brief explanation of the answer" },
+                  cnebCompetence: { type: Type.STRING, description: "The official CNEB competence evaluated here" },
+                  blankSentence: { type: Type.STRING, description: "For fill_in_the_blanks: The sentence with '___' for the blank" },
+                  correctWords: { type: Type.ARRAY, items: { type: Type.STRING }, description: "For fill_in_the_blanks: The correct word(s) that go in the blank" }
                 },
-                required: ["text", "options", "correctAnswerIndex", "explanation"]
+                required: ["type", "text", "options", "correctAnswerIndex", "explanation", "cnebCompetence"]
               }
             }
           }

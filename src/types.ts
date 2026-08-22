@@ -16,13 +16,20 @@ export interface QuestionCache {
   createdAt: string;
 }
 
+export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_in_the_blanks';
+
 export interface Question {
   id: string;
+  type?: QuestionType; // Optional for backward compatibility, defaults to multiple_choice
   text: string;
-  options: string[];
+  options: string[]; // Still used for true/false or choices
   correctAnswerIndex: number;
   explanation: string;
   subject?: Subject;
+  cnebCompetence?: string;
+  // Specific fields for fill_in_the_blanks
+  blankSentence?: string; // e.g. "El perro ___ (correr) rápido."
+  correctWords?: string[]; // e.g. ["corre"]
 }
 
 export interface Achievement {
@@ -92,6 +99,7 @@ export interface UserProfile {
   parentalEmail?: string;
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };
   hasCompletedTour?: boolean;
+  showCNEBCompetencies?: boolean;
   notificationsEnabled?: boolean;
   dailyReminderTime?: string;
   history?: LessonHistory[];

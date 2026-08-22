@@ -567,15 +567,35 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
               <div className="w-full space-y-2 mb-8 sm:mb-12">
                 {level === 'Secundaria' && (
                   <span className={`${theme.iconColor} font-bold uppercase tracking-widest text-sm text-center sm:text-left block`}>
-                    Materia: {subject}
+                    Materia: {subject} {question.cnebCompetence ? `• ${question.cnebCompetence}` : ''}
                   </span>
                 )}
-                <h1 className={`${theme.textHeading} text-center sm:text-left leading-tight py-4 mb-0`}>
-                  {question.text}
+                
+                {/* Pregunta o Fill in the Blanks */}
+                <h1 className={`${theme.textHeading} text-center sm:text-left leading-tight py-4 mb-0 transition-all duration-300`}>
+                  {question.type === 'fill_in_the_blanks' && question.blankSentence
+                    ? (
+                      <span>
+                        {question.blankSentence.split('___')[0]}
+                        <span className={`inline-block min-w-[80px] text-center border-b-4 mx-2 px-4 pb-1 transition-colors ${
+                          isAnswered && selectedOption === question.correctAnswerIndex ? 'border-emerald-500 text-emerald-500' :
+                          isAnswered ? 'border-rose-500 text-rose-500' :
+                          selectedOption !== null ? 'border-indigo-500 text-indigo-500' : 'border-slate-300 dark:border-slate-600 text-transparent'
+                        }`}>
+                          {selectedOption !== null ? question.options[selectedOption] : '____'}
+                        </span>
+                        {question.blankSentence.split('___')[1]}
+                      </span>
+                    )
+                    : question.text}
                 </h1>
+                
+                {question.type === 'fill_in_the_blanks' && !question.blankSentence && (
+                  <h1 className={`${theme.textHeading} text-center sm:text-left leading-tight py-4 mb-0`}>{question.text}</h1>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr">
+              <div className={`grid gap-4 auto-rows-fr ${question.type === 'true_false' ? 'grid-cols-2 max-w-lg mx-auto w-full' : 'grid-cols-1 sm:grid-cols-2'}`}>
                 {question.options.map((opt, i) => {
                   let btnStateClass = theme.buttonDefault;
                   if (isAnswered) {
@@ -586,14 +606,18 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                     }
                   }
 
+                  const isTrueFalse = question.type === 'true_false';
+
                   return (
-                    <button
+                    <motion.button
                       key={i}
+                      whileHover={!isAnswered && lives > 0 ? { scale: 1.02 } : {}}
+                      whileTap={!isAnswered && lives > 0 ? { scale: 0.95 } : {}}
                       disabled={isAnswered || lives <= 0}
                       onClick={() => handleSelect(i)}
-                      className={`${theme.buttonClass} ${btnStateClass} min-h-[100px] cursor-pointer`}
+                      className={`${theme.buttonClass} ${btnStateClass} ${isTrueFalse ? 'min-h-[120px] text-xl' : 'min-h-[100px]'} cursor-pointer flex items-center justify-center`}
                     >
-                      {level === 'Secundaria' && (
+                      {level === 'Secundaria' && !isTrueFalse && (
                         <span className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg font-bold transition-colors ${
                           isAnswered && i === question.correctAnswerIndex ? 'bg-emerald-500 text-white' : 
                           isAnswered && i === selectedOption ? 'bg-rose-500 text-white' : 
@@ -602,8 +626,8 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                           {i + 1}
                         </span>
                       )}
-                      <span className={theme.buttonText}>{opt}</span>
-                    </button>
+                      <span className={`${theme.buttonText} ${isTrueFalse ? 'font-black text-2xl' : ''}`}>{opt}</span>
+                    </motion.button>
                   );
                 })}
               </div>

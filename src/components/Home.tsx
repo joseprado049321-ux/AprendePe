@@ -27,6 +27,14 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
   const t = getSubjectTheme(subject);
 
+  const cnebMap: Record<Subject, string[]> = {
+    Matemáticas: ['Resuelve problemas de cantidad', 'Resuelve problemas de regularidad, equivalencia y cambio', 'Resuelve problemas de forma, movimiento y localización', 'Resuelve problemas de gestión de datos e incertidumbre', 'Números y operaciones', 'Álgebra y funciones', 'Geometría y medida', 'Estadística y probabilidad', 'Resolución de problemas avanzados', 'Competencia Matemática Final'],
+    Comunicación: ['Se comunica oralmente en su lengua materna', 'Lee diversos tipos de textos escritos', 'Escribe diversos tipos de textos', 'Literatura y expresiones', 'Comprensión lectora avanzada', 'Producción de textos complejos', 'Gramática y ortografía', 'Análisis de textos', 'Comunicación asertiva', 'Competencia Comunicativa Final'],
+    Ciencias: ['Indaga mediante métodos científicos', 'Explica el mundo físico basándose en conocimientos', 'Diseña y construye soluciones tecnológicas', 'Materia y energía', 'Ecosistemas y biodiversidad', 'Cuerpo humano y salud', 'Tierra y universo', 'Tecnología y sociedad', 'Experimentación', 'Competencia Científica Final'],
+    Historia: ['Construye interpretaciones históricas', 'Gestiona responsablemente el espacio y el ambiente', 'Gestiona responsablemente los recursos económicos', 'Culturas antiguas', 'Historia del Perú', 'Geografía peruana', 'Ciudadanía y civismo', 'Economía básica', 'Historia universal', 'Competencia Histórica Final'],
+    Variado: ['Exploración Inicial', 'Descubrimiento', 'Reto Intermedio', 'Aventura de Conocimiento', 'Desafío Mental', 'Gimnasia Cerebral', 'Prueba de Habilidades', 'Conocimiento General', 'Reto Experto', 'Desafío Final']
+  };
+
   const pendingMistakesCount = (profile.mistakeBank || []).filter(m => !m.mastered).length;
 
   const currentUnlocked = profile.unlockedLevels?.[subject] || 1;
@@ -272,6 +280,8 @@ export default function Home({ profile, updateProfile }: HomeProps) {
               }
 
               const currentWidth = levelWidths[i] || 'w-48';
+              const competenceName = cnebMap[subject][i];
+              const displayName = profile.showCNEBCompetencies ? competenceName : `Nivel ${node.id}`;
 
               return (
                 <motion.div 
@@ -279,22 +289,28 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="relative flex flex-col items-center justify-center z-10"
+                  className="relative flex flex-col items-center justify-center z-10 group"
                 >
+                  {profile.showCNEBCompetencies && (
+                    <div className="absolute -top-10 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 whitespace-nowrap text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {competenceName}
+                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white dark:bg-slate-800 rotate-45 border-b border-r border-slate-200 dark:border-slate-700"></div>
+                    </div>
+                  )}
                   <button
                     onClick={node.unlocked ? () => handleNodeClick(node.id, node.unlocked) : undefined}
                     disabled={!node.unlocked}
                     title={node.unlocked ? undefined : `🔒 Completa el Nivel ${node.id - 1} para desbloquear`}
-                    className={`${currentWidth} h-20 rounded-xl flex items-center justify-center transition-all duration-300 pointer-events-auto ${
+                    className={`${currentWidth} h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto ${
                       node.unlocked 
-                        ? `${nodeBg} hover:scale-105 hover:shadow-2xl active:scale-95` 
+                        ? `${nodeBg} hover:scale-105 active:scale-90 active:translate-y-2` 
                         : 'bg-slate-200 dark:bg-slate-800 shadow-[0_6px_0_#cbd5e1] dark:shadow-[0_6px_0_#0f172a] text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed'
                     }`}
                   >
-                    {node.unlocked ? <span className="text-[26px] font-bold">{node.id}</span> : <Lock size={28} />}
+                    {node.unlocked ? <span className="text-[26px] font-black tracking-tight">{node.id}</span> : <Lock size={28} />}
                   </button>
-                  <span className="font-bold text-[12px] whitespace-nowrap absolute -bottom-[24px] text-slate-400 dark:text-slate-500">
-                    Nivel {node.id}
+                  <span className="font-bold text-[13px] text-center mt-3 text-slate-500 dark:text-slate-400 max-w-[140px] leading-tight">
+                    {displayName}
                   </span>
                 </motion.div>
               );
