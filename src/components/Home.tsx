@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Flame, Brain, User, Lock, Play, Loader2, Calculator, BookOpen, MessageCircle, FlaskConical, Shuffle, ChevronDown, Sparkles, ChevronRight } from 'lucide-react';
-import { Level, Subject, UserProfile } from '../types';
+import { Level, Subject, UserProfile, SubTheme } from '../types';
 import { collection, query, where, limit, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getSubjectTheme } from '../lib/theme';
+import { curriculumMap } from '../data/curriculum';
 import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import { useSound } from '../contexts/SoundContext';
@@ -27,38 +28,9 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
   const t = getSubjectTheme(subject);
 
-  const cnebMap: Record<Subject, string[]> = {
-    Matemáticas: ['Resuelve problemas de cantidad', 'Resuelve problemas de regularidad, equivalencia y cambio', 'Resuelve problemas de forma, movimiento y localización', 'Resuelve problemas de gestión de datos e incertidumbre', 'Números y operaciones', 'Álgebra y funciones', 'Geometría y medida', 'Estadística y probabilidad', 'Resolución de problemas avanzados', 'Competencia Matemática Final'],
-    Comunicación: ['Se comunica oralmente en su lengua materna', 'Lee diversos tipos de textos escritos', 'Escribe diversos tipos de textos', 'Literatura y expresiones', 'Comprensión lectora avanzada', 'Producción de textos complejos', 'Gramática y ortografía', 'Análisis de textos', 'Comunicación asertiva', 'Competencia Comunicativa Final'],
-    Ciencias: ['Indaga mediante métodos científicos', 'Explica el mundo físico basándose en conocimientos', 'Diseña y construye soluciones tecnológicas', 'Materia y energía', 'Ecosistemas y biodiversidad', 'Cuerpo humano y salud', 'Tierra y universo', 'Tecnología y sociedad', 'Experimentación', 'Competencia Científica Final'],
-    Historia: ['Construye interpretaciones históricas', 'Gestiona responsablemente el espacio y el ambiente', 'Gestiona responsablemente los recursos económicos', 'Culturas antiguas', 'Historia del Perú', 'Geografía peruana', 'Ciudadanía y civismo', 'Economía básica', 'Historia universal', 'Competencia Histórica Final'],
-    Variado: ['Exploración Inicial', 'Descubrimiento', 'Reto Intermedio', 'Aventura de Conocimiento', 'Desafío Mental', 'Gimnasia Cerebral', 'Prueba de Habilidades', 'Conocimiento General', 'Reto Experto', 'Desafío Final']
-  };
-
   const pendingMistakesCount = (profile.mistakeBank || []).filter(m => !m.mastered).length;
 
-  const currentUnlocked = profile.unlockedLevels?.[subject] || 1;
-
-  // Simulate a path of levels
-  const pathNodes = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    unlocked: (i + 1) <= currentUnlocked
-  }));
-
-  const levelWidths = useMemo(() => {
-    const sizes = ['w-32', 'w-48', 'w-64']; // Small, Medium, Large
-    let lastSizeIdx = -1;
-    return Array.from({ length: 10 }, () => {
-      let nextSizeIdx;
-      do {
-        nextSizeIdx = Math.floor(Math.random() * 3);
-      } while (nextSizeIdx === lastSizeIdx);
-      lastSizeIdx = nextSizeIdx;
-      return sizes[nextSizeIdx];
-    });
-  }, []);
-
-  const handleNodeClick = async (nodeId: number, isUnlocked: boolean) => {
+  const handleNodeClick = async (subTheme: SubTheme, isUnlocked: boolean) => {
     if (!isUnlocked) {
       playSound('fail');
       return;
@@ -72,6 +44,8 @@ export default function Home({ profile, updateProfile }: HomeProps) {
     
     playSound('click');
     setGeneratingState('checking');
+    
+    const nodeId = subTheme.id;
     
     try {
       const userHistory = {
@@ -119,6 +93,8 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           subject, 
           level: profile.diagnosticLevel || profile.level, 
           nodeId,
+          promptTopic: subTheme.promptTopic,
+          cnebCompetence: subTheme.cnebCompetence,
           userId: profile.uid,
           userHistory,
           lastAccuracy,
@@ -259,61 +235,109 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         )}
 
         {/* Level Path Map & Global Lives Column */}
-        <div className="flex w-full relative z-10 px-4">
-          <div className="flex-1 flex flex-col items-center gap-[60px] py-10">
-            {pathNodes.map((node, i) => {
-              // Variado strict palette: alternate colors for nodes
-              let nodeBg = t.node;
-              if (subject === 'Variado' && node.unlocked) {
-                 const colors = ['bg-rose-500 shadow-[0_6px_0_#be123c]', 'bg-amber-500 shadow-[0_6px_0_#b45309]', 'bg-sky-500 shadow-[0_6px_0_#0369a1]', 'bg-emerald-500 shadow-[0_6px_0_#047857]'];
-                 nodeBg = colors[i % 4];
-                 if(nodeBg.includes('amber')) {
-                   nodeBg += ' text-slate-900';
-                 } else {
-                   nodeBg += ' text-white';
-                 }
-              } else if (node.unlocked) {
-                 nodeBg = `bg-[var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'})] shadow-[0_6px_0_var(--${subject === 'Matemáticas' ? 'math' : subject === 'Historia' ? 'social' : subject === 'Comunicación' ? 'comm' : 'science'}-s)] border-0 text-white hover:brightness-110`;
-                 if (subject === 'Comunicación') {
-                     nodeBg += ' text-[#5a3e00]';
-                 }
-              }
+        <div className="flex w-full relative z-10 px-0">
+          <div className="flex-1 flex flex-col w-full">
+            {curriculumMap[subject].map((biome, bIndex) => {
+               // Calculate global indices to know previous XP requirements
+               const allSubThemes = curriculumMap[subject].flatMap(b => b.subThemes);
+               
+               return (
+                 <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>
+                   
+                   {/* Biome Name Banner */}
+                   <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/30 text-white font-black text-lg shadow-lg z-20">
+                     {biome.name}
+                   </div>
+                   
+                   <div className="flex flex-col items-center gap-[80px] mt-10 w-full relative">
+                     {biome.subThemes.map((subTheme, i) => {
+                       const globalIndex = allSubThemes.findIndex(st => st.id === subTheme.id);
+                       const previousXP = globalIndex > 0 ? allSubThemes[globalIndex - 1].requiredXP : 0;
+                       
+                       const userXP = profile.xp || 0;
+                       const isUnlocked = userXP >= previousXP;
+                       const targetXP = subTheme.requiredXP;
+                       
+                       const nodeMaxXP = targetXP - previousXP;
+                       const nodeCurrentXP = Math.max(0, Math.min(userXP - previousXP, nodeMaxXP));
+                       const progressPercent = Math.round((nodeCurrentXP / nodeMaxXP) * 100);
+                       const isMastered = progressPercent >= 100;
+                       
+                       const currentWidth = ['-translate-x-12', 'translate-x-0', 'translate-x-12'][i % 3];
+                       
+                       let nodeBg = 'bg-white text-slate-800';
+                       if (isMastered) nodeBg = 'bg-amber-400 text-white';
+                       
+                       return (
+                         <div key={subTheme.id} className={`relative flex flex-col items-center justify-center z-10 group ${currentWidth}`}>
+                           {/* SVG Progress Ring */}
+                           {isUnlocked && (
+                             <svg className="absolute w-[110px] h-[110px] -top-[15px] -left-[15px] transform -rotate-90 pointer-events-none">
+                               <circle
+                                 cx="55" cy="55" r="48"
+                                 stroke="rgba(255,255,255,0.3)"
+                                 strokeWidth="8"
+                                 fill="transparent"
+                               />
+                               <circle
+                                 cx="55" cy="55" r="48"
+                                 stroke={isMastered ? '#fbbf24' : '#fff'}
+                                 strokeWidth="8"
+                                 fill="transparent"
+                                 strokeDasharray={301.59}
+                                 strokeDashoffset={301.59 - (progressPercent / 100) * 301.59}
+                                 className="transition-all duration-1000 ease-out"
+                                 strokeLinecap="round"
+                               />
+                             </svg>
+                           )}
 
-              const currentWidth = levelWidths[i] || 'w-48';
-              const competenceName = cnebMap[subject][i];
-              const displayName = profile.showCNEBCompetencies ? competenceName : `Nivel ${node.id}`;
-
-              return (
-                <motion.div 
-                  key={node.id} 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="relative flex flex-col items-center justify-center z-10 group"
-                >
-                  {profile.showCNEBCompetencies && (
-                    <div className="absolute -top-10 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 whitespace-nowrap text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {competenceName}
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white dark:bg-slate-800 rotate-45 border-b border-r border-slate-200 dark:border-slate-700"></div>
-                    </div>
-                  )}
-                  <button
-                    onClick={node.unlocked ? () => handleNodeClick(node.id, node.unlocked) : undefined}
-                    disabled={!node.unlocked}
-                    title={node.unlocked ? undefined : `🔒 Completa el Nivel ${node.id - 1} para desbloquear`}
-                    className={`${currentWidth} h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto ${
-                      node.unlocked 
-                        ? `${nodeBg} hover:scale-105 active:scale-90 active:translate-y-2` 
-                        : 'bg-slate-200 dark:bg-slate-800 shadow-[0_6px_0_#cbd5e1] dark:shadow-[0_6px_0_#0f172a] text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    {node.unlocked ? <span className="text-[26px] font-black tracking-tight">{node.id}</span> : <Lock size={28} />}
-                  </button>
-                  <span className="font-bold text-[13px] text-center mt-3 text-slate-500 dark:text-slate-400 max-w-[140px] leading-tight">
-                    {displayName}
-                  </span>
-                </motion.div>
-              );
+                           {/* Competence Tooltip (Optional/User Pref) */}
+                           {profile.showCNEBCompetencies && (
+                             <div className="absolute -top-12 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 whitespace-nowrap text-xs font-bold">
+                               {subTheme.cnebCompetence}
+                               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/90 rotate-45"></div>
+                             </div>
+                           )}
+                           
+                           <button
+                             onClick={isUnlocked ? () => handleNodeClick(subTheme, isUnlocked) : undefined}
+                             disabled={!isUnlocked}
+                             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto relative z-10 ${
+                               isUnlocked 
+                                 ? `${nodeBg} shadow-[0_6px_0_rgba(0,0,0,0.2)] hover:scale-105 active:scale-90 active:translate-y-2` 
+                                 : 'bg-slate-300/50 backdrop-blur-sm shadow-[0_6px_0_rgba(0,0,0,0.1)] text-white/50 cursor-not-allowed'
+                             }`}
+                           >
+                             {isUnlocked ? (
+                               isMastered ? <Sparkles size={32} /> : <Play size={32} className="ml-1" />
+                             ) : (
+                               <Lock size={32} />
+                             )}
+                           </button>
+                           
+                           {/* Topic Title and XP requirement */}
+                           <div className="flex flex-col items-center mt-4 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-sm">
+                             <span className="font-bold text-sm text-white text-center max-w-[140px] leading-tight">
+                               {subTheme.name}
+                             </span>
+                             {isUnlocked && !isMastered && (
+                               <span className="text-xs font-black text-white/90 mt-0.5">
+                                 {nodeCurrentXP} / {nodeMaxXP} XP
+                               </span>
+                             )}
+                             {!isUnlocked && (
+                               <span className="text-xs font-bold text-white/70 mt-0.5 flex items-center gap-1">
+                                 <Lock size={10} /> Req. {targetXP} XP
+                               </span>
+                             )}
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
+               );
             })}
           </div>
 

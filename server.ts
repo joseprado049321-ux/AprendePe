@@ -35,7 +35,7 @@ const ai = new GoogleGenAI({
 
 app.post("/api/generate-questions", async (req, res) => {
   try {
-    const { subject, level, userId, userHistory, nodeId, lastAccuracy, lastLivesLost } = req.body;
+    const { subject, level, userId, userHistory, nodeId, promptTopic, cnebCompetence, lastAccuracy, lastLivesLost } = req.body;
     const diagnosticLevel = userHistory?.diagnosticLevel || level;
     const educationalStage = userHistory?.educationalStage || "Primaria";
     const grade = userHistory?.grade || "Desconocido";
@@ -73,8 +73,9 @@ app.post("/api/generate-questions", async (req, res) => {
       
       TONO Y LENGUAJE: Si la etapa es 'Inicial', usa un lenguaje extremadamente sencillo, historias con animales y palabras cortas. Si es 'Primaria', usa un tono alentador y ejemplos cotidianos. Si es 'Secundaria', usa un lenguaje académico, serio, retador y directo.
       
-      DIFICULTAD BASE Y CNEB: El estudiante está en el grado ${grade} de ${educationalStage}. Ajusta el rigor del currículo estrictamente a este nivel oficial basándote en el Currículo Nacional de la Educación Básica (CNEB) del Perú. 
-      Asigna una "cnebCompetence" (Competencia del CNEB) oficial y específica a cada pregunta (ej. "Resuelve problemas de cantidad", "Lee diversos tipos de textos escritos", etc.) adecuada para el Nivel ${targetLevel}.
+      DIFICULTAD BASE Y CNEB: El estudiante está en el grado ${grade} de ${educationalStage}. Ajusta el rigor del currículo estrictamente a este nivel oficial basándote en el Currículo Nacional de la Educación Básica (CNEB) del Perú.
+      TEMA ESPECÍFICO (MUY IMPORTANTE): Genera todas las preguntas ESTRICTAMENTE sobre el siguiente subtema o instrucción: "${promptTopic || subject}". No te desvíes a otros temas de la materia.
+      La competencia CNEB para todas las preguntas debe ser exactamente: "${cnebCompetence || 'Competencia General'}". Asígnala en el campo "cnebCompetence" del JSON generado.
       Además, su puntaje diagnóstico fue de ${diagnosticScore}%. Si el puntaje es bajo, inicia enseñando los fundamentos de este grado. Si es alto, dale problemas avanzados.
 
       FORMATOS DE PREGUNTA: Para hacer la lección interactiva, debes generar una mezcla de los siguientes tipos de pregunta (type):

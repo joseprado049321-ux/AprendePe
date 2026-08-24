@@ -1,6 +1,22 @@
 export type Level = 'Inicial' | 'Primaria' | 'Secundaria';
 export type Subject = 'Matemáticas' | 'Historia' | 'Comunicación' | 'Ciencias' | 'Variado';
 
+export interface SubTheme {
+  id: string;
+  name: string;
+  requiredXP: number;     // XP required to COMPLETE this node and unlock the next
+  cnebCompetence: string; // Official CNEB competence
+  promptTopic: string;    // Instruction for Gemini
+}
+
+export interface Biome {
+  id: string;
+  name: string;
+  bgGradient: string;     // Tailwind gradient classes for procedural generation
+  pathColor: string;      // Color for the path connecting nodes
+  subThemes: SubTheme[];
+}
+
 export interface UserDiagnostic {
   level: Level;
   score: number;
