@@ -142,10 +142,36 @@ export default function Home({ profile, updateProfile }: HomeProps) {
     }
   };
 
+  const generateVegetation = (subject: string, biomeId: string) => {
+    // Generates absolute positioned SVG decorations
+    const isMath = subject === 'Matemáticas';
+    const isComm = subject === 'Comunicación';
+    const isSci = subject === 'Ciencias';
+    
+    // Just a few static absolute elements for flavor
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+        <svg className="absolute top-10 left-10 w-16 h-16 text-white/40" viewBox="0 0 24 24" fill="currentColor">
+           {isMath && <path d="M12 2L2 22h20L12 2zm0 4l6 14H6l6-14z" />}
+           {isComm && <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />}
+           {(isSci || subject === 'Historia' || subject === 'Variado') && <circle cx="12" cy="12" r="10" />}
+        </svg>
+        <svg className="absolute top-1/3 right-10 w-24 h-24 text-white/20 rotate-45" viewBox="0 0 24 24" fill="currentColor">
+           {isMath && <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z" />}
+           {isComm && <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />}
+           {(isSci || subject === 'Historia' || subject === 'Variado') && <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />}
+        </svg>
+        <svg className="absolute bottom-20 left-1/4 w-12 h-12 text-white/30 -rotate-12" viewBox="0 0 24 24" fill="currentColor">
+           <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z" />
+        </svg>
+      </div>
+    );
+  };
+
   return (
-    <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative`}>
-      <div className="w-full max-w-md mx-auto px-4 pt-8 pb-24 min-h-screen flex flex-col relative z-0">
-             <header className="flex justify-between items-center mb-6 sticky top-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur pb-4 z-40 pt-2 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500">
+    <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
+      <div className="w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0">
+             <header className="w-full max-w-4xl mx-auto px-4 pt-8 flex justify-between items-center mb-6 sticky top-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur pb-4 z-40 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 rounded-b-3xl">
           <div className="flex items-center gap-2">
              <div className={`p-2 rounded-full ${t.iconBg}`}>
                 <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : ''} />
@@ -202,7 +228,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           <motion.div 
             initial={{ opacity: 0, y: -10 }} 
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
+            className="mb-4 px-4 w-full max-w-4xl mx-auto"
           >
             <Link 
               to="/review"
@@ -244,8 +270,10 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                return (
                  <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>
                    
+                   {generateVegetation(subject, biome.id)}
+
                    {/* Biome Name Banner */}
-                   <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/30 text-white font-black text-lg shadow-lg z-20">
+                   <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-sm px-8 py-2.5 rounded-full border border-white/30 text-white font-black text-xl shadow-lg z-20">
                      {biome.name}
                    </div>
                    
@@ -270,51 +298,54 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                        
                        return (
                          <div key={subTheme.id} className={`relative flex flex-col items-center justify-center z-10 group ${currentWidth}`}>
-                           {/* SVG Progress Ring */}
-                           {isUnlocked && (
-                             <svg className="absolute w-[110px] h-[110px] -top-[15px] -left-[15px] transform -rotate-90 pointer-events-none">
-                               <circle
-                                 cx="55" cy="55" r="48"
-                                 stroke="rgba(255,255,255,0.3)"
-                                 strokeWidth="8"
-                                 fill="transparent"
-                               />
-                               <circle
-                                 cx="55" cy="55" r="48"
-                                 stroke={isMastered ? '#fbbf24' : '#fff'}
-                                 strokeWidth="8"
-                                 fill="transparent"
-                                 strokeDasharray={301.59}
-                                 strokeDashoffset={301.59 - (progressPercent / 100) * 301.59}
-                                 className="transition-all duration-1000 ease-out"
-                                 strokeLinecap="round"
-                               />
-                             </svg>
-                           )}
-
-                           {/* Competence Tooltip (Optional/User Pref) */}
+                           
+                           {/* Competence Tooltip */}
                            {profile.showCNEBCompetencies && (
-                             <div className="absolute -top-12 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20 whitespace-nowrap text-xs font-bold">
+                             <div className="absolute -top-12 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30 whitespace-nowrap text-xs font-bold">
                                {subTheme.cnebCompetence}
                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/90 rotate-45"></div>
                              </div>
                            )}
-                           
-                           <button
-                             onClick={isUnlocked ? () => handleNodeClick(subTheme, isUnlocked) : undefined}
-                             disabled={!isUnlocked}
-                             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto relative z-10 ${
-                               isUnlocked 
-                                 ? `${nodeBg} shadow-[0_6px_0_rgba(0,0,0,0.2)] hover:scale-105 active:scale-90 active:translate-y-2` 
-                                 : 'bg-slate-300/50 backdrop-blur-sm shadow-[0_6px_0_rgba(0,0,0,0.1)] text-white/50 cursor-not-allowed'
-                             }`}
-                           >
-                             {isUnlocked ? (
-                               isMastered ? <Sparkles size={32} /> : <Play size={32} className="ml-1" />
-                             ) : (
-                               <Lock size={32} />
+
+                           <div className="relative w-20 h-20 flex items-center justify-center">
+                             {/* SVG Progress Ring */}
+                             {isUnlocked && (
+                               <svg className="absolute w-[110px] h-[110px] transform -rotate-90 pointer-events-none z-0">
+                                 <circle
+                                   cx="55" cy="55" r="48"
+                                   stroke="rgba(255,255,255,0.3)"
+                                   strokeWidth="8"
+                                   fill="transparent"
+                                 />
+                                 <circle
+                                   cx="55" cy="55" r="48"
+                                   stroke={isMastered ? '#fbbf24' : '#fff'}
+                                   strokeWidth="8"
+                                   fill="transparent"
+                                   strokeDasharray={301.59}
+                                   strokeDashoffset={301.59 - (progressPercent / 100) * 301.59}
+                                   className="transition-all duration-1000 ease-out"
+                                   strokeLinecap="round"
+                                 />
+                               </svg>
                              )}
-                           </button>
+                             
+                             <button
+                               onClick={isUnlocked ? () => handleNodeClick(subTheme, isUnlocked) : undefined}
+                               disabled={!isUnlocked}
+                               className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto relative z-10 ${
+                                 isUnlocked 
+                                   ? `${nodeBg} shadow-[0_6px_0_rgba(0,0,0,0.2)] hover:scale-105 active:scale-90 active:translate-y-2` 
+                                   : 'bg-slate-300/50 backdrop-blur-sm shadow-[0_6px_0_rgba(0,0,0,0.1)] text-white/50 cursor-not-allowed'
+                               }`}
+                             >
+                               {isUnlocked ? (
+                                 isMastered ? <Sparkles size={32} /> : <Play size={32} className="ml-1" />
+                               ) : (
+                                 <Lock size={32} />
+                               )}
+                             </button>
+                           </div>
                            
                            {/* Topic Title and XP requirement */}
                            <div className="flex flex-col items-center mt-4 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-sm">
@@ -341,10 +372,10 @@ export default function Home({ profile, updateProfile }: HomeProps) {
             })}
           </div>
 
-          {/* Global Lives Column */}
-          <div className="w-20 shrink-0 flex flex-col items-center pt-10">
-            <div className="sticky top-28 flex flex-col gap-3">
-              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-wider mb-2">Vidas</span>
+          {/* Global Lives Column - Fixed Position */}
+          <div className="fixed top-28 right-4 sm:right-10 z-40 flex flex-col items-center">
+            <div className="flex flex-col gap-3">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-300 text-center uppercase tracking-wider mb-2 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-sm shadow-sm">Vidas</span>
               {Array.from({ length: 5 }).map((_, i) => {
                  const hasLife = i < currentLives;
                  const isJustGained = justGainedLife && i === currentLives - 1;

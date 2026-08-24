@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart, Sparkles, Lightbulb, HelpCircle, BookOpen } from 'lucide-react';
+import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart, Sparkles, Lightbulb, HelpCircle, BookOpen, ChevronDown } from 'lucide-react';
 import { Level, Subject, UserProfile, MistakeItem } from '../types';
 import { getTheme } from '../lib/theme';
 import { getQuestions } from '../data';
@@ -42,6 +42,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
   // AI Explanation State
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showInlineExplanation, setShowInlineExplanation] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<{ explanation: string; tip: string; keyConcept: string } | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
@@ -182,6 +183,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
   const handleContinue = async () => {
     setShowAiModal(false);
+    setShowInlineExplanation(false);
     setAiExplanation(null);
     setLoadingAi(false);
 
@@ -678,55 +680,74 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                 {/* Explicación Detallada de IA Directa */}
                 {!isCorrect && (
                   <div className="bg-black/20 dark:bg-slate-950/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 text-white shadow-lg space-y-3">
-                    <div className="flex items-center justify-between gap-2 border-b border-white/15 pb-2.5">
+                    <button 
+                      onClick={() => setShowInlineExplanation(!showInlineExplanation)}
+                      className="w-full flex items-center justify-between gap-2 border-white/15 pb-2 cursor-pointer outline-none"
+                    >
                       <div className="flex items-center gap-2">
                         <Sparkles size={18} className="text-amber-300 animate-pulse" />
                         <span className="font-extrabold text-sm sm:text-base tracking-wide">
                           Explicación Detallada de tu Tutor IA
                         </span>
                       </div>
-                      {aiExplanation?.keyConcept && (
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-amber-200 border border-white/20">
-                          {aiExplanation.keyConcept}
-                        </span>
-                      )}
-                    </div>
-
-                    {loadingAi ? (
-                      <div className="py-4 flex items-center gap-3 text-white/90">
-                        <Loader2 className="animate-spin text-amber-300 shrink-0" size={24} />
-                        <span className="text-sm font-medium animate-pulse">
-                          Tu Tutor de IA está analizando tu respuesta para explicarte con máxima claridad...
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="space-y-3 text-sm sm:text-base text-white/95">
-                        <p className="leading-relaxed whitespace-pre-line bg-black/15 p-3 rounded-xl border border-white/10">
-                          {aiExplanation?.explanation || question.explanation}
-                        </p>
-
-                        {aiExplanation?.tip && (
-                          <div className="flex items-start gap-2.5 bg-amber-500/20 border border-amber-300/40 p-3 rounded-xl text-amber-100 text-xs sm:text-sm font-medium">
-                            <Lightbulb size={18} className="text-amber-300 shrink-0 mt-0.5" />
-                            <div>
-                              <strong className="text-amber-200 block mb-0.5">Truco para recordar:</strong>
-                              <span>{aiExplanation.tip}</span>
-                            </div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        {aiExplanation?.keyConcept && (
+                          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-amber-200 border border-white/20 hidden sm:inline-block">
+                            {aiExplanation.keyConcept}
+                          </span>
                         )}
-
-                        <div className="text-xs text-white/80 flex items-center justify-between pt-1">
-                          <span>🎒 Guardado en tu <strong>Baúl de Errores</strong> para repasar sin perder vidas.</span>
-                          <button
-                            type="button"
-                            onClick={handleOpenAiExplanation}
-                            className="text-amber-200 underline font-bold hover:text-white cursor-pointer ml-2"
-                          >
-                            Ver en modal
-                          </button>
-                        </div>
+                        <ChevronDown className={`transition-transform duration-300 ${showInlineExplanation ? 'rotate-180' : ''}`} />
                       </div>
-                    )}
+                    </button>
+
+                    <AnimatePresence>
+                      {showInlineExplanation && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-3 border-t border-white/15">
+                            {loadingAi ? (
+                              <div className="py-4 flex items-center gap-3 text-white/90">
+                                <Loader2 className="animate-spin text-amber-300 shrink-0" size={24} />
+                                <span className="text-sm font-medium animate-pulse">
+                                  Tu Tutor de IA está analizando tu respuesta para explicarte con máxima claridad...
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="space-y-3 text-sm sm:text-base text-white/95">
+                                <p className="leading-relaxed whitespace-pre-line bg-black/15 p-3 rounded-xl border border-white/10">
+                                  {aiExplanation?.explanation || question.explanation}
+                                </p>
+
+                                {aiExplanation?.tip && (
+                                  <div className="flex items-start gap-2.5 bg-amber-500/20 border border-amber-300/40 p-3 rounded-xl text-amber-100 text-xs sm:text-sm font-medium">
+                                    <Lightbulb size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                                    <div>
+                                      <strong className="text-amber-200 block mb-0.5">Truco para recordar:</strong>
+                                      <span>{aiExplanation.tip}</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="text-xs text-white/80 flex items-center justify-between pt-1">
+                                  <span>🎒 Guardado en tu <strong>Baúl de Errores</strong> para repasar sin perder vidas.</span>
+                                  <button
+                                    type="button"
+                                    onClick={handleOpenAiExplanation}
+                                    className="text-amber-200 underline font-bold hover:text-white cursor-pointer ml-2"
+                                  >
+                                    Ver en modal
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
