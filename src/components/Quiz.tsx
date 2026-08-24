@@ -101,9 +101,6 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
 
-      // Disparar explicación de IA directamente
-      fetchAiExplanation(index);
-
       // Guardar en el Baúl de Errores (mistakeBank)
       const existingMistakes = profile.mistakeBank || [];
       const exists = existingMistakes.some(m => m.question.text === question.text);
@@ -681,7 +678,13 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                 {!isCorrect && (
                   <div className="bg-black/20 dark:bg-slate-950/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 text-white shadow-lg space-y-3">
                     <button 
-                      onClick={() => setShowInlineExplanation(!showInlineExplanation)}
+                      onClick={() => {
+                        const newState = !showInlineExplanation;
+                        setShowInlineExplanation(newState);
+                        if (newState && !aiExplanation && selectedOption !== null) {
+                          fetchAiExplanation(selectedOption);
+                        }
+                      }}
                       className="w-full flex items-center justify-between gap-2 border-white/15 pb-2 cursor-pointer outline-none"
                     >
                       <div className="flex items-center gap-2">
