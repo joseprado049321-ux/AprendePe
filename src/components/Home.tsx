@@ -143,27 +143,78 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   };
 
   const generateVegetation = (subject: string, biomeId: string) => {
-    // Generates absolute positioned SVG decorations
-    const isMath = subject === 'Matemáticas';
-    const isComm = subject === 'Comunicación';
-    const isSci = subject === 'Ciencias';
-    
-    // Just a few static absolute elements for flavor
+    // Definir SVGs detallados
+    const TreeSVG = () => (
+      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L4 10h3l-4 8h8v4h2v-4h8l-4-8h3L12 2z"/>
+      </svg>
+    );
+
+    const PalmSVG = () => (
+      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M11 22h2c0-5 2-9 4-12-2 1-4 1-5 1 0-3 2-6 5-8-3 1-5 4-6 7-1-3-3-6-6-7 3 2 5 5 5 8-1 0-3 0-5-1 2 3 4 7 4 12z" />
+      </svg>
+    );
+
+    const VolcanoSVG = () => (
+      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16 9l-2 3H10L8 9 2 22h20L16 9z" />
+        <path d="M12 1c-1.5 0-2 1-2 2s1 2 1 3-1 2 0 3 2 1 2-1 1-2 1-3-1-2 0-3 1.5-2 0-2z" className="text-white/40" />
+      </svg>
+    );
+
+    const MountainSVG = () => (
+      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
+      </svg>
+    );
+
+    const PlanetSVG = () => (
+      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="6" fill="currentColor" className="text-white/20" stroke="none" />
+        <path d="M2 12c0 3.5 5 5 10 5s10-1.5 10-5" />
+      </svg>
+    );
+
+    const CastleSVG = () => (
+      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2 22h20V12h-2v5h-2v-5h-2v5h-2v-5h-2v5h-2v-5H8v5H6v-5H4v10H2zm4-12h4V3L8 1 6 3v7zm10 0h4V3l-2-2-2 2v7z"/>
+      </svg>
+    );
+
+    let Deco1, Deco2, Deco3;
+
+    if (biomeId.includes('math_biome_1') || biomeId.includes('sci_biome_1')) {
+      // Selva / Tropical
+      Deco1 = PalmSVG; Deco2 = PalmSVG; Deco3 = MountainSVG;
+    } else if (biomeId.includes('math_biome_2')) {
+      // Volcán
+      Deco1 = VolcanoSVG; Deco2 = VolcanoSVG; Deco3 = MountainSVG;
+    } else if (biomeId.includes('comm_biome_1')) {
+      // Bosque
+      Deco1 = TreeSVG; Deco2 = TreeSVG; Deco3 = TreeSVG;
+    } else if (biomeId.includes('comm_biome_2')) {
+      // Cuentos / Castillos
+      Deco1 = CastleSVG; Deco2 = TreeSVG; Deco3 = CastleSVG;
+    } else if (biomeId.includes('sci_biome_2')) {
+      // Galaxia
+      Deco1 = PlanetSVG; Deco2 = PlanetSVG; Deco3 = PlanetSVG;
+    } else {
+      // Genérico (Ruinas, Cueva, etc)
+      Deco1 = MountainSVG; Deco2 = TreeSVG; Deco3 = MountainSVG;
+    }
+
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
-        <svg className="absolute top-10 left-10 w-16 h-16 text-white/40" viewBox="0 0 24 24" fill="currentColor">
-           {isMath && <path d="M12 2L2 22h20L12 2zm0 4l6 14H6l6-14z" />}
-           {isComm && <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />}
-           {(isSci || subject === 'Historia' || subject === 'Variado') && <circle cx="12" cy="12" r="10" />}
-        </svg>
-        <svg className="absolute top-1/3 right-10 w-24 h-24 text-white/20 rotate-45" viewBox="0 0 24 24" fill="currentColor">
-           {isMath && <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z" />}
-           {isComm && <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />}
-           {(isSci || subject === 'Historia' || subject === 'Variado') && <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />}
-        </svg>
-        <svg className="absolute bottom-20 left-1/4 w-12 h-12 text-white/30 -rotate-12" viewBox="0 0 24 24" fill="currentColor">
-           <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z" />
-        </svg>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
+        <div className="absolute top-12 left-6 w-24 h-24 rotate-[-5deg]">
+          <Deco1 />
+        </div>
+        <div className="absolute top-1/3 right-4 w-32 h-32 rotate-6">
+          <Deco2 />
+        </div>
+        <div className="absolute bottom-24 left-1/4 w-28 h-28 rotate-[-10deg]">
+          <Deco3 />
+        </div>
       </div>
     );
   };
