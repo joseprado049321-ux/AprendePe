@@ -5,7 +5,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import fs from 'fs';
-import { getRandomTopicsForStage, getTopicsForGrade } from './src/lib/syllabusParser';
+import { getRandomTopicsForStage, getTopicsForGrade } from './src/lib/syllabusParser.js';
 
 // Initialize Firebase Admin SDK
 let db: FirebaseFirestore.Firestore | null = null;
