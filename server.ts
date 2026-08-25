@@ -5,7 +5,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import fs from 'fs';
-import { getRandomTopicsForStage, getTopicsForGrade } from './src/lib/syllabusParser.js';
+import { getRandomTopicsForStage, getTopicsForGrade, getNodeForGrade } from './src/lib/syllabusParser.js';
 
 // Initialize Firebase Admin SDK
 let db: FirebaseFirestore.Firestore | null = null;
@@ -269,6 +269,25 @@ Devuelve un JSON con:
   } catch (error: any) {
     console.error("Error crítico en /api/evaluate-diagnostic:", error);
     res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+app.get("/api/curriculum", (req, res) => {
+  try {
+    const { stage, grade } = req.query;
+    if (!stage || !grade) {
+      return res.status(400).json({ error: "Missing stage or grade" });
+    }
+    
+    const node = getNodeForGrade(grade as string, stage as string);
+    if (!node) {
+      return res.status(404).json({ error: "Syllabus not found for this grade" });
+    }
+
+    res.json(node);
+  } catch (error: any) {
+    console.error("Error in /api/curriculum:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

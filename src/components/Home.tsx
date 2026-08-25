@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Flame, Brain, User, Lock, Play, Loader2, Calculator, BookOpen, MessageCircle, FlaskConical, Shuffle, ChevronDown, Sparkles, ChevronRight } from 'lucide-react';
-import { Level, Subject, UserProfile, SubTheme } from '../types';
+import { Level, Subject, UserProfile, SubTheme, Biome } from '../types';
 import { collection, query, where, limit, getDocs, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getSubjectTheme } from '../lib/theme';
@@ -21,9 +21,84 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const [subject, setSubject] = useState<Subject>(profile.lastSelectedCourse as Subject || 'Matemáticas');
   const [generatingState, setGeneratingState] = useState<'idle' | 'checking' | 'generating'>('idle');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [dynamicCurriculum, setDynamicCurriculum] = useState<Biome[] | null>(null);
+  const [loadingCurriculum, setLoadingCurriculum] = useState(false);
   const navigate = useNavigate();
   const { playSound } = useSound();
   const { currentLives, timeUntilNext, justGainedLife } = useLives(profile, updateProfile);
+
+  useEffect(() => {
+    if (subject !== 'Matemáticas') {
+      setDynamicCurriculum(null);
+      return;
+    }
+
+    const fetchCurriculum = async () => {
+      setLoadingCurriculum(true);
+      const gradeStr = profile.diagnosticLevel || profile.level;
+      let stage = 'Secundaria';
+      if (gradeStr.toLowerCase().includes('primaria') || gradeStr.toLowerCase().includes('grado')) {
+        stage = 'Primaria';
+      }
+
+      try {
+        const res = await fetch(`/api/curriculum?grade=${encodeURIComponent(gradeStr)}&stage=${stage}`);
+        if (!res.ok) throw new Error("Failed to fetch curriculum");
+        const node = await res.json();
+        
+        const gradients = [
+          'from-emerald-300 via-teal-400 to-emerald-500',
+          'from-cyan-400 via-blue-500 to-indigo-600',
+          'from-orange-400 via-rose-500 to-red-600',
+          'from-amber-200 via-yellow-400 to-orange-400',
+          'from-fuchsia-300 via-pink-400 to-rose-400'
+        ];
+
+        const getCumulativeXP = (index: number) => {
+          if (index === 0) return 100;
+          let total = 100;
+          for (let i = 1; i <= index; i++) {
+            const increment = Math.min(100 + (i * 20), 400); // Cap increment
+            total += increment;
+          }
+          return total;
+        };
+
+        let globalIndex = 0;
+        const biomes: Biome[] = node.units.map((unit: any, i: number) => {
+          const subThemes = unit.topics.map((topic: string) => {
+            const xpRequirement = getCumulativeXP(globalIndex);
+            const subTheme: SubTheme = {
+              id: `dyn_${i}_${globalIndex}`,
+              name: topic.length > 30 ? topic.substring(0, 27) + '...' : topic,
+              requiredXP: xpRequirement,
+              cnebCompetence: 'Resuelve problemas',
+              promptTopic: topic
+            };
+            globalIndex++;
+            return subTheme;
+          });
+          
+          return {
+            id: `dyn_biome_${i}`,
+            name: unit.name,
+            bgGradient: gradients[i % gradients.length],
+            pathColor: '#ffffff',
+            subThemes
+          };
+        });
+        
+        setDynamicCurriculum(biomes);
+      } catch (err) {
+        console.warn("Could not load dynamic curriculum", err);
+        setDynamicCurriculum(null);
+      } finally {
+        setLoadingCurriculum(false);
+      }
+    };
+    
+    fetchCurriculum();
+  }, [subject, profile.diagnosticLevel, profile.level]);
 
   const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
   const t = getSubjectTheme(subject);
@@ -314,9 +389,15 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         {/* Level Path Map & Global Lives Column */}
         <div className="flex w-full relative z-10 px-0">
           <div className="flex-1 flex flex-col w-full">
-            {curriculumMap[subject].map((biome, bIndex) => {
+            {loadingCurriculum ? (
+              <div className="w-full flex flex-col items-center justify-center py-32 opacity-70">
+                <Loader2 size={40} className="animate-spin text-slate-400 mb-4" />
+                <p className="text-slate-500 font-bold">Cargando tu temario...</p>
+              </div>
+            ) : (dynamicCurriculum || curriculumMap[subject]).map((biome, bIndex) => {
                // Calculate global indices to know previous XP requirements
-               const allSubThemes = curriculumMap[subject].flatMap(b => b.subThemes);
+               const activeMap = dynamicCurriculum || curriculumMap[subject];
+               const allSubThemes = activeMap.flatMap(b => b.subThemes);
                
                return (
                  <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>

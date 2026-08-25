@@ -126,13 +126,7 @@ export function getRandomTopicsForStage(stage: string, count: number = 5): {grad
  * Gets all topics for a specific grade.
  */
 export function getTopicsForGrade(grade: string, stage: string): string[] {
-  const syllabus = loadSyllabus();
-  // Attempt exact match or substring match
-  const node = syllabus.find(s => 
-    (s.grade.toLowerCase().includes(grade.toLowerCase()) || grade.toLowerCase().includes(s.grade.toLowerCase())) && 
-    s.stage.toLowerCase() === stage.toLowerCase()
-  );
-  
+  const node = getNodeForGrade(grade, stage);
   if (!node) return [];
 
   const allTopics: string[] = [];
@@ -140,4 +134,17 @@ export function getTopicsForGrade(grade: string, stage: string): string[] {
     allTopics.push(...unit.topics);
   }
   return allTopics;
+}
+
+/**
+ * Gets the full SyllabusNode for a specific grade.
+ */
+export function getNodeForGrade(grade: string, stage: string): SyllabusNode | null {
+  const syllabus = loadSyllabus();
+  // Attempt exact match or substring match
+  const node = syllabus.find(s => 
+    (s.grade.toLowerCase().includes(grade.toLowerCase()) || grade.toLowerCase().includes(s.grade.toLowerCase())) && 
+    s.stage.toLowerCase() === stage.toLowerCase()
+  );
+  return node || null;
 }
