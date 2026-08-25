@@ -216,77 +216,71 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   };
 
   const generateVegetation = (subject: string, biomeId: string) => {
-    // Definir SVGs detallados
-    const TreeSVG = () => (
-      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L4 10h3l-4 8h8v4h2v-4h8l-4-8h3L12 2z"/>
-      </svg>
-    );
-
-    const PalmSVG = () => (
-      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M11 22h2c0-5 2-9 4-12-2 1-4 1-5 1 0-3 2-6 5-8-3 1-5 4-6 7-1-3-3-6-6-7 3 2 5 5 5 8-1 0-3 0-5-1 2 3 4 7 4 12z" />
-      </svg>
-    );
-
-    const VolcanoSVG = () => (
-      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16 9l-2 3H10L8 9 2 22h20L16 9z" />
-        <path d="M12 1c-1.5 0-2 1-2 2s1 2 1 3-1 2 0 3 2 1 2-1 1-2 1-3-1-2 0-3 1.5-2 0-2z" className="text-white/40" />
-      </svg>
-    );
-
-    const MountainSVG = () => (
-      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
-      </svg>
-    );
-
-    const PlanetSVG = () => (
-      <svg className="w-full h-full text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="6" fill="currentColor" className="text-white/20" stroke="none" />
-        <path d="M2 12c0 3.5 5 5 10 5s10-1.5 10-5" />
-      </svg>
-    );
-
-    const CastleSVG = () => (
-      <svg className="w-full h-full text-white/20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2 22h20V12h-2v5h-2v-5h-2v5h-2v-5h-2v5h-2v-5H8v5H6v-5H4v10H2zm4-12h4V3L8 1 6 3v7zm10 0h4V3l-2-2-2 2v7z"/>
-      </svg>
-    );
-
-    let Deco1, Deco2, Deco3;
-
-    if (biomeId.includes('math_biome_1') || biomeId.includes('sci_biome_1')) {
-      // Selva / Tropical
-      Deco1 = PalmSVG; Deco2 = PalmSVG; Deco3 = MountainSVG;
-    } else if (biomeId.includes('math_biome_2')) {
-      // Volcán
-      Deco1 = VolcanoSVG; Deco2 = VolcanoSVG; Deco3 = MountainSVG;
-    } else if (biomeId.includes('comm_biome_1')) {
-      // Bosque
-      Deco1 = TreeSVG; Deco2 = TreeSVG; Deco3 = TreeSVG;
-    } else if (biomeId.includes('comm_biome_2')) {
-      // Cuentos / Castillos
-      Deco1 = CastleSVG; Deco2 = TreeSVG; Deco3 = CastleSVG;
-    } else if (biomeId.includes('sci_biome_2')) {
-      // Galaxia
-      Deco1 = PlanetSVG; Deco2 = PlanetSVG; Deco3 = PlanetSVG;
-    } else {
-      // Genérico (Ruinas, Cueva, etc)
-      Deco1 = MountainSVG; Deco2 = TreeSVG; Deco3 = MountainSVG;
-    }
-
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
-        <div className="absolute top-12 left-6 w-24 h-24 rotate-[-5deg]">
-          <Deco1 />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Left Tree */}
+        <div className="absolute top-1/4 -left-16 md:-left-8 w-64 md:w-80 h-[400px] pointer-events-none opacity-90 z-0">
+          <svg viewBox="0 0 200 300" className="w-full h-full" preserveAspectRatio="none">
+            {/* Trunk */}
+            <path d="M90,300 Q100,180 110,130 Q120,180 130,300 Z" fill="#3a2b22" opacity="0.95" />
+            <path d="M110,190 Q90,150 70,120" stroke="#3a2b22" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M115,160 Q140,130 160,100" stroke="#3a2b22" strokeWidth="6" fill="none" strokeLinecap="round" />
+            <path d="M100,240 Q80,210 60,180" stroke="#3a2b22" strokeWidth="5" fill="none" strokeLinecap="round" />
+            
+            {/* Watercolor Foliage */}
+            <circle cx="110" cy="110" r="75" fill="#22c55e" opacity="0.8" filter="blur(3px)" />
+            <circle cx="65" cy="130" r="55" fill="#16a34a" opacity="0.85" filter="blur(2px)" />
+            <circle cx="150" cy="100" r="60" fill="#15803d" opacity="0.75" filter="blur(3px)" />
+            <circle cx="120" cy="60" r="65" fill="#4ade80" opacity="0.9" filter="blur(2px)" />
+            <circle cx="80" cy="80" r="50" fill="#bef264" opacity="0.75" filter="blur(1px)" />
+            <circle cx="140" cy="140" r="45" fill="#166534" opacity="0.8" filter="blur(2px)" />
+            <circle cx="90" cy="160" r="45" fill="#047857" opacity="0.7" filter="blur(2px)" />
+          </svg>
         </div>
-        <div className="absolute top-1/3 right-4 w-32 h-32 rotate-6">
-          <Deco2 />
+        
+        {/* Right Tree */}
+        <div className="absolute top-1/3 -right-20 md:-right-10 w-72 md:w-96 h-[450px] pointer-events-none opacity-90 z-0 transform -scale-x-100">
+          <svg viewBox="0 0 200 300" className="w-full h-full" preserveAspectRatio="none">
+            {/* Trunk */}
+            <path d="M90,300 Q100,180 110,130 Q120,180 130,300 Z" fill="#3a2b22" opacity="0.95" />
+            <path d="M110,190 Q90,150 70,120" stroke="#3a2b22" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M115,160 Q140,130 160,100" stroke="#3a2b22" strokeWidth="6" fill="none" strokeLinecap="round" />
+            <path d="M100,240 Q80,210 60,180" stroke="#3a2b22" strokeWidth="5" fill="none" strokeLinecap="round" />
+            
+            {/* Watercolor Foliage */}
+            <circle cx="110" cy="110" r="75" fill="#22c55e" opacity="0.8" filter="blur(3px)" />
+            <circle cx="65" cy="130" r="55" fill="#16a34a" opacity="0.85" filter="blur(2px)" />
+            <circle cx="150" cy="100" r="60" fill="#15803d" opacity="0.75" filter="blur(3px)" />
+            <circle cx="120" cy="60" r="65" fill="#4ade80" opacity="0.9" filter="blur(2px)" />
+            <circle cx="80" cy="80" r="50" fill="#bef264" opacity="0.75" filter="blur(1px)" />
+            <circle cx="140" cy="140" r="45" fill="#166534" opacity="0.8" filter="blur(2px)" />
+            <circle cx="90" cy="160" r="45" fill="#047857" opacity="0.7" filter="blur(2px)" />
+          </svg>
         </div>
-        <div className="absolute bottom-24 left-1/4 w-28 h-28 rotate-[-10deg]">
-          <Deco3 />
+
+        {/* Floating Shapes (Triangles from Mockup) */}
+        <div className="absolute top-1/4 left-1/4 w-12 h-12 rotate-[-15deg] opacity-10 pointer-events-none">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
+            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
+          </svg>
+        </div>
+        <div className="absolute top-2/3 right-1/4 w-16 h-16 rotate-[25deg] opacity-10 pointer-events-none">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
+            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
+          </svg>
+        </div>
+        <div className="absolute bottom-1/4 left-1/3 w-10 h-10 rotate-[-5deg] opacity-10 pointer-events-none">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
+            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
+          </svg>
+        </div>
+
+        {/* Watercolor Hills at the bottom */}
+        <div className="absolute bottom-0 left-0 w-full h-32 md:h-48 pointer-events-none z-0">
+          <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="w-full h-full">
+            <path d="M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z" fill="#14532d" opacity="0.4" filter="blur(1px)"/>
+            <path d="M0,70 Q300,90 600,60 T1000,70 L1000,100 L0,100 Z" fill="#064e3b" opacity="0.5" filter="blur(2px)"/>
+          </svg>
         </div>
       </div>
     );
