@@ -41,7 +41,7 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
   useEffect(() => {
     const updateTargetRect = () => {
       const step = steps[currentStep];
-      if (step.targetId) {
+      if (step?.targetId) {
         const el = document.getElementById(step.targetId);
         if (el) {
           setTargetRect(el.getBoundingClientRect());
@@ -61,7 +61,7 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
   const handleNext = () => {
     playSound('click');
     if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep(currentStep + 1); // Avoid updater function to prevent out-of-bounds on rapid clicks
     } else {
       finishTour();
     }
@@ -84,7 +84,7 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
       )}
       
       <AnimatePresence mode="wait">
-        {targetRect && steps[currentStep].targetId ? (
+        {targetRect && steps[currentStep]?.targetId ? (
           <motion.div
             key={currentStep}
             initial={{ opacity: 0, y: -20 }}
@@ -101,8 +101,8 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-white dark:text-slate-800 drop-shadow-md">
                 <ArrowDown size={32} fill="currentColor" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{steps[currentStep].title}</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm">{steps[currentStep].description}</p>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{steps[currentStep]?.title}</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm">{steps[currentStep]?.description}</p>
               
               <div className="flex justify-between items-center">
                 <div className="flex gap-1">
@@ -136,10 +136,10 @@ export default function Tour({ profile, updateProfile, onComplete }: TourProps) 
                 <Check size={32} />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                {steps[currentStep].title}
+                {steps[currentStep]?.title}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 mb-8">
-                {steps[currentStep].description}
+                {steps[currentStep]?.description}
               </p>
               
               <button 
