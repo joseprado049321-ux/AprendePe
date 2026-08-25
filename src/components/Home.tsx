@@ -35,14 +35,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
     const fetchCurriculum = async () => {
       setLoadingCurriculum(true);
-      const gradeStr = profile.diagnosticLevel || profile.level;
-      let stage = 'Secundaria';
-      if (gradeStr.toLowerCase().includes('primaria') || gradeStr.toLowerCase().includes('grado')) {
-        stage = 'Primaria';
-      }
+      const gradeStr = profile.grade || '1ero';
+      let stage = profile.educationalStage || 'Secundaria';
+      if (profile.level === 'Primaria') stage = 'Primaria';
 
       try {
-        const res = await fetch(`/api/curriculum?grade=${encodeURIComponent(gradeStr)}&stage=${stage}`);
+        const res = await fetch(`/api/curriculum?grade=${encodeURIComponent(gradeStr)}&stage=${encodeURIComponent(stage)}`);
         if (!res.ok) throw new Error("Failed to fetch curriculum");
         const node = await res.json();
         

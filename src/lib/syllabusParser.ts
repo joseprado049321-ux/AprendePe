@@ -141,9 +141,15 @@ export function getTopicsForGrade(grade: string, stage: string): string[] {
  */
 export function getNodeForGrade(grade: string, stage: string): SyllabusNode | null {
   const syllabus = loadSyllabus();
+  
+  // Normalize grades like "3ero" to "3er", "1ero" to "1er"
+  let searchGrade = grade.toLowerCase();
+  if (searchGrade === '1ero') searchGrade = '1er';
+  if (searchGrade === '3ero') searchGrade = '3er';
+
   // Attempt exact match or substring match
   const node = syllabus.find(s => 
-    (s.grade.toLowerCase().includes(grade.toLowerCase()) || grade.toLowerCase().includes(s.grade.toLowerCase())) && 
+    (s.grade.toLowerCase().includes(searchGrade) || searchGrade.includes(s.grade.toLowerCase())) && 
     s.stage.toLowerCase() === stage.toLowerCase()
   );
   return node || null;
