@@ -27,7 +27,7 @@ export default function Leccion({ questions, onComplete }: LeccionProps) {
     return <div className="p-8 text-center text-slate-500 dark:text-slate-400">No hay preguntas disponibles.</div>;
   }
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = questions[currentIndex] || questions[0];
   const progressPercentage = ((currentIndex) / questions.length) * 100;
 
   const handleSelectOption = (index: number) => {

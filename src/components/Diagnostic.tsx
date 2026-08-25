@@ -61,7 +61,7 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
 
   const handleAnswer = async (index: number) => {
     playSound('click');
-    const isCorrect = index === questions[currentQ].correctAnswerIndex;
+    const isCorrect = index === questions[currentQ]?.correctAnswerIndex;
     const newScore = isCorrect ? score + 1 : score;
     setScore(newScore);
 
@@ -238,9 +238,9 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
 
               <AnimatePresence mode="wait">
                 <motion.div key={currentQ} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
-                  <h2 className="text-2xl font-semibold leading-relaxed text-slate-900 dark:text-white">{questions[currentQ].text}</h2>
+                  <h2 className="text-2xl font-semibold leading-relaxed text-slate-900 dark:text-white">{questions[currentQ]?.text}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {questions[currentQ].options.map((opt: string, idx: number) => (
+                    {questions[currentQ]?.options?.map((opt: string, idx: number) => (
                       <button
                         key={idx}
                         onClick={() => handleAnswer(idx)}

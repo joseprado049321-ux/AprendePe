@@ -46,7 +46,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const [aiExplanation, setAiExplanation] = useState<{ explanation: string; tip: string; keyConcept: string } | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
-  const question = questions[currentIndex];
+  const question = questions[currentIndex] || questions[0];
   const progress = questions.length > 0 ? ((currentIndex) / questions.length) * 100 : 0;
 
   const fetchAiExplanation = async (selectedIdx: number) => {
@@ -186,7 +186,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
     if (currentIndex < questions.length - 1) {
       playSound('click');
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex(currentIndex + 1); // Avoid updater function
       setSelectedOption(null);
       setIsAnswered(false);
     } else {

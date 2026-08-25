@@ -65,7 +65,7 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
     setIsPracticing(true);
   };
 
-  const currentMistake = practiceQueue[currentIndex];
+  const currentMistake = practiceQueue[currentIndex] || practiceQueue[0];
   const currentQ = currentMistake?.question;
 
   // Handle Practice Answer
