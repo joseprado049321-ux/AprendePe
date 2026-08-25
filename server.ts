@@ -5,6 +5,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import fs from 'fs';
+import { getRandomTopicsForStage, getTopicsForGrade } from './src/lib/syllabusParser';
 
 // Initialize Firebase Admin SDK
 let db: FirebaseFirestore.Firestore | null = null;
@@ -170,12 +171,22 @@ app.post("/api/generate-diagnostic", async (req, res) => {
   try {
     const { educationalStage, grade, selfAssessedLevel } = req.body;
 
+    let topicsPrompt = "";
+    if (educationalStage === "Primaria" || educationalStage === "Secundaria") {
+      const randomTopics = getRandomTopicsForStage(educationalStage, 5);
+      if (randomTopics.length > 0) {
+        const topicsStr = randomTopics.map(t => `- ${t.topic} (Nivel sugerido: ${t.grade})`).join("\n");
+        topicsPrompt = `Para evaluar con precisión el nivel, asegúrate de incluir preguntas que evalúen los siguientes temas extraídos de nuestro temario oficial:\n${topicsStr}\nCada pregunta generada debe incluir el campo 'topic' indicando a cuál de estos temas pertenece (o 'Cultura General' si no pertenece a ninguno).`;
+      }
+    }
+
     const prompt = `Actúa como un profesor experto de Perú evaluando bajo los estándares del Currículo Nacional de Educación Básica (CNEB). Genera una prueba diagnóstica de exactamente 10 preguntas que integren cultura general, resolución de problemas (matemáticas) y comprensión lectora para un estudiante de ${educationalStage}, en el grado ${grade}, que se considera de nivel ${selfAssessedLevel}. 
 REGLAS ESTRICTAS:
 - Asegúrate de evaluar competencias clave adaptadas a los lineamientos de la RVM N.° 094-2020-MINEDU.
 - Si es 'Inicial', usa conceptos básicos (colores, formas, animales, entorno).
 - Si es 'Primaria' o 'Secundaria', formula preguntas contextualizadas a la realidad peruana.
-- Devuelve ÚNICAMENTE un arreglo JSON puro con 10 objetos. Cada objeto debe tener: 'text' (la pregunta), 'options' (arreglo de exactamente 4 opciones de texto), y 'correctAnswerIndex' (número del 0 al 3).`;
+${topicsPrompt}
+- Devuelve ÚNICAMENTE un arreglo JSON puro con 10 objetos. Cada objeto debe tener: 'text' (la pregunta), 'options' (arreglo de exactamente 4 opciones de texto), 'correctAnswerIndex' (número del 0 al 3) y 'topic' (string, el tema evaluado).`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite",
@@ -189,9 +200,10 @@ REGLAS ESTRICTAS:
             properties: {
               text: { type: Type.STRING, description: "The question text" },
               options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Exactly 4 options" },
-              correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" }
+              correctAnswerIndex: { type: Type.NUMBER, description: "0-based index of the correct option" },
+              topic: { type: Type.STRING, description: "The specific syllabus topic evaluated" }
             },
-            required: ["text", "options", "correctAnswerIndex"]
+            required: ["text", "options", "correctAnswerIndex", "topic"]
           }
         }
       }
@@ -205,6 +217,58 @@ REGLAS ESTRICTAS:
       details: error.message,
       stack: error.stack
     });
+  }
+});
+
+app.post("/api/evaluate-diagnostic", async (req, res) => {
+  try {
+    const { educationalStage, diagnosticResults } = req.body;
+    // diagnosticResults is an array of { question: string, topic: string, isCorrect: boolean }
+
+    const prompt = `Actúa como un coordinador académico experto. 
+El estudiante de etapa "${educationalStage}" ha tomado una prueba diagnóstica y estos son sus resultados por tema:
+${JSON.stringify(diagnosticResults, null, 2)}
+
+Tu tarea es:
+1. Analizar en qué temas acertó y en cuáles falló.
+2. Determinar a qué grado pertenece (ej. "4to Sec" o "3er Grado").
+3. Identificar cuál fue el PRIMER tema crítico en el que falló, que será su punto de partida recomendado para estudiar.
+
+Devuelve un JSON con:
+- 'assignedGrade': El grado escolar asignado.
+- 'startingTopic': El tema exacto por el que debería empezar a estudiar para cubrir sus deficiencias.
+- 'explanation': Una breve explicación amigable de por qué se le asignó ese nivel y tema.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-flash-lite",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            assignedGrade: { type: Type.STRING, description: "The assigned grade, e.g. '4to Sec'" },
+            startingTopic: { type: Type.STRING, description: "The topic to start learning" },
+            explanation: { type: Type.STRING, description: "Explanation for the user" }
+          },
+          required: ["assignedGrade", "startingTopic", "explanation"]
+        }
+      }
+    });
+
+    const evaluation = JSON.parse(response.text || "{}");
+    
+    // Validate if the starting topic exists in our syllabus, else keep the AI's suggestion
+    const gradeTopics = getTopicsForGrade(evaluation.assignedGrade, educationalStage);
+    if (gradeTopics.length > 0 && !gradeTopics.includes(evaluation.startingTopic)) {
+      // Logic could go here to match to nearest topic if we had fuzzy matching
+      // For now, we trust Gemini's startingTopic logic based on the test
+    }
+
+    res.json(evaluation);
+  } catch (error: any) {
+    console.error("Error crítico en /api/evaluate-diagnostic:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
