@@ -19,6 +19,7 @@ interface HomeProps {
 
 export default function Home({ profile, updateProfile }: HomeProps) {
   const [subject, setSubject] = useState<Subject>(profile.lastSelectedCourse as Subject || 'Matemáticas');
+  const [visibleNodesCount, setVisibleNodesCount] = useState(10);
   const [generatingState, setGeneratingState] = useState<'idle' | 'checking' | 'generating'>('idle');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [dynamicCurriculum, setDynamicCurriculum] = useState<Biome[] | null>(null);
@@ -144,7 +145,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         }
       }
 
-      if (cachedQuestions && cachedQuestions.length > 0) {
+      if (cachedQuestions) {
         setGeneratingState('idle');
         navigate('/quiz', { 
           state: { subject, level: profile.diagnosticLevel || profile.level, questions: cachedQuestions, nodeId } 
@@ -218,68 +219,23 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const generateVegetation = (subject: string, biomeId: string) => {
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Left Tree */}
-        <div className="absolute top-1/4 -left-16 md:-left-8 w-64 md:w-80 h-[400px] pointer-events-none opacity-90 z-0">
-          <svg viewBox="0 0 200 300" className="w-full h-full" preserveAspectRatio="none">
-            {/* Trunk */}
-            <path d="M90,300 Q100,180 110,130 Q120,180 130,300 Z" fill="#3a2b22" opacity="0.95" />
-            <path d="M110,190 Q90,150 70,120" stroke="#3a2b22" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M115,160 Q140,130 160,100" stroke="#3a2b22" strokeWidth="6" fill="none" strokeLinecap="round" />
-            <path d="M100,240 Q80,210 60,180" stroke="#3a2b22" strokeWidth="5" fill="none" strokeLinecap="round" />
-            
-            {/* Watercolor Foliage */}
-            <circle cx="110" cy="110" r="75" fill="#22c55e" opacity="0.8" filter="blur(3px)" />
-            <circle cx="65" cy="130" r="55" fill="#16a34a" opacity="0.85" filter="blur(2px)" />
-            <circle cx="150" cy="100" r="60" fill="#15803d" opacity="0.75" filter="blur(3px)" />
-            <circle cx="120" cy="60" r="65" fill="#4ade80" opacity="0.9" filter="blur(2px)" />
-            <circle cx="80" cy="80" r="50" fill="#bef264" opacity="0.75" filter="blur(1px)" />
-            <circle cx="140" cy="140" r="45" fill="#166534" opacity="0.8" filter="blur(2px)" />
-            <circle cx="90" cy="160" r="45" fill="#047857" opacity="0.7" filter="blur(2px)" />
+        {/* Left Minimalist Tree */}
+        <div className="absolute top-1/4 -left-8 w-32 h-64 pointer-events-none opacity-50 z-0">
+          <svg viewBox="0 0 100 200" className="w-full h-full" preserveAspectRatio="none">
+            <path d="M50,200 L50,100" stroke="currentColor" strokeWidth="4" className="text-emerald-900" />
+            <circle cx="50" cy="80" r="30" fill="currentColor" className="text-emerald-500" />
+            <circle cx="30" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
+            <circle cx="70" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
           </svg>
         </div>
         
-        {/* Right Tree */}
-        <div className="absolute top-1/3 -right-20 md:-right-10 w-72 md:w-96 h-[450px] pointer-events-none opacity-90 z-0 transform -scale-x-100">
-          <svg viewBox="0 0 200 300" className="w-full h-full" preserveAspectRatio="none">
-            {/* Trunk */}
-            <path d="M90,300 Q100,180 110,130 Q120,180 130,300 Z" fill="#3a2b22" opacity="0.95" />
-            <path d="M110,190 Q90,150 70,120" stroke="#3a2b22" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M115,160 Q140,130 160,100" stroke="#3a2b22" strokeWidth="6" fill="none" strokeLinecap="round" />
-            <path d="M100,240 Q80,210 60,180" stroke="#3a2b22" strokeWidth="5" fill="none" strokeLinecap="round" />
-            
-            {/* Watercolor Foliage */}
-            <circle cx="110" cy="110" r="75" fill="#22c55e" opacity="0.8" filter="blur(3px)" />
-            <circle cx="65" cy="130" r="55" fill="#16a34a" opacity="0.85" filter="blur(2px)" />
-            <circle cx="150" cy="100" r="60" fill="#15803d" opacity="0.75" filter="blur(3px)" />
-            <circle cx="120" cy="60" r="65" fill="#4ade80" opacity="0.9" filter="blur(2px)" />
-            <circle cx="80" cy="80" r="50" fill="#bef264" opacity="0.75" filter="blur(1px)" />
-            <circle cx="140" cy="140" r="45" fill="#166534" opacity="0.8" filter="blur(2px)" />
-            <circle cx="90" cy="160" r="45" fill="#047857" opacity="0.7" filter="blur(2px)" />
-          </svg>
-        </div>
-
-        {/* Floating Shapes (Triangles from Mockup) */}
-        <div className="absolute top-1/4 left-1/4 w-12 h-12 rotate-[-15deg] opacity-10 pointer-events-none">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
-            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
-          </svg>
-        </div>
-        <div className="absolute top-2/3 right-1/4 w-16 h-16 rotate-[25deg] opacity-10 pointer-events-none">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
-            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
-          </svg>
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 w-10 h-10 rotate-[-5deg] opacity-10 pointer-events-none">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="text-white">
-            <path d="M12 2L1 21h22L12 2zm0 5l4 7h-8l4-7z" />
-          </svg>
-        </div>
-
-        {/* Watercolor Hills at the bottom */}
-        <div className="absolute bottom-0 left-0 w-full h-32 md:h-48 pointer-events-none z-0">
-          <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="w-full h-full">
-            <path d="M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z" fill="#14532d" opacity="0.4" filter="blur(1px)"/>
-            <path d="M0,70 Q300,90 600,60 T1000,70 L1000,100 L0,100 Z" fill="#064e3b" opacity="0.5" filter="blur(2px)"/>
+        {/* Right Minimalist Tree */}
+        <div className="absolute top-1/3 -right-8 w-32 h-64 pointer-events-none opacity-50 z-0 transform -scale-x-100">
+          <svg viewBox="0 0 100 200" className="w-full h-full" preserveAspectRatio="none">
+            <path d="M50,200 L50,100" stroke="currentColor" strokeWidth="4" className="text-emerald-900" />
+            <circle cx="50" cy="80" r="30" fill="currentColor" className="text-emerald-500" />
+            <circle cx="30" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
+            <circle cx="70" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
           </svg>
         </div>
       </div>
@@ -386,13 +342,28 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                 <Loader2 size={40} className="animate-spin text-slate-400 mb-4" />
                 <p className="text-slate-500 font-bold">Cargando tu temario...</p>
               </div>
-            ) : (dynamicCurriculum || curriculumMap[subject]).map((biome, bIndex) => {
-               // Calculate global indices to know previous XP requirements
+            ) : (() => {
                const activeMap = dynamicCurriculum || curriculumMap[subject];
                const allSubThemes = activeMap.flatMap(b => b.subThemes);
+               const totalNodesInCurriculum = allSubThemes.length;
                
+               // Pagination logic
+               let renderedNodesCount = 0;
+               const paginatedMap = activeMap.map(biome => {
+                 if (renderedNodesCount >= visibleNodesCount) return { ...biome, subThemes: [] };
+                 const remainingAllowed = visibleNodesCount - renderedNodesCount;
+                 const subThemesToRender = biome.subThemes.slice(0, remainingAllowed);
+                 renderedNodesCount += subThemesToRender.length;
+                 return { ...biome, subThemes: subThemesToRender };
+               }).filter(biome => biome.subThemes.length > 0);
+               
+               const hasMoreNodes = visibleNodesCount < totalNodesInCurriculum;
+
                return (
-                 <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>
+                 <>
+                 {paginatedMap.map((biome, bIndex) => {
+                   return (
+                     <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>
                    
                    {generateVegetation(subject, biome.id)}
 
@@ -494,6 +465,21 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                  </div>
                );
             })}
+                 
+                 {/* Load More Button */}
+                 {hasMoreNodes && (
+                   <div className="w-full flex justify-center py-12 bg-slate-900">
+                     <button
+                       onClick={() => setVisibleNodesCount(prev => prev + 10)}
+                       className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95"
+                     >
+                       Generar 10 niveles más
+                     </button>
+                   </div>
+                 )}
+                 </>
+               );
+            })()}
           </div>
 
           {/* Global Lives Column - Fixed Position */}
