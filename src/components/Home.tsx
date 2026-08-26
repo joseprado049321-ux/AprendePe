@@ -176,7 +176,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         })
       });
 
-      if (!response.ok) throw new Error("Error generating questions");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        console.error("API Error details:", errData);
+        throw new Error(errData?.details || "Error generating questions");
+      }
 
       const data = await response.json();
       const generatedQuestions = data.questions || [];
