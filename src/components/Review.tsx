@@ -34,6 +34,9 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
   const [sessionXp, setSessionXp] = useState(0);
   const [masteredInSession, setMasteredInSession] = useState(0);
   const [activeTab, setActiveTab] = useState<'pending' | 'mastered'>('pending');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [showRewardModal, setShowRewardModal] = useState(false);
 
   // AI explanation state
   const [showAiModal, setShowAiModal] = useState(false);
@@ -42,13 +45,33 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
   const [inspectingMistake, setInspectingMistake] = useState<MistakeItem | null>(null);
 
   // Filtered mistakes
-  const filteredPending = selectedSubject === 'Todos' 
+  let filteredPending = selectedSubject === 'Todos' 
     ? pendingMistakes 
     : pendingMistakes.filter(m => m.subject === selectedSubject);
 
-  const filteredMastered = selectedSubject === 'Todos' 
+  if (searchTerm) {
+    filteredPending = filteredPending.filter(m => m.question.text.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
+  
+  filteredPending.sort((a, b) => {
+    const dateA = new Date(a.failedAt).getTime();
+    const dateB = new Date(b.failedAt).getTime();
+    return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  });
+
+  let filteredMastered = selectedSubject === 'Todos' 
     ? masteredMistakes 
     : masteredMistakes.filter(m => m.subject === selectedSubject);
+    
+  if (searchTerm) {
+    filteredMastered = filteredMastered.filter(m => m.question.text.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
+  
+  filteredMastered.sort((a, b) => {
+    const dateA = new Date(a.failedAt).getTime();
+    const dateB = new Date(b.failedAt).getTime();
+    return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  });
 
   const subjectsList = ['Todos', 'Matemáticas', 'Comunicación', 'Ciencias', 'Historia', 'Variado'];
 
@@ -152,7 +175,7 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
     }
   };
 
-  const handleNextPracticeQuestion = () => {
+  const handleNextPracticeQuestion = async () => {
     setShowAiModal(false);
     setAiExplanation(null);
     setLoadingAi(false);
@@ -165,6 +188,12 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
     } else {
       playSound('levelUp');
       setIsPracticing(false);
+      
+      const currentLives = profile.lives ?? 5;
+      if (currentLives < 5) {
+        await updateProfile({ lives: currentLives + 1 });
+      }
+      setShowRewardModal(true);
     }
   };
 
@@ -296,6 +325,44 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
                   </button>
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reward Modal */}
+      <AnimatePresence>
+        {showRewardModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center relative"
+            >
+              <div className="w-20 h-20 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mb-4">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                  <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
+                ¡Gran Trabajo!
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 font-medium mb-6">
+                Has repasado tus errores exitosamente.
+                {(profile.lives ?? 5) < 5 ? ' ¡Recuperaste 1 Vida! 💖' : ' ¡Ganaste XP extra! ⭐'}
+              </p>
+              <button
+                onClick={() => setShowRewardModal(false)}
+                className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+              >
+                Continuar
+              </button>
             </motion.div>
           </motion.div>
         )}
@@ -520,58 +587,74 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
             </div>
           </div>
 
-          {/* Primary Action Button (Start Practice) */}
-          {pendingMistakes.length > 0 && (
-            <button
-              onClick={handleStartPractice}
-              className="w-full mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-indigo-500/25 flex items-center justify-between transition-all transform active:scale-[0.98] cursor-pointer"
+          {/* Start Practice Call to Action */}
+          {filteredPending.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden mb-8"
             >
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Play size={20} className="fill-current ml-0.5" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold">¡Iniciar Práctica de Repaso!</div>
-                  <div className="text-xs text-indigo-100 font-medium">
-                    Practica {filteredPending.length} {filteredPending.length === 1 ? 'pregunta' : 'preguntas'} ({selectedSubject})
-                  </div>
-                </div>
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+              
+              <div className="flex-1 relative z-10 text-center md:text-left">
+                <h2 className="text-2xl font-black mb-2 flex items-center justify-center md:justify-start gap-2">
+                  <ShieldCheck size={28} />
+                  Practica para recuperar vidas
+                </h2>
+                <p className="text-indigo-100 font-medium max-w-lg mb-0 text-sm sm:text-base">
+                  Repasa {filteredPending.length} {filteredPending.length === 1 ? 'pregunta' : 'preguntas'} en las que fallaste. Al completar la sesión recuperarás 1 vida extra. 💖
+                </p>
               </div>
-              <span className="bg-white/20 text-xs px-3 py-1.5 rounded-xl font-bold uppercase tracking-wider">
-                +5 XP c/u
-              </span>
-            </button>
+              
+              <button
+                onClick={handleStartPractice}
+                className="w-full md:w-auto px-8 py-4 bg-white text-indigo-600 hover:bg-slate-50 font-black rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-transform active:scale-95 group relative z-10 cursor-pointer"
+              >
+                <Play size={20} className="fill-indigo-600 group-hover:scale-110 transition-transform" />
+                INICIAR PRÁCTICA
+              </button>
+            </motion.div>
           )}
 
-          {/* Subjects Filter Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6">
-            {subjectsList.map(s => {
-              const count = s === 'Todos' 
-                ? pendingMistakes.length 
-                : pendingMistakes.filter(m => m.subject === s).length;
-
-              return (
-                <button
-                  key={s}
-                  onClick={() => setSelectedSubject(s)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                    selectedSubject === s
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <span>{s}</span>
-                  {count > 0 && (
-                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                      selectedSubject === s ? 'bg-white/30 text-white' : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                    }`}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          {/* Filters and Search (DataTables Style) */}
+          <div className="flex flex-col md:flex-row gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+            <div className="relative w-full flex-1">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              </div>
+              <input 
+                type="text" 
+                placeholder="Buscar preguntas..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all font-medium outline-none"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="flex-1 md:w-48 px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold text-slate-700 dark:text-slate-300 border-none appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.2em' }}
+              >
+                {subjectsList.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              
+              <button
+                onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
+                className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0 cursor-pointer"
+                title={sortOrder === 'newest' ? 'Más recientes primero' : 'Más antiguos primero'}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={sortOrder === 'newest' ? '' : 'rotate-180 transition-transform'}>
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+              </button>
+            </div>
           </div>
+
+
 
           {/* Tabs: Pendientes vs Dominadas */}
           <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6">
