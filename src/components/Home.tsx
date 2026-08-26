@@ -218,26 +218,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
   const generateVegetation = (subject: string, biomeId: string) => {
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Left Minimalist Tree */}
-        <div className="absolute top-1/4 -left-8 w-32 h-64 pointer-events-none opacity-50 z-0">
-          <svg viewBox="0 0 100 200" className="w-full h-full" preserveAspectRatio="none">
-            <path d="M50,200 L50,100" stroke="currentColor" strokeWidth="4" className="text-emerald-900" />
-            <circle cx="50" cy="80" r="30" fill="currentColor" className="text-emerald-500" />
-            <circle cx="30" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
-            <circle cx="70" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
-          </svg>
-        </div>
-        
-        {/* Right Minimalist Tree */}
-        <div className="absolute top-1/3 -right-8 w-32 h-64 pointer-events-none opacity-50 z-0 transform -scale-x-100">
-          <svg viewBox="0 0 100 200" className="w-full h-full" preserveAspectRatio="none">
-            <path d="M50,200 L50,100" stroke="currentColor" strokeWidth="4" className="text-emerald-900" />
-            <circle cx="50" cy="80" r="30" fill="currentColor" className="text-emerald-500" />
-            <circle cx="30" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
-            <circle cx="70" cy="70" r="20" fill="currentColor" className="text-emerald-600" />
-          </svg>
-        </div>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <img 
+          src="/background.png" 
+          alt="Background" 
+          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90"
+        />
       </div>
     );
   };
