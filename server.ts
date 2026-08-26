@@ -26,12 +26,7 @@ app.use(express.json());
 
 // Use Gemini SDK
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
+  apiKey: process.env.GEMINI_API_KEY
 });
 
 app.post("/api/generate-questions", async (req, res) => {
@@ -107,7 +102,7 @@ app.post("/api/generate-questions", async (req, res) => {
     while (attempts < maxAttempts) {
       try {
         const response = await ai.models.generateContent({
-          model: "gemini-3.6-flash",
+          model: "gemini-flash-latest",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -189,7 +184,7 @@ ${topicsPrompt}
 - Devuelve ÚNICAMENTE un arreglo JSON puro con 10 objetos. Cada objeto debe tener: 'text' (la pregunta), 'options' (arreglo de exactamente 4 opciones de texto), 'correctAnswerIndex' (número del 0 al 3) y 'topic' (string, el tema evaluado).`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -240,7 +235,7 @@ Devuelve un JSON con:
 - 'explanation': Una breve explicación amigable de por qué se le asignó ese nivel y tema.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -330,7 +325,7 @@ app.post("/api/explain-mistake", async (req, res) => {
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
