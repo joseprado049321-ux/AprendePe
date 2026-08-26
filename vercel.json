@@ -9,7 +9,8 @@
       "src": "server.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["Temario/**/*.md"]
+        "includeFiles": ["Temario/**/*.md"],
+        "maxDuration": 60
       }
     }
   ],
