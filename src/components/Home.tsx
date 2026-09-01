@@ -226,7 +226,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         <img 
           src="/background.png" 
           alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90"
+          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90 mix-blend-multiply dark:mix-blend-color-burn"
         />
       </div>
     );
