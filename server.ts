@@ -267,16 +267,46 @@ Devuelve un JSON con:
   }
 });
 
-app.get("/api/curriculum", (req, res) => {
+app.get("/api/curriculum", async (req, res) => {
   try {
-    const { stage, grade } = req.query;
+    const { stage, grade, subject } = req.query;
     if (!stage || !grade) {
       return res.status(400).json({ error: "Missing stage or grade" });
     }
     
-    const node = getNodeForGrade(grade as string, stage as string);
+    let node = null;
+    
+    // Si es matemáticas intentamos cargar el estático (si existe)
+    if (subject === 'Matemáticas') {
+       node = getNodeForGrade(grade as string, stage as string);
+    }
+
+    // Si no existe el estático o es otra materia, usamos la IA
     if (!node) {
-      return res.status(404).json({ error: "Syllabus not found for this grade" });
+       console.log(`Generating AI curriculum for ${subject} - ${grade} ${stage}`);
+       const prompt = `Actúa como experto en el Currículo Nacional de Educación Básica (CNEB) del Perú.
+Genera el temario oficial del curso de "${subject}" para el grado "${grade}" de la etapa "${stage}".
+El temario debe estar dividido en unidades y temas. Genera al menos 4 unidades con 4 a 6 temas cada una.
+Devuelve EXACTAMENTE este formato JSON puro, sin markdown adicional:
+{
+  "grade": "${grade}",
+  "stage": "${stage}",
+  "units": [
+    {
+      "name": "Nombre de la Unidad",
+      "topics": ["Tema 1", "Tema 2", "Tema 3"]
+    }
+  ]
+}`;
+
+       const response = await ai.models.generateContent({
+         model: "gemini-flash-latest",
+         contents: prompt,
+         config: {
+           responseMimeType: "application/json",
+         }
+       });
+       node = JSON.parse(response.text || "{}");
     }
 
     res.json(node);

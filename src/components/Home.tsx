@@ -29,11 +29,6 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   const { currentLives, timeUntilNext, justGainedLife } = useLives(profile, updateProfile);
 
   useEffect(() => {
-    if (subject !== 'Matemáticas') {
-      setDynamicCurriculum(null);
-      return;
-    }
-
     const fetchCurriculum = async () => {
       setLoadingCurriculum(true);
       const gradeStr = profile.grade || '1ero';
@@ -41,7 +36,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
       if (profile.level === 'Primaria') stage = 'Primaria';
 
       try {
-        const res = await fetch(`/api/curriculum?grade=${encodeURIComponent(gradeStr)}&stage=${encodeURIComponent(stage)}`);
+        const res = await fetch(`/api/curriculum?grade=${encodeURIComponent(gradeStr)}&stage=${encodeURIComponent(stage)}&subject=${encodeURIComponent(subject)}`);
         if (!res.ok) throw new Error("Failed to fetch curriculum");
         const node = await res.json();
         
