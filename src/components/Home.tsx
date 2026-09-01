@@ -235,29 +235,30 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   return (
     <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
       <div className="w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0">
-             <header className="w-full max-w-4xl mx-auto px-4 pt-8 flex justify-between items-center mb-6 sticky top-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur pb-4 z-40 border-b border-slate-200 dark:border-slate-800 transition-colors duration-500 rounded-b-3xl">
+             <header className="w-full max-w-4xl mx-auto px-4 pt-8 flex justify-between items-center mb-6 sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl pb-4 z-40 border-b border-white/50 dark:border-slate-700/60 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 transition-all duration-500 rounded-b-3xl">
           <div className="flex items-center gap-2">
-             <div className={`p-2 rounded-full ${t.iconBg}`}>
-                <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : ''} />
+             <div className={`p-2 rounded-2xl shadow-sm ${t.iconBg}`}>
+                <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : 'text-white'} />
              </div>
-             <h1 className="text-slate-900 dark:text-white font-bold mb-0 mt-0 text-xl">AprendePe</h1>
+             <h1 className="text-slate-900 dark:text-white font-black mb-0 mt-0 text-xl tracking-tight">AprendePe</h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
              <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl font-bold text-sm text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors"
+                  className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl font-bold text-sm text-slate-800 dark:text-slate-100 hover:bg-white dark:hover:bg-slate-700 shadow-sm transition-all hover:shadow-md"
                 >
                   {subject} <ChevronDown size={16} />
                 </button>
                 <AnimatePresence>
                   {isDropdownOpen && (
                     <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl w-40 overflow-hidden z-50"
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="absolute right-0 top-full mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl w-44 overflow-hidden z-50"
                     >
                       {subjects.map(s => (
                         <button
@@ -268,7 +269,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                             playSound('click'); 
                             updateProfile({ lastSelectedCourse: s });
                           }}
-                          className={`block w-full text-left px-4 py-3 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${subject === s ? t.textHeading : 'text-slate-700 dark:text-slate-300'}`}
+                          className={`block w-full text-left px-4 py-3.5 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${subject === s ? t.textHeading : 'text-slate-700 dark:text-slate-300'}`}
                         >
                           {s}
                         </button>
@@ -277,12 +278,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                   )}
                 </AnimatePresence>
              </div>
-             <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 px-3 py-1.5 font-bold text-sm">
-                <Flame size={18} className="animate-pulse text-amber-500" />
+             <div className="flex items-center gap-1.5 bg-amber-500/10 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 px-3 py-2 rounded-xl font-bold text-sm shadow-sm">
+                <Flame size={18} className="animate-pulse fill-amber-500/20" />
                 <span>{profile.streak}</span>
              </div>
-             <Link to="/profile" className="p-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors">
-                <User size={18} />
+             <Link to="/profile" className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-700 shadow-sm hover:shadow-md transition-all">
+                <User size={20} />
              </Link>
           </div>
         </header>
@@ -290,34 +291,35 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         {/* Baúl de Errores Quick Banner */}
         {pendingMistakesCount > 0 && (
           <motion.div 
-            initial={{ opacity: 0, y: -10 }} 
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }} 
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="mb-4 px-4 w-full max-w-4xl mx-auto"
           >
             <Link 
               to="/review"
-              className="block p-3.5 bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-purple-500/15 dark:from-amber-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 border border-amber-300/60 dark:border-amber-700/50 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+              className="block p-4 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 dark:from-amber-900/40 dark:via-orange-900/40 dark:to-rose-900/40 border border-amber-400/50 dark:border-amber-700/60 rounded-3xl shadow-lg hover:shadow-amber-500/30 transition-all duration-500 group relative overflow-hidden backdrop-blur-xl"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/30 group-hover:scale-105 transition-transform">
-                    <Sparkles size={20} className="animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
+              <div className="flex items-center justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/40 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <Sparkles size={24} className="animate-pulse" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">Baúl de Errores</span>
-                      <span className="bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="font-black text-base text-slate-900 dark:text-white tracking-tight">Baúl de Errores</span>
+                      <span className="bg-amber-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-sm">
                         {pendingMistakesCount}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Repasa sin perder vidas y gana +5 XP
+                    <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 opacity-90">
+                      Recupera conocimiento y gana +5 XP sin gastar vidas.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
-                  <span>Repasar</span>
-                  <ChevronRight size={16} />
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/50 dark:bg-black/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 group-hover:translate-x-1">
+                  <ChevronRight size={20} className="stroke-[3]" />
                 </div>
               </div>
             </Link>
@@ -381,10 +383,17 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                        let nodeBg = 'bg-white text-slate-800';
                        if (isMastered) nodeBg = 'bg-amber-400 text-white';
                        
-                       return (
-                         <div key={subTheme.id} className={`relative flex flex-col items-center justify-center z-10 group ${currentWidth}`}>
-                           
-                           {/* Competence Tooltip */}
+                        return (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.5, delay: (i % 10) * 0.1, type: "spring", bounce: 0.4 }}
+                            key={subTheme.id} 
+                            className={`relative flex flex-col items-center justify-center z-10 group ${currentWidth}`}
+                          >
+                            
+                            {/* Competence Tooltip */}
                            {profile.showCNEBCompetencies && (
                              <div className="absolute -top-12 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30 whitespace-nowrap text-xs font-bold">
                                {subTheme.cnebCompetence}
@@ -392,23 +401,23 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                              </div>
                            )}
 
-                           <div className="relative w-20 h-20 flex items-center justify-center">
+                           <div className="relative w-24 h-24 flex items-center justify-center">
                              {/* SVG Progress Ring */}
                              {isUnlocked && (
-                               <svg className="absolute w-[110px] h-[110px] transform -rotate-90 pointer-events-none z-0">
+                               <svg className="absolute w-[116px] h-[116px] transform -rotate-90 pointer-events-none z-0 drop-shadow-md">
                                  <circle
-                                   cx="55" cy="55" r="48"
-                                   stroke="rgba(255,255,255,0.3)"
-                                   strokeWidth="8"
+                                   cx="58" cy="58" r="50"
+                                   stroke="rgba(255,255,255,0.25)"
+                                   strokeWidth="10"
                                    fill="transparent"
                                  />
                                  <circle
-                                   cx="55" cy="55" r="48"
-                                   stroke={isMastered ? '#fbbf24' : '#fff'}
-                                   strokeWidth="8"
+                                   cx="58" cy="58" r="50"
+                                   stroke={isMastered ? '#fbbf24' : '#60a5fa'}
+                                   strokeWidth="10"
                                    fill="transparent"
-                                   strokeDasharray={301.59}
-                                   strokeDashoffset={301.59 - (progressPercent / 100) * 301.59}
+                                   strokeDasharray={314.16}
+                                   strokeDashoffset={314.16 - (progressPercent / 100) * 314.16}
                                    className="transition-all duration-1000 ease-out"
                                    strokeLinecap="round"
                                  />
@@ -420,12 +429,12 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                                disabled={!isUnlocked}
                                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto relative z-10 ${
                                  isUnlocked 
-                                   ? `${nodeBg} shadow-[0_6px_0_rgba(0,0,0,0.2)] hover:scale-105 active:scale-90 active:translate-y-2` 
-                                   : 'bg-slate-300/50 backdrop-blur-sm shadow-[0_6px_0_rgba(0,0,0,0.1)] text-white/50 cursor-not-allowed'
+                                   ? `${nodeBg} shadow-[0_8px_0_rgba(0,0,0,0.15)] hover:scale-110 hover:-translate-y-2 active:scale-95 active:translate-y-1 active:shadow-[0_2px_0_rgba(0,0,0,0.15)]` 
+                                   : 'bg-slate-300/60 dark:bg-slate-800/60 backdrop-blur-md shadow-[0_6px_0_rgba(0,0,0,0.1)] text-white/50 dark:text-slate-500 cursor-not-allowed'
                                }`}
                              >
                                {isUnlocked ? (
-                                 isMastered ? <Sparkles size={32} /> : <Play size={32} className="ml-1" />
+                                 isMastered ? <Sparkles size={36} className="text-white drop-shadow-md" /> : <Play size={36} className="ml-1 text-slate-800 drop-shadow-sm" fill="currentColor" />
                                ) : (
                                  <Lock size={32} />
                                )}
@@ -448,7 +457,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                                </span>
                              )}
                            </div>
-                         </div>
+                         </motion.div>
                        );
                      })}
                    </div>
@@ -512,42 +521,55 @@ export default function Home({ profile, updateProfile }: HomeProps) {
       <AnimatePresence>
         {generatingState === 'checking' && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center"
           >
-            <Loader2 size={40} className="text-white animate-spin drop-shadow-md" />
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], rotate: [0, 180, 360] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+               <Loader2 size={48} className="text-white drop-shadow-lg" />
+            </motion.div>
           </motion.div>
         )}
         
         {generatingState === 'generating' && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            className="fixed inset-0 z-50 bg-slate-900/70 flex flex-col items-center justify-center p-6"
           >
-            <div className="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border border-slate-700 flex flex-col items-center shadow-2xl text-center">
-              <Loader2 size={64} className="text-white animate-spin mb-6" />
-              <h2 className="text-2xl font-bold text-white mb-3">Generando...</h2>
-              <p className="text-slate-400 mb-8">
-                Espera. Las preguntas se están generando...
+            <motion.div 
+              initial={{ scale: 0.9, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white/10 dark:bg-slate-800/80 backdrop-blur-3xl p-10 rounded-[2rem] w-full max-w-sm border border-white/20 dark:border-slate-700/50 flex flex-col items-center shadow-[0_0_50px_rgba(0,0,0,0.3)] text-center relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
+              <motion.div
+                 animate={{ rotate: 360 }}
+                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                 className="relative z-10 mb-6"
+              >
+                <div className="w-16 h-16 rounded-full border-4 border-indigo-400 border-t-transparent animate-spin"></div>
+              </motion.div>
+              <h2 className="text-2xl font-black text-white mb-3 relative z-10 tracking-tight">Preparando tu lección</h2>
+              <p className="text-indigo-100/80 mb-8 relative z-10 font-medium">
+                La IA está creando un desafío perfecto para ti...
               </p>
-              <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                 <div className="bg-white h-full w-full animate-[progress_2s_ease-in-out_infinite] origin-left" style={{
-                   animationName: 'shimmer',
-                   background: 'linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.5) 100%)',
-                   backgroundSize: '200% 100%',
-                 }} />
+              <div className="w-full bg-black/40 rounded-full h-3 overflow-hidden relative z-10 p-0.5">
+                 <motion.div 
+                   className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 h-full w-full rounded-full" 
+                   initial={{ x: '-100%' }}
+                   animate={{ x: '100%' }}
+                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                 />
               </div>
-            </div>
-            <style>{`
-              @keyframes shimmer {
-                0% { background-position: 100% 0; }
-                100% { background-position: -100% 0; }
-              }
-            `}</style>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

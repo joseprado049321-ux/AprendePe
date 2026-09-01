@@ -12,9 +12,9 @@
   --bg: #f8fafc;
   --text: #0f172a;
   --muted: #64748b;
-  --math:    #1cb0f6; --math-s:    #1899d6;
+  --math:    #06b6d4; --math-s:    #0891b2;
   --comm:    #f59e0b; --comm-s:    #d97706;
-  --social:  #ef4444; --social-s:  #dc2626;
+  --social:  #f43f5e; --social-s:  #e11d48;
   --science: #10b981; --science-s: #059669;
   --danger:  #ef4444; --danger-s:  #dc2626;
   --gray:    #f1f5f9; --gray-s:    #e2e8f0;
@@ -80,5 +80,23 @@
   .no-scrollbar {
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Glassmorphism Utilities */
+  .glass-panel {
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 shadow-sm transition-all duration-300;
+  }
+  .glass-panel-heavy {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-slate-700/60 shadow-xl transition-all duration-300;
+  }
+  
+  /* Text Utilities */
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600;
+  }
+
+  /* Smooth Transitions */
+  .transition-smooth {
+    @apply transition-all duration-500 ease-out;
   }
 }

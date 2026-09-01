@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart, Sparkles, Lightbulb, HelpCircle, BookOpen, ChevronDown } from 'lucide-react';
+import { X, CheckCircle, XCircle, HeartPulse, Diamond, Gem, Shield, Zap, Loader2, Heart, Sparkles, Lightbulb, HelpCircle, BookOpen, ChevronDown, ChevronRight } from 'lucide-react';
 import { Level, Subject, UserProfile, MistakeItem } from '../types';
 import { getTheme } from '../lib/theme';
 import { getQuestions } from '../data';
@@ -538,8 +538,18 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         <button onClick={() => navigate('/home')} className="text-slate-400 hover:text-slate-500 transition-colors cursor-pointer">
           <X size={28} strokeWidth={2.5} />
         </button>
-        <div className={`grow ${theme.progressBg}`}>
-          <div className={theme.progressFill} style={{ width: `${progress}%` }} />
+        <div className={`grow bg-slate-200/50 dark:bg-slate-800/50 rounded-full h-4 overflow-hidden shadow-inner backdrop-blur-sm border border-slate-300/30 dark:border-slate-700/30`}>
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ type: "spring", stiffness: 80, damping: 15 }}
+            className="h-full bg-gradient-to-r from-indigo-400 via-purple-500 to-indigo-500 rounded-full relative"
+          >
+            <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_linear_infinite]" style={{
+              backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+              backgroundSize: '200% 100%'
+            }}></div>
+          </motion.div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -610,22 +620,34 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                   return (
                     <motion.button
                       key={i}
-                      whileHover={!isAnswered && lives > 0 ? { scale: 1.02 } : {}}
+                      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: i * 0.15, type: "spring", stiffness: 400, damping: 25 }}
+                      whileHover={!isAnswered && lives > 0 ? { scale: 1.03, boxShadow: "0px 8px 25px rgba(99, 102, 241, 0.25)" } : {}}
                       whileTap={!isAnswered && lives > 0 ? { scale: 0.95 } : {}}
                       disabled={isAnswered || lives <= 0}
                       onClick={() => handleSelect(i)}
-                      className={`${theme.buttonClass} ${btnStateClass} ${isTrueFalse ? 'min-h-[120px] text-xl' : 'min-h-[100px]'} cursor-pointer flex items-center justify-center`}
+                      className={`${theme.buttonClass} ${btnStateClass} ${isTrueFalse ? 'min-h-[120px] text-xl' : 'min-h-[100px]'} cursor-pointer flex items-center justify-center transition-all duration-300 relative overflow-hidden ${
+                        isAnswered && i === selectedOption ? 'ring-4 ring-indigo-400/50 shadow-[0_0_25px_rgba(99,102,241,0.6)] z-10 scale-[1.02]' : ''
+                      } ${
+                        isAnswered && i === question.correctAnswerIndex ? 'ring-4 ring-emerald-400/50 shadow-[0_0_25px_rgba(16,185,129,0.6)] z-10 scale-[1.02]' : ''
+                      }`}
                     >
+                      {/* Inner glow effect on selection */}
+                      {isAnswered && i === selectedOption && (
+                        <div className="absolute inset-0 bg-white/10 dark:bg-white/5 pointer-events-none mix-blend-overlay"></div>
+                      )}
+
                       {level === 'Secundaria' && !isTrueFalse && (
-                        <span className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg font-bold transition-colors ${
-                          isAnswered && i === question.correctAnswerIndex ? 'bg-emerald-500 text-white' : 
-                          isAnswered && i === selectedOption ? 'bg-rose-500 text-white' : 
-                          'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
+                        <span className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl font-black text-lg transition-colors shadow-sm ${
+                          isAnswered && i === question.correctAnswerIndex ? 'bg-emerald-500 text-white shadow-emerald-500/40' : 
+                          isAnswered && i === selectedOption ? 'bg-rose-500 text-white shadow-rose-500/40' : 
+                          'bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-indigo-500/40'
                         }`}>
-                          {i + 1}
+                          {['A', 'B', 'C', 'D', 'E'][i] || (i + 1)}
                         </span>
                       )}
-                      <span className={`${theme.buttonText} ${isTrueFalse ? 'font-black text-2xl' : ''}`}>{opt}</span>
+                      <span className={`${theme.buttonText} ${isTrueFalse ? 'font-black text-3xl' : 'font-bold text-lg'} drop-shadow-sm`}>{opt}</span>
                     </motion.button>
                   );
                 })}
@@ -638,40 +660,46 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       <AnimatePresence>
         {isAnswered && (
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-40 bg-inherit"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 350, damping: 28, mass: 0.8 }}
+            className="fixed bottom-0 left-0 right-0 z-40 bg-inherit shadow-[0_-20px_50px_rgba(0,0,0,0.15)]"
           >
-            <div className={`${isCorrect ? theme.panelCorrect : theme.panelIncorrect} max-h-[85vh] overflow-y-auto`}>
-              <div className="max-w-4xl mx-auto w-full flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 shrink-0">
+            <div className={`${isCorrect ? 'bg-emerald-500 dark:bg-emerald-600 text-emerald-50 shadow-[0_-10px_40px_rgba(16,185,129,0.4)]' : 'bg-rose-500 dark:bg-rose-600 text-rose-50 shadow-[0_-10px_40px_rgba(225,29,72,0.4)]'} rounded-t-[2.5rem] border-t-4 border-white/30 max-h-[85vh] overflow-y-auto p-6 sm:p-10 transition-colors duration-500`}>
+              <div className="max-w-4xl mx-auto w-full flex flex-col gap-5">
+                <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
+                  <div className="flex items-start gap-5">
+                    <div className="mt-1 shrink-0 bg-white/20 p-3 rounded-2xl backdrop-blur-sm shadow-inner">
                       {isCorrect ? (
-                        <CheckCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
+                        <CheckCircle strokeWidth={3} className="w-10 h-10 text-white drop-shadow-md" />
                       ) : (
-                        <XCircle strokeWidth={2.5} className="w-8 h-8 text-white" />
+                        <XCircle strokeWidth={3} className="w-10 h-10 text-white drop-shadow-md" />
                       )}
                     </div>
                     <div>
-                      <h2 className="font-bold text-xl sm:text-2xl mb-1 text-white">
-                        {isCorrect ? '¡Excelente!' : 'Casi lo logras'}
+                      <h2 className="font-black text-2xl sm:text-3xl mb-1.5 text-white tracking-tight drop-shadow-sm">
+                        {isCorrect ? '¡Excelente Trabajo!' : 'Casi lo logras'}
                       </h2>
                       {isCorrect && (
-                        <p className="text-base sm:text-lg text-white opacity-90">
+                        <p className="text-base sm:text-lg text-emerald-50 font-medium leading-relaxed drop-shadow-sm">
                            {question.explanation}
                         </p>
                       )}
                     </div>
                   </div>
-                  <button 
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleContinue}
-                    className={`${isCorrect ? theme.panelButtonCorrect : theme.panelButtonIncorrect} shrink-0 self-end sm:self-auto`}
+                    className={`shrink-0 self-end sm:self-auto px-10 py-4 rounded-2xl font-black text-xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 w-full sm:w-auto ${
+                      isCorrect 
+                        ? 'bg-white text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700' 
+                        : 'bg-white text-rose-600 hover:bg-rose-50 hover:text-rose-700'
+                    }`}
                   >
-                    Continuar
-                  </button>
+                    Continuar <ChevronRight className="stroke-[3]" />
+                  </motion.button>
                 </div>
 
                 {/* Explicación Detallada de IA Directa */}
