@@ -217,13 +217,15 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
   const generateVegetation = (subject: string, biomeId: string) => {
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 mix-blend-multiply dark:mix-blend-color-burn">
-        <img 
-          src="/background.png" 
-          alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90"
-        />
-      </div>
+      <div 
+        className="absolute inset-0 pointer-events-none z-0 mix-blend-multiply dark:mix-blend-color-burn opacity-90"
+        style={{
+          backgroundImage: 'url(/background.png)',
+          backgroundSize: '100% auto',
+          backgroundRepeat: 'repeat-y',
+          backgroundPosition: 'top center'
+        }}
+      />
     );
   };
 
@@ -350,7 +352,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                  <>
                  {paginatedMap.map((biome, bIndex) => {
                    return (
-                     <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden shadow-inner`}>
+                     <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden`}>
                    
                    {generateVegetation(subject, biome.id)}
 
@@ -390,7 +392,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                             
                             {/* Competence Tooltip */}
                            {profile.showCNEBCompetencies && (
-                             <div className="absolute -top-12 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30 whitespace-nowrap text-xs font-bold">
+                             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1.5 rounded-xl shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30 whitespace-nowrap text-xs font-bold">
                                {subTheme.cnebCompetence}
                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/90 rotate-45"></div>
                              </div>
