@@ -222,11 +222,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
 
   const generateVegetation = (subject: string, biomeId: string) => {
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 mix-blend-multiply dark:mix-blend-color-burn">
         <img 
           src="/background.png" 
           alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90 mix-blend-multiply dark:mix-blend-color-burn"
+          className="absolute inset-0 w-full h-full object-cover object-bottom opacity-90"
         />
       </div>
     );
