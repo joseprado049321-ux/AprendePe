@@ -46,11 +46,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
         const node = await res.json();
         
         const gradients = [
-          'from-emerald-300 via-teal-400 to-emerald-500',
-          'from-cyan-400 via-blue-500 to-indigo-600',
-          'from-orange-400 via-rose-500 to-red-600',
-          'from-amber-200 via-yellow-400 to-orange-400',
-          'from-fuchsia-300 via-pink-400 to-rose-400'
+          'from-cyan-100 to-lime-100 dark:from-slate-900 dark:to-lime-950',
+          'from-lime-100 to-amber-100 dark:from-lime-950 dark:to-amber-950',
+          'from-amber-100 to-rose-200 dark:from-amber-950 dark:to-rose-950', // AprendePe Coral
+          'from-rose-200 to-fuchsia-200 dark:from-rose-950 dark:to-fuchsia-950',
+          'from-fuchsia-200 to-cyan-100 dark:from-fuchsia-950 dark:to-slate-900'
         ];
 
         const getCumulativeXP = (index: number) => {

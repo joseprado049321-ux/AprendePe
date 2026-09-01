@@ -5,7 +5,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'math_biome_1',
       name: 'Isla de los Números',
-      bgGradient: 'from-emerald-300 via-teal-400 to-emerald-500',
+      bgGradient: 'from-cyan-100 to-lime-100 dark:from-slate-900 dark:to-lime-950',
       pathColor: '#059669', // emerald-600
       subThemes: [
         {
@@ -34,7 +34,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'math_biome_2',
       name: 'Volcán Aritmético',
-      bgGradient: 'from-orange-400 via-rose-500 to-red-600',
+      bgGradient: 'from-lime-100 to-amber-100 dark:from-lime-950 dark:to-amber-950',
       pathColor: '#be123c', // rose-700
       subThemes: [
         {
@@ -65,7 +65,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'comm_biome_1',
       name: 'Bosque de las Letras',
-      bgGradient: 'from-amber-200 via-yellow-400 to-orange-400',
+      bgGradient: 'from-amber-100 to-rose-200 dark:from-amber-950 dark:to-rose-950',
       pathColor: '#b45309',
       subThemes: [
         {
@@ -87,7 +87,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'comm_biome_2',
       name: 'Valle de Cuentos',
-      bgGradient: 'from-fuchsia-300 via-pink-400 to-rose-400',
+      bgGradient: 'from-rose-200 to-fuchsia-200 dark:from-rose-950 dark:to-fuchsia-950',
       pathColor: '#be185d',
       subThemes: [
         {
@@ -111,7 +111,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'sci_biome_1',
       name: 'Laboratorio Selva',
-      bgGradient: 'from-lime-300 via-green-400 to-emerald-600',
+      bgGradient: 'from-lime-100 to-emerald-200 dark:from-lime-950 dark:to-emerald-950',
       pathColor: '#047857',
       subThemes: [
         {
@@ -135,7 +135,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'hist_biome_1',
       name: 'Ruinas del Tiempo',
-      bgGradient: 'from-stone-300 via-orange-200 to-yellow-600',
+      bgGradient: 'from-orange-100 to-amber-200 dark:from-orange-950 dark:to-amber-950',
       pathColor: '#9a3412',
       subThemes: [
         {
@@ -159,7 +159,7 @@ export const curriculumMap: Record<Subject, Biome[]> = {
     {
       id: 'var_biome_1',
       name: 'Isla Desafío',
-      bgGradient: 'from-cyan-400 via-blue-500 to-indigo-600',
+      bgGradient: 'from-cyan-100 to-indigo-200 dark:from-cyan-950 dark:to-indigo-950',
       pathColor: '#1d4ed8',
       subThemes: [
         {
