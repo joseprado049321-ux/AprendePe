@@ -1,5 +1,5 @@
 export type Level = 'Inicial' | 'Primaria' | 'Secundaria';
-export type Subject = 'Matemáticas' | 'Historia' | 'Comunicación' | 'Ciencias' | 'Variado';
+export type Subject = 'Matemáticas' | 'Historia' | 'Comunicación' | 'Ciencias';
 
 export interface SubTheme {
   id: string;

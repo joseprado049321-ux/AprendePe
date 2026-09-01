@@ -94,7 +94,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
     fetchCurriculum();
   }, [subject, profile.diagnosticLevel, profile.level]);
 
-  const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias', 'Variado'];
+  const subjects: Subject[] = ['Matemáticas', 'Historia', 'Comunicación', 'Ciencias'];
   const t = getSubjectTheme(subject);
 
   const pendingMistakesCount = (profile.mistakeBank || []).filter(m => !m.mastered).length;
@@ -233,7 +233,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
              <header className="w-full max-w-4xl mx-auto px-4 pt-8 flex justify-between items-center mb-6 sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl pb-4 z-40 border-b border-white/50 dark:border-slate-700/60 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 transition-all duration-500 rounded-b-3xl">
           <div className="flex items-center gap-2">
              <div className={`p-2 rounded-2xl shadow-sm ${t.iconBg}`}>
-                <Brain size={24} className={subject === 'Variado' ? 'text-slate-900' : 'text-white'} />
+                <Brain size={24} className="text-white" />
              </div>
              <h1 className="text-slate-900 dark:text-white font-black mb-0 mt-0 text-xl tracking-tight">AprendePe</h1>
           </div>

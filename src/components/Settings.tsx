@@ -228,7 +228,7 @@ export default function Settings({ profile, updateProfile, isGuest, linkGuestToG
                 <p className="text-sm text-slate-500 dark:text-slate-400">Materia por defecto al abrir la app.</p>
               </div>
               <select 
-                  value={profile.lastSelectedCourse || 'Variado'}
+                  value={profile.lastSelectedCourse || 'Matemáticas'}
                   onChange={(e) => updateProfile && updateProfile({ lastSelectedCourse: e.target.value })}
                   className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer font-medium"
               >
@@ -236,7 +236,7 @@ export default function Settings({ profile, updateProfile, isGuest, linkGuestToG
                   <option value="Comunicación">Comunicación</option>
                   <option value="Ciencias">Ciencias</option>
                   <option value="Historia">Historia</option>
-                  <option value="Variado">Variado</option>
+
               </select>
             </div>
             

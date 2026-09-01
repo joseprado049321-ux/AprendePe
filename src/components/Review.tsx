@@ -73,7 +73,7 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
     return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
   });
 
-  const subjectsList = ['Todos', 'Matemáticas', 'Comunicación', 'Ciencias', 'Historia', 'Variado'];
+  const subjectsList = ['Todos', 'Matemáticas', 'Comunicación', 'Ciencias', 'Historia'];
 
   // Start Practice Session
   const handleStartPractice = () => {

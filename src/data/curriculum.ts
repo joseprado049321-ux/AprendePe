@@ -154,29 +154,5 @@ export const curriculumMap: Record<Subject, Biome[]> = {
         }
       ]
     }
-  ],
-  Variado: [
-    {
-      id: 'var_biome_1',
-      name: 'Isla Desafío',
-      bgGradient: 'from-cyan-100 to-indigo-200 dark:from-cyan-950 dark:to-indigo-950',
-      pathColor: '#1d4ed8',
-      subThemes: [
-        {
-          id: 'var_1',
-          name: 'Desafío Inicial',
-          requiredXP: 200,
-          cnebCompetence: 'Competencia Transversal',
-          promptTopic: 'Preguntas mezcladas de matemáticas básicas y lenguaje.'
-        },
-        {
-          id: 'var_2',
-          name: 'Mente Ágil',
-          requiredXP: 500,
-          cnebCompetence: 'Competencia Transversal',
-          promptTopic: 'Adivinanzas, problemas lógicos simples y cultura general básica.'
-        }
-      ]
-    }
   ]
 };
