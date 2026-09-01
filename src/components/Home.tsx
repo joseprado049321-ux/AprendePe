@@ -216,7 +216,19 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   };
 
   const { paginatedMap, hasMoreNodes, allSubThemes } = useMemo(() => {
-    const activeMap = dynamicCurriculum || curriculumMap[subject];
+    let activeMap = dynamicCurriculum || curriculumMap[subject];
+    
+    // Si es invitado, limitamos los nodos a un máximo de 15 a nivel de biomas
+    if (profile.uid === 'guest') {
+      let allowed = 15;
+      activeMap = activeMap.map(biome => {
+        if (allowed <= 0) return { ...biome, subThemes: [] };
+        const take = Math.min(allowed, biome.subThemes.length);
+        allowed -= take;
+        return { ...biome, subThemes: biome.subThemes.slice(0, take) };
+      }).filter(b => b.subThemes.length > 0);
+    }
+    
     const all = activeMap.flatMap(b => b.subThemes);
     let renderedCount = 0;
     const paginated = activeMap.map(biome => {
@@ -227,7 +239,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
       return { ...biome, subThemes: subThemesToRender };
     }).filter(biome => biome.subThemes.length > 0);
     return { paginatedMap: paginated, hasMoreNodes: visibleNodesCount < all.length, allSubThemes: all };
-  }, [dynamicCurriculum, subject, visibleNodesCount]);
+  }, [dynamicCurriculum, subject, visibleNodesCount, profile.uid]);
 
   return (
     <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
@@ -454,13 +466,32 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                  
                  {/* Load More Button */}
                  {hasMoreNodes && (
-                   <div className="w-full flex justify-center py-12 bg-slate-900">
+                   <div className="w-full flex justify-center py-12 bg-slate-900 z-10 relative">
                      <button
                        onClick={() => setVisibleNodesCount(prev => prev + 10)}
-                       className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95"
+                       className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 cursor-pointer"
                      >
                        Generar 10 niveles más
                      </button>
+                   </div>
+                 )}
+                 
+                 {profile.uid === 'guest' && (
+                   <div className="w-full max-w-lg mx-auto py-12 px-6 z-10 relative text-center">
+                     <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1 rounded-3xl shadow-xl shadow-indigo-500/30">
+                       <div className="bg-white dark:bg-slate-900 rounded-[22px] p-6 sm:p-8 flex flex-col items-center">
+                         <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mb-4">
+                           <Lock size={32} className="text-indigo-600 dark:text-indigo-400" />
+                         </div>
+                         <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">¡Has llegado al límite!</h3>
+                         <p className="text-slate-600 dark:text-slate-400 font-medium mb-6">
+                           Como invitado solo puedes jugar los primeros 15 niveles. ¡Regístrate ahora para desbloquear cientos de niveles y guardar tu progreso en la nube!
+                         </p>
+                         <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer">
+                           Crear Cuenta Gratis
+                         </button>
+                       </div>
+                     </div>
                    </div>
                  )}
                  </>

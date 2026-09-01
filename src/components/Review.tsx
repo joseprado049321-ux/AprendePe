@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, BookOpen, CheckCircle, XCircle, Sparkles, Lightbulb, 
   ShieldCheck, Award, Zap, RotateCcw, ChevronRight, CheckCircle2, 
-  Trash2, HelpCircle, Loader2, Play
+  Trash2, HelpCircle, Loader2, Play, Trophy
 } from 'lucide-react';
 import { UserProfile, MistakeItem, Subject } from '../types';
 import { useSound } from '../contexts/SoundContext';
@@ -552,250 +552,253 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
             </div>
           </div>
 
-          {/* Stats Banner */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-            <div className="bg-white dark:bg-slate-800/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <RotateCcw size={20} />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-slate-900 dark:text-white leading-none block">
-                  {pendingMistakes.length}
-                </span>
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Por repasar</span>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <CheckCircle2 size={20} />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-slate-900 dark:text-white leading-none block">
-                  {masteredMistakes.length}
-                </span>
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Dominadas</span>
-              </div>
-            </div>
-
-            <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
-              <div>
-                <span className="text-xs uppercase font-bold opacity-80 block tracking-wider">Modo Seguro</span>
-                <span className="text-lg font-bold">Sin perder vidas</span>
-              </div>
-              <ShieldCheck size={32} className="opacity-90" />
-            </div>
-          </div>
-
-          {/* Start Practice Call to Action */}
-          {filteredPending.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden mb-8"
-            >
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
-              
-              <div className="flex-1 relative z-10 text-center md:text-left">
-                <h2 className="text-2xl font-black mb-2 flex items-center justify-center md:justify-start gap-2">
-                  <ShieldCheck size={28} />
-                  Practica para recuperar vidas
-                </h2>
-                <p className="text-indigo-100 font-medium max-w-lg mb-0 text-sm sm:text-base">
-                  Repasa {filteredPending.length} {filteredPending.length === 1 ? 'pregunta' : 'preguntas'} en las que fallaste. Al completar la sesión recuperarás 1 vida extra. 💖
-                </p>
-              </div>
-              
-              <button
-                onClick={handleStartPractice}
-                className="w-full md:w-auto px-8 py-4 bg-white text-indigo-600 hover:bg-slate-50 font-black rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-transform active:scale-95 group relative z-10 cursor-pointer"
-              >
-                <Play size={20} className="fill-indigo-600 group-hover:scale-110 transition-transform" />
-                INICIAR PRÁCTICA
-              </button>
-            </motion.div>
-          )}
-
-          {/* Filters and Search (DataTables Style) */}
-          <div className="flex flex-col md:flex-row gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
-            <div className="relative w-full flex-1">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-              </div>
-              <input 
-                type="text" 
-                placeholder="Buscar preguntas..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all font-medium outline-none"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <select
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-                className="flex-1 md:w-48 px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold text-slate-700 dark:text-slate-300 border-none appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.2em' }}
-              >
-                {subjectsList.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              
-              <button
-                onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
-                className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0 cursor-pointer"
-                title={sortOrder === 'newest' ? 'Más recientes primero' : 'Más antiguos primero'}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={sortOrder === 'newest' ? '' : 'rotate-180 transition-transform'}>
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <polyline points="19 12 12 19 5 12"></polyline>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-
-
-          {/* Tabs: Pendientes vs Dominadas */}
-          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6">
-            <button
-              onClick={() => setActiveTab('pending')}
-              className={`pb-3 px-4 font-bold text-sm sm:text-base border-b-2 transition-all cursor-pointer ${
-                activeTab === 'pending'
-                  ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              Por Repasar ({filteredPending.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('mastered')}
-              className={`pb-3 px-4 font-bold text-sm sm:text-base border-b-2 transition-all cursor-pointer ${
-                activeTab === 'mastered'
-                  ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400'
-                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              Dominadas ({filteredMastered.length})
-            </button>
-          </div>
-
-          {/* Content */}
-          {activeTab === 'pending' ? (
-            filteredPending.length === 0 ? (
-              <div className="text-center py-16 px-4 bg-white dark:bg-slate-800/60 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 size={44} />
+          {profile.uid === 'guest' ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-20 px-4">
+              <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 text-center max-w-md mx-auto w-full">
+                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Lock className="text-slate-400" size={40} />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                  ¡Tu Baúl de Errores está limpio! 🎉
-                </h3>
-                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
-                  No tienes preguntas pendientes en esta sección. Sigue aprendiendo en las lecciones para poner a prueba tus habilidades.
-                </p>
-                <button
-                  onClick={() => navigate('/home')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-transform active:scale-95 cursor-pointer"
-                >
-                  Ir al Mapa de Niveles
+                <h3 className="font-black text-2xl text-slate-900 dark:text-white mb-3">Baúl de Errores Bloqueado</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-base mb-8">Crea una cuenta para guardar tus errores automáticamente y repasarlos sin perder vidas.</p>
+                <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer text-lg">
+                  Crear Cuenta Gratis
                 </button>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredPending.map(item => {
-                  const q = item.question;
-                  const userAns = item.userAnswerIndex !== undefined && q.options[item.userAnswerIndex] 
-                    ? q.options[item.userAnswerIndex] 
-                    : null;
-                  const correctAns = q.options[q.correctAnswerIndex];
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-sm hover:shadow-md transition-all flex flex-col gap-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                          {item.subject}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleFetchAiForCurrent(item)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 px-2.5 py-1 rounded-lg transition-colors cursor-pointer border border-indigo-200 dark:border-indigo-800"
-                          >
-                            <Sparkles size={14} className="text-amber-400" />
-                            <span>Explicar con IA</span>
-                          </button>
-                          <button
-                            onClick={(e) => handleRemoveMistake(item.id, e)}
-                            title="Eliminar de la lista"
-                            className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white leading-snug">
-                        {q.text}
-                      </h4>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
-                        {userAns && (
-                          <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 flex items-center gap-2">
-                            <XCircle size={16} className="text-rose-500 shrink-0" />
-                            <span>Tu respuesta: <strong>{userAns}</strong></span>
-                          </div>
-                        )}
-                        <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                          <CheckCircle size={16} className="text-emerald-500 shrink-0" />
-                          <span>Correcta: <strong>{correctAns}</strong></span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )
+            </div>
           ) : (
-            filteredMastered.length === 0 ? (
-              <div className="text-center py-12 px-4 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Aún no has dominado preguntas en esta categoría. ¡Inicia una sesión de práctica de repaso para dominarlas!
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredMastered.map(item => (
-                  <div
-                    key={item.id}
-                    className="bg-white/70 dark:bg-slate-800/50 p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 flex items-center justify-between gap-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 size={20} className="text-emerald-500 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                            {item.subject}
-                          </span>
-                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">¡Dominada! ✨</span>
-                        </div>
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                          {item.question.text}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleFetchAiForCurrent(item)}
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer shrink-0"
-                      title="Ver explicación de IA"
-                    >
-                      <Sparkles size={16} />
-                    </button>
+            <>
+              {/* Stats Banner */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                <div className="bg-white dark:bg-slate-800/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <RotateCcw size={20} />
                   </div>
+                  <div>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white leading-none block">
+                      {pendingMistakes.length}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Por repasar</span>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white leading-none block">
+                      {masteredMistakes.length}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Dominadas</span>
+                  </div>
+                </div>
+
+                <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
+                  <div>
+                    <span className="text-xs uppercase font-bold opacity-80 block tracking-wider">Modo Seguro</span>
+                    <span className="text-lg font-bold">Sin perder vidas</span>
+                  </div>
+                  <ShieldCheck size={32} className="opacity-90" />
+                </div>
+              </div>
+
+              {/* Start Practice Call to Action */}
+              {filteredPending.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden mb-8"
+                >
+                  <div className="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+                  
+                  <div className="flex-1 relative z-10 text-center md:text-left">
+                    <h2 className="text-2xl font-black mb-2 flex items-center justify-center md:justify-start gap-2">
+                      <Zap className="text-amber-300" /> Iniciar Práctica Intensiva
+                    </h2>
+                    <p className="text-indigo-100 font-medium">Repasa {practiceQueue.length} preguntas de {activeTab} ahora mismo.</p>
+                  </div>
+
+                  <button
+                    onClick={handleStartPractice}
+                    className="relative z-10 bg-white text-indigo-600 hover:bg-slate-50 hover:text-indigo-700 font-black py-4 px-8 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center gap-2 w-full md:w-auto justify-center cursor-pointer"
+                  >
+                    <Play size={20} className="fill-current" />
+                    <span>Empezar Repaso</span>
+                  </button>
+                </motion.div>
+              )}
+
+              {/* Tabs */}
+              <div className="flex space-x-2 mb-6 overflow-x-auto no-scrollbar pb-1">
+                {subjectsList.map(subject => (
+                  <button
+                    key={subject}
+                    onClick={() => setSelectedSubject(subject)}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+                      selectedSubject === subject
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {subject}
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] ${
+                      selectedSubject === subject 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                    }`}>
+                      {subject === 'Todos' ? allMistakes.length : allMistakes.filter(m => m.subject === subject).length}
+                    </span>
+                  </button>
                 ))}
               </div>
-            )
+
+              {/* Filters */}
+              <div className="flex items-center gap-4 mb-6 border-b border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setActiveTab('pending')}
+                  className={`pb-3 font-bold text-sm px-2 transition-colors relative cursor-pointer ${
+                    activeTab === 'pending'
+                      ? 'text-indigo-600 dark:text-indigo-400'
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Por repasar ({filteredPending.length})
+                  {activeTab === 'pending' && (
+                    <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('mastered')}
+                  className={`pb-3 font-bold text-sm px-2 transition-colors relative cursor-pointer ${
+                    activeTab === 'mastered'
+                      ? 'text-indigo-600 dark:text-indigo-400'
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                  }`}
+                >
+                  Dominadas ({filteredMastered.length})
+                  {activeTab === 'mastered' && (
+                    <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full" />
+                  )}
+                </button>
+              </div>
+
+              {/* Content List */}
+              {activeTab === 'pending' ? (
+                filteredPending.length === 0 ? (
+                  <div className="text-center py-16 px-4 bg-white dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Trophy size={36} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                      ¡Tu Baúl de Errores está limpio! 🎉
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
+                      No tienes preguntas pendientes en esta sección. Sigue aprendiendo en las lecciones para poner a prueba tus habilidades.
+                    </p>
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-transform active:scale-95 cursor-pointer"
+                    >
+                      Ir al Mapa de Niveles
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredPending.map(item => {
+                      const q = item.question;
+                      const userAns = item.userAnswerIndex !== undefined && q.options[item.userAnswerIndex] 
+                        ? q.options[item.userAnswerIndex] 
+                        : null;
+                      const correctAns = q.options[q.correctAnswerIndex];
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-sm hover:shadow-md transition-all flex flex-col gap-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              {item.subject}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleFetchAiForCurrent(item)}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 px-2.5 py-1 rounded-lg transition-colors cursor-pointer border border-indigo-200 dark:border-indigo-800"
+                              >
+                                <Sparkles size={14} className="text-amber-400" />
+                                <span>Explicar con IA</span>
+                              </button>
+                              <button
+                                onClick={(e) => handleRemoveMistake(item.id, e)}
+                                title="Eliminar de la lista"
+                                className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white leading-snug">
+                            {q.text}
+                          </h4>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+                            {userAns && (
+                              <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 flex items-center gap-2">
+                                <XCircle size={16} className="text-rose-500 shrink-0" />
+                                <span>Tu respuesta: <strong>{userAns}</strong></span>
+                              </div>
+                            )}
+                            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                              <CheckCircle size={16} className="text-emerald-500 shrink-0" />
+                              <span>Correcta: <strong>{correctAns}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : (
+                filteredMastered.length === 0 ? (
+                  <div className="text-center py-12 px-4 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Aún no has dominado preguntas en esta categoría. ¡Inicia una sesión de práctica de repaso para dominarlas!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredMastered.map(item => (
+                      <div
+                        key={item.id}
+                        className="bg-white/70 dark:bg-slate-800/50 p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 flex items-center justify-between gap-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <CheckCircle2 size={20} className="text-emerald-500 shrink-0 mt-0.5" />
+                          <div>
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                                {item.subject}
+                              </span>
+                              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">¡Dominada! ✨</span>
+                            </div>
+                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                              {item.question.text}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleFetchAiForCurrent(item)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer shrink-0"
+                        >
+                          <Sparkles size={20} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </>
           )}
         </div>
       )}

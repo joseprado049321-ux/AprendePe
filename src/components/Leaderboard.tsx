@@ -22,6 +22,10 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
           { uid: 'mock1', displayName: 'Estudiante Estrella', xp: 2500, level: 'Secundaria', streak: 5, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock2', displayName: 'Lector Veloz', xp: 1800, level: 'Primaria', streak: 3, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock3', displayName: 'Matemático Pro', xp: 1200, level: 'Secundaria', streak: 1, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'mock4', displayName: 'Científico', xp: 900, level: 'Secundaria', streak: 2, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'mock5', displayName: 'Explorador', xp: 750, level: 'Primaria', streak: 1, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'mock6', displayName: 'Genio', xp: 600, level: 'Secundaria', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'mock7', displayName: 'Curioso', xp: 450, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'guest', displayName: 'Invitado (Tú)', xp: 0, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' }
         ];
         // Sort descending by xp
@@ -66,9 +70,10 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
             <p className="font-bold">Cargando ranking...</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col relative">
             {users.map((u, index) => {
               const isCurrentUser = u.uid === currentUserId;
+              const isGuestBlurred = currentUserId === 'guest' && index > 2;
               
               // Top 3 styles
               let cardBg = 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm';
@@ -87,7 +92,7 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
               return (
                 <div 
                   key={u.uid} 
-                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all hover:-translate-y-0.5 ${cardBg} ${isCurrentUser ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 shadow-md' : ''}`}
+                  className={`flex items-center justify-between p-4 mb-3 rounded-2xl border transition-all ${isGuestBlurred ? 'blur-md opacity-40 select-none grayscale' : 'hover:-translate-y-0.5'} ${cardBg} ${isCurrentUser ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 shadow-md' : ''}`}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${badgeBg}`}>
@@ -107,6 +112,19 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
                 </div>
               );
             })}
+            
+            {currentUserId === 'guest' && (
+              <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 flex flex-col items-center justify-end pb-4">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 text-center max-w-sm mx-auto w-full">
+                  <Trophy className="text-amber-500 mx-auto mb-3" size={32} />
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Desbloquea el Ranking</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Crea una cuenta para competir con otros estudiantes y ver tu posición real.</p>
+                  <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors cursor-pointer">
+                    Crear Cuenta Gratis
+                  </button>
+                </div>
+              </div>
+            )}
             
             {users.length === 0 && (
               <div className="text-center py-12 text-slate-400 font-bold">

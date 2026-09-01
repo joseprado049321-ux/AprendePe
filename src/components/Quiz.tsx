@@ -39,6 +39,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const [showOutOfLivesModal, setShowOutOfLivesModal] = useState(false);
   const [rescuing, setRescuing] = useState(false);
   const [reward, setReward] = useState<RewardDrop | null>(null);
+  const [hasWatchedAdInLevel, setHasWatchedAdInLevel] = useState(false);
 
   // AI Explanation State
   const [showAiModal, setShowAiModal] = useState(false);
@@ -169,6 +170,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     setTimeout(async () => {
         await updateProfile({ lives: lives + 1 });
         setRescuing(false);
+        setHasWatchedAdInLevel(true);
         setShowOutOfLivesModal(false);
         setSelectedOption(null);
         setIsAnswered(false);
@@ -387,13 +389,15 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                                       </div>
                                   </button>
                                   
-                                  <button 
-                                      onClick={handleWatchAd}
-                                      className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold py-4 px-6 rounded-2xl shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
-                                  >
-                                      <Zap size={22} className="text-emerald-500 dark:text-emerald-400" />
-                                      <span className="text-lg">Ver anuncio (1 Vida)</span>
-                                  </button>
+                                  {!hasWatchedAdInLevel && (
+                                    <button 
+                                        onClick={handleWatchAd}
+                                        className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold py-4 px-6 rounded-2xl shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+                                    >
+                                        <Zap size={22} className="text-emerald-500 dark:text-emerald-400" />
+                                        <span className="text-lg">Ver anuncio (1 Vida)</span>
+                                    </button>
+                                  )}
                                   
                                   <button 
                                       onClick={() => navigate('/home')}
@@ -479,7 +483,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                     <Sparkles size={24} className="animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tutor de IA AprendePe</h3>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tutor IA: {profile.tutor ? profile.tutor.split(' ')[0] : 'Buhito'}</h3>
                     <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 mt-0.5">
                       {aiExplanation?.keyConcept || subject}
                     </span>
@@ -722,7 +726,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                       <div className="flex items-center gap-2">
                         <Sparkles size={18} className="text-amber-300 animate-pulse" />
                         <span className="font-extrabold text-sm sm:text-base tracking-wide">
-                          Explicación Detallada de tu Tutor IA
+                          Explicación de {profile.tutor ? profile.tutor.split(' ')[0] : 'Buhito'} (IA)
                         </span>
                       </div>
                       <div className="flex items-center gap-3">

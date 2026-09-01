@@ -33,7 +33,17 @@ export default function App() {
     if (isGuest) {
       const localStr = localStorage.getItem('guestProfile');
       if (localStr) {
-        setProfile(JSON.parse(localStr));
+        const parsed = JSON.parse(localStr);
+        const resetProfile = {
+          ...parsed,
+          xp: 0,
+          points: 0,
+          unlockedLevels: {},
+          wallet: { oro: 50, esmeralda: 0 },
+          inventory: { streakProtectors: 0, xpMultipliers: 0 }
+        };
+        localStorage.setItem('guestProfile', JSON.stringify(resetProfile));
+        setProfile(resetProfile);
       } else {
         const guestProfile: UserProfile = {
           uid: 'guest',

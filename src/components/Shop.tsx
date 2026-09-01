@@ -19,7 +19,8 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
   const unlockedAvatars = profile.unlockedAvatars || [];
   const unlockedFrames = profile.unlockedFrames || [];
 
-  const [activeTab, setActiveTab] = useState<'potenciadores' | 'avatares' | 'marcos'>('potenciadores');
+  const [activeTab, setActiveTab] = useState<'potenciadores' | 'avatares' | 'marcos' | 'recargas'>('potenciadores');
+  const [isSimulatingPayment, setIsSimulatingPayment] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -102,6 +103,30 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
     }
   };
 
+  const handleBuyEmeraldPackage = (amount: number, price: number) => {
+    if (profile.uid === 'guest') return;
+    setIsSimulatingPayment(true);
+    setTimeout(async () => {
+      await updateProfile({
+        wallet: { ...wallet, esmeralda: wallet.esmeralda + amount }
+      });
+      setIsSimulatingPayment(false);
+      showToast(`¡Compra exitosa! Recibiste ${amount} Esmeraldas.`, 'success');
+    }, 2000);
+  };
+
+  const handleWatchAd = () => {
+    if (profile.uid === 'guest') return;
+    setIsSimulatingPayment(true);
+    setTimeout(async () => {
+      await updateProfile({
+        wallet: { ...wallet, esmeralda: wallet.esmeralda + 1 }
+      });
+      setIsSimulatingPayment(false);
+      showToast(`¡Gracias por ver el anuncio! Recibiste 1 Esmeralda.`, 'success');
+    }, 3000);
+  };
+
   // Conditions for boosters
   const canBuyStreak = wallet.esmeralda >= 3;
   const canBuyMultiplier = wallet.esmeralda >= 50;
@@ -166,7 +191,24 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
           >
             <Sparkles size={16} /> Marcos
           </button>
+          <button 
+            onClick={() => setActiveTab('recargas')}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'recargas' ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+          >
+            <Gem size={16} /> Recargas
+          </button>
         </div>
+
+        {profile.uid === 'guest' && (
+           <div className="bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800/40 rounded-2xl p-4 mb-6 flex flex-col items-center text-center">
+             <AlertCircle className="text-rose-500 mb-2" size={24} />
+             <h3 className="font-bold text-rose-700 dark:text-rose-400">Tienda no disponible</h3>
+             <p className="text-rose-600 dark:text-rose-300 text-sm mt-1 mb-3">Los invitados no pueden realizar compras. ¡Regístrate para desbloquear la tienda!</p>
+             <button onClick={() => navigate('/register')} className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-xl text-sm transition-colors cursor-pointer">
+               Crear Cuenta
+             </button>
+           </div>
+        )}
 
         {activeTab === 'potenciadores' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -195,8 +237,8 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
               <div className="w-full mt-2">
                 <button 
                   onClick={() => handleBuy('streakProtector')} 
-                  disabled={!canBuyStreak} 
-                  className="w-full bg-indigo-50 hover:bg-indigo-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors"
+                  disabled={!canBuyStreak || profile.uid === 'guest'} 
+                  className="w-full bg-indigo-50 hover:bg-indigo-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
                 >
                   Comprar
                 </button>
@@ -233,8 +275,8 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
               <div className="w-full mt-2">
                 <button 
                   onClick={() => handleBuy('xpMultiplier')} 
-                  disabled={!canBuyMultiplier} 
-                  className="w-full bg-amber-50 hover:bg-amber-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors"
+                  disabled={!canBuyMultiplier || profile.uid === 'guest'} 
+                  className="w-full bg-amber-50 hover:bg-amber-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
                 >
                   Comprar
                 </button>
@@ -271,8 +313,8 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
               <div className="w-full mt-2">
                 <button 
                   onClick={() => handleBuy('buyEmerald')} 
-                  disabled={!canBuyEmerald} 
-                  className="w-full bg-emerald-50 hover:bg-emerald-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors"
+                  disabled={!canBuyEmerald || profile.uid === 'guest'} 
+                  className="w-full bg-emerald-50 hover:bg-emerald-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
                 >
                   Comprar
                 </button>
@@ -309,8 +351,8 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
               <div className="w-full mt-2">
                 <button 
                   onClick={() => handleBuy('buyLife')} 
-                  disabled={!canBuyLife} 
-                  className="w-full bg-rose-50 hover:bg-rose-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors"
+                  disabled={!canBuyLife || profile.uid === 'guest'} 
+                  className="w-full bg-rose-50 hover:bg-rose-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
                 >
                   {isLivesMax ? 'Vidas Llenas' : 'Comprar'}
                 </button>
@@ -355,9 +397,9 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                       <>
                         <button 
                           onClick={() => handleBuyAvatar(av.id, av.priceGold)}
-                          disabled={!hasEnoughGold}
-                          className={`w-full py-2 flex justify-center items-center gap-1.5 rounded-xl font-bold text-xs transition-colors ${
-                            hasEnoughGold
+                          disabled={!hasEnoughGold || profile.uid === 'guest'}
+                          className={`w-full py-2 flex justify-center items-center gap-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                            hasEnoughGold && profile.uid !== 'guest'
                               ? 'bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-500/20 dark:hover:bg-amber-500/30 dark:text-amber-300 shadow-sm'
                               : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 cursor-not-allowed'
                           }`}
@@ -405,9 +447,9 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                       <>
                         <button 
                           onClick={() => handleBuyFrame(fr.id, fr.priceEmeralds)}
-                          disabled={!hasEnoughEmeralds}
-                          className={`w-full py-2 flex justify-center items-center gap-1.5 rounded-xl font-bold text-xs transition-colors ${
-                            hasEnoughEmeralds
+                          disabled={!hasEnoughEmeralds || profile.uid === 'guest'}
+                          className={`w-full py-2 flex justify-center items-center gap-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                            hasEnoughEmeralds && profile.uid !== 'guest'
                               ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 shadow-sm'
                               : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 cursor-not-allowed'
                           }`}
@@ -426,6 +468,124 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                 </div>
               );
             })}
+      </div>
+        )}
+
+        {activeTab === 'recargas' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Anuncio */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                    <Zap className="text-purple-500" size={32} />
+                  </div>
+                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                    <Gem size={14} className="text-emerald-500" />
+                    <span>+1</span>
+                  </div>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Ver Anuncio</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                  Gana una esmeralda gratis apoyándonos viendo un corto video publicitario.
+                </p>
+              </div>
+              <div className="w-full mt-2">
+                <button 
+                  onClick={handleWatchAd}
+                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                  className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 disabled:text-slate-400 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
+                >
+                  {isSimulatingPayment ? 'Cargando...' : 'Ver Video'}
+                </button>
+              </div>
+            </div>
+
+            {/* Regular */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
+                    <Gem className="text-emerald-500" size={32} />
+                  </div>
+                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                    <Gem size={14} className="text-emerald-500" />
+                    <span>100</span>
+                  </div>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Paquete Regular</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                  Ideal para probar artículos o comprar potenciadores ocasionales.
+                </p>
+              </div>
+              <div className="w-full mt-2">
+                <button 
+                  onClick={() => handleBuyEmeraldPackage(100, 5)}
+                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
+                >
+                  {isSimulatingPayment ? 'Procesando...' : <>S/ 5.00</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Inter */}
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-1 shadow-lg shadow-indigo-500/20 h-full">
+              <div className="bg-white dark:bg-slate-900 rounded-xl p-4 flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
+                      <Gem className="text-indigo-500" size={32} />
+                    </div>
+                    <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                      <Gem size={14} className="text-indigo-500" />
+                      <span>1,000</span>
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">Paquete Inter <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Popular</span></h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                    Perfecto para coleccionistas. Compra los mejores marcos y avatares.
+                  </p>
+                </div>
+                <div className="w-full mt-2">
+                  <button 
+                    onClick={() => handleBuyEmeraldPackage(1000, 20)}
+                    disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
+                  >
+                    {isSimulatingPayment ? 'Procesando...' : 'S/ 20.00'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Premium */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
+                    <Gem className="text-amber-500" size={32} />
+                  </div>
+                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                    <Gem size={14} className="text-amber-500" />
+                    <span>100K</span>
+                  </div>
+                </div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Paquete Premium</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                  Esmeraldas ilimitadas para desbloquear la experiencia completa sin restricciones.
+                </p>
+              </div>
+              <div className="w-full mt-2">
+                <button 
+                  onClick={() => handleBuyEmeraldPackage(100000, 100)}
+                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
+                >
+                  {isSimulatingPayment ? 'Procesando...' : <>S/ 100.00</>}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

@@ -111,6 +111,7 @@ export interface UserProfile {
   diagnosticLevel?: Level;
   hasCompletedDiagnostic?: boolean;
   theme?: 'light' | 'dark';
+  tutor?: string;
   parentalPin?: string;
   parentalEmail?: string;
   weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };

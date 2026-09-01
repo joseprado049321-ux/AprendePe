@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Moon, Sun, Volume2, VolumeX, Bell, BellOff, Shield, Trash2, LogOut, Lock, Mail, AlertTriangle, KeyRound, Unlock } from 'lucide-react';
+import { ChevronLeft, Moon, Sun, Volume2, VolumeX, Bell, BellOff, Shield, Trash2, LogOut, Lock, Mail, AlertTriangle, KeyRound, Unlock, Sparkles } from 'lucide-react';
 import { UserProfile, Level } from '../types';
 import { useSound } from '../contexts/SoundContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -236,7 +236,29 @@ export default function Settings({ profile, updateProfile, isGuest, linkGuestToG
                   <option value="Comunicación">Comunicación</option>
                   <option value="Ciencias">Ciencias</option>
                   <option value="Historia">Historia</option>
+              </select>
+            </div>
 
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+              <div>
+                <h3 className="font-medium text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-amber-500" size={18} /> Tutor Pedagógico IA</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Personaliza la personalidad de tu guía.</p>
+              </div>
+              <select 
+                  value={profile.tutor || 'Buhito (Sabio)'}
+                  onChange={(e) => updateProfile && updateProfile({ tutor: e.target.value })}
+                  disabled={profile.uid === 'guest'}
+                  title={profile.uid === 'guest' ? 'Crea una cuenta para desbloquear más tutores' : ''}
+                  className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                  <option value="Buhito (Sabio)">🦉 Buhito (Sabio)</option>
+                  {profile.uid !== 'guest' && (
+                    <>
+                      <option value="Zorro (Astuto)">🦊 Zorro (Astuto)</option>
+                      <option value="Llama (Paciente)">🦙 Llama (Paciente)</option>
+                      <option value="Mono (Divertido) - Pro" disabled>🐒 Mono (Pro)</option>
+                    </>
+                  )}
               </select>
             </div>
             

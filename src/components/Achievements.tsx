@@ -92,9 +92,10 @@ export default function Achievements({ profile, updateProfile }: AchievementsPro
         </div>
       </header>
 
-      <main className="w-full max-w-2xl mx-auto px-4 py-8 space-y-4">
-        {ACHIEVEMENTS.map(ach => {
-          const unlockedData = normalizedAchievements.find(a => a.id === ach.id);
+      <main className="w-full max-w-2xl mx-auto px-4 py-8 space-y-4 relative">
+        <div className={profile.uid === 'guest' ? 'blur-md opacity-40 select-none grayscale pointer-events-none' : ''}>
+          {ACHIEVEMENTS.map(ach => {
+            const unlockedData = normalizedAchievements.find(a => a.id === ach.id);
           const isUnlocked = !!unlockedData;
           const isClaimed = isUnlocked && unlockedData.isClaimed;
           
@@ -176,6 +177,20 @@ export default function Achievements({ profile, updateProfile }: AchievementsPro
             </div>
           );
         })}
+        </div>
+
+        {profile.uid === 'guest' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 text-center max-w-sm mx-auto w-full">
+              <Lock className="text-slate-400 mx-auto mb-3" size={32} />
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Logros Bloqueados</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Crea una cuenta para desbloquear logros y ganar recompensas increíbles.</p>
+              <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors cursor-pointer">
+                Crear Cuenta Gratis
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <BottomNav activeTab="/achievements" onChangeTab={(tab) => navigate(tab)} />
