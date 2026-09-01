@@ -535,7 +535,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       </AnimatePresence>
 
       <div className="pt-8 pb-4 px-4 sm:px-8 max-w-4xl mx-auto w-full flex items-center gap-6">
-        <button onClick={() => navigate('/home')} className="text-slate-400 hover:text-slate-500 transition-colors cursor-pointer">
+        <button 
+          onClick={() => navigate('/home')} 
+          aria-label="Cerrar lección"
+          className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
           <X size={28} strokeWidth={2.5} />
         </button>
         <div className={`grow bg-slate-200/50 dark:bg-slate-800/50 rounded-full h-4 overflow-hidden shadow-inner backdrop-blur-sm border border-slate-300/30 dark:border-slate-700/30`}>

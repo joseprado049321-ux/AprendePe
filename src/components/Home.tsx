@@ -215,23 +215,32 @@ export default function Home({ profile, updateProfile }: HomeProps) {
     }
   };
 
-  const generateVegetation = (subject: string, biomeId: string) => {
-    return (
-      <div 
-        className="absolute inset-0 pointer-events-none z-0 mix-blend-multiply dark:mix-blend-color-burn opacity-90"
-        style={{
-          backgroundImage: 'url(/background.png)',
-          backgroundSize: '100% auto',
-          backgroundRepeat: 'repeat-y',
-          backgroundPosition: 'top center'
-        }}
-      />
-    );
-  };
+  const { paginatedMap, hasMoreNodes, allSubThemes } = useMemo(() => {
+    const activeMap = dynamicCurriculum || curriculumMap[subject];
+    const all = activeMap.flatMap(b => b.subThemes);
+    let renderedCount = 0;
+    const paginated = activeMap.map(biome => {
+      if (renderedCount >= visibleNodesCount) return { ...biome, subThemes: [] };
+      const remainingAllowed = visibleNodesCount - renderedCount;
+      const subThemesToRender = biome.subThemes.slice(0, remainingAllowed);
+      renderedCount += subThemesToRender.length;
+      return { ...biome, subThemes: subThemesToRender };
+    }).filter(biome => biome.subThemes.length > 0);
+    return { paginatedMap: paginated, hasMoreNodes: visibleNodesCount < all.length, allSubThemes: all };
+  }, [dynamicCurriculum, subject, visibleNodesCount]);
 
   return (
     <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
       <div className="w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0">
+        <div 
+          className="absolute inset-0 pointer-events-none z-0 mix-blend-multiply dark:mix-blend-color-burn opacity-90"
+          style={{
+            backgroundImage: 'url(/background.png)',
+            backgroundSize: '100% auto',
+            backgroundRepeat: 'repeat-y',
+            backgroundPosition: 'top center'
+          }}
+        />
              <header className="w-full max-w-4xl mx-auto px-4 pt-8 flex justify-between items-center mb-6 sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl pb-4 z-40 border-b border-white/50 dark:border-slate-700/60 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/50 transition-all duration-500 rounded-b-3xl">
           <div className="flex items-center gap-2">
              <div className={`p-2 rounded-2xl shadow-sm ${t.iconBg}`}>
@@ -279,7 +288,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                 <Flame size={18} className="animate-pulse fill-amber-500/20" />
                 <span>{profile.streak}</span>
              </div>
-             <Link to="/profile" className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-700 shadow-sm hover:shadow-md transition-all">
+             <Link to="/profile" aria-label="Perfil de usuario" className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-700 shadow-sm hover:shadow-md transition-all">
                 <User size={20} />
              </Link>
           </div>
@@ -331,30 +340,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                 <Loader2 size={40} className="animate-spin text-slate-400 mb-4" />
                 <p className="text-slate-500 font-bold">Cargando tu temario...</p>
               </div>
-            ) : (() => {
-               const activeMap = dynamicCurriculum || curriculumMap[subject];
-               const allSubThemes = activeMap.flatMap(b => b.subThemes);
-               const totalNodesInCurriculum = allSubThemes.length;
-               
-               // Pagination logic
-               let renderedNodesCount = 0;
-               const paginatedMap = activeMap.map(biome => {
-                 if (renderedNodesCount >= visibleNodesCount) return { ...biome, subThemes: [] };
-                 const remainingAllowed = visibleNodesCount - renderedNodesCount;
-                 const subThemesToRender = biome.subThemes.slice(0, remainingAllowed);
-                 renderedNodesCount += subThemesToRender.length;
-                 return { ...biome, subThemes: subThemesToRender };
-               }).filter(biome => biome.subThemes.length > 0);
-               
-               const hasMoreNodes = visibleNodesCount < totalNodesInCurriculum;
-
-               return (
+            ) : (
                  <>
                  {paginatedMap.map((biome, bIndex) => {
                    return (
                      <div key={biome.id} className={`w-full flex flex-col items-center py-16 bg-gradient-to-b ${biome.bgGradient} relative overflow-hidden`}>
-                   
-                   {generateVegetation(subject, biome.id)}
 
                    {/* Biome Name Banner */}
                    <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-sm px-8 py-2.5 rounded-full border border-white/30 text-white font-black text-xl shadow-lg z-20">
@@ -474,8 +464,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                    </div>
                  )}
                  </>
-               );
-            })()}
+            )}
           </div>
 
           {/* Global Lives Column - Fixed Position */}

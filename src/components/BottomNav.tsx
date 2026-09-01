@@ -27,7 +27,7 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-slate-800/50 z-50 pb-safe transition-colors shadow-[0_-5px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.2)]">
-      <div className="flex justify-around items-center w-full max-w-xl mx-auto px-2 py-3 min-h-[72px]">
+      <div className="flex justify-start sm:justify-around items-center w-full max-w-xl mx-auto px-4 py-3 min-h-[72px] overflow-x-auto no-scrollbar gap-2 sm:gap-0">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id || (activeTab === '/' && tab.id === '/home');
           const IconComponent = tab.icon;
@@ -37,10 +37,11 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
               key={tab.id}
               id={`nav-tab-${tab.id.replace('/', '')}`}
               onClick={() => handleTabClick(tab.id)}
-              className={`relative flex items-center justify-center transition-all duration-500 ease-out px-4 py-2.5 rounded-2xl cursor-pointer flex-col gap-1 w-[75px] sm:w-[85px] z-10 group ${
+              aria-label={tab.label}
+              className={`relative flex items-center justify-center transition-all duration-500 ease-out px-4 py-2.5 rounded-2xl cursor-pointer flex-col gap-1 shrink-0 w-[75px] sm:w-[85px] z-10 group ${
                 isActive 
                   ? 'text-indigo-600 dark:text-indigo-400 font-bold' 
-                  : 'text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium'
               }`}
             >
               {isActive && (
