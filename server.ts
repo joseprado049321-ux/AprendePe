@@ -447,13 +447,14 @@ app.post('/api/checkout', async (req, res) => {
 
 app.post('/api/webhook', async (req, res) => {
   try {
-    const { type, data } = req.query;
+    const type = req.query.type as string;
+    const dataId = (req.query['data.id'] || (req.query.data as any)?.id) as string;
 
-    if (type === 'payment' && data && data.id) {
+    if (type === 'payment' && dataId) {
       // You should verify the payment signature/status here using the MP SDK in production
       // For brevity, assuming payment is successful if we get the webhook:
       
-      const paymentId = data.id as string;
+      const paymentId = dataId;
       const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
         headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
       });
