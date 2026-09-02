@@ -115,7 +115,6 @@ export interface UserProfile {
   tutor?: string;
   parentalPin?: string;
   parentalEmail?: string;
-  weeklyGoals?: { targetXP: number; currentXP: number; resetDate: string; tasksCompleted?: number; };
   hasCompletedTour?: boolean;
   showCNEBCompetencies?: boolean;
   notificationsEnabled?: boolean;

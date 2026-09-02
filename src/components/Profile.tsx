@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
-import { BarChart3, Diamond, Gem, Zap, Flame, Edit2, Check, UserCircle2, Sparkles, Target } from 'lucide-react';
+import { BarChart3, Diamond, Gem, Zap, Flame, Edit2, Check, UserCircle2, Sparkles, Target, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSound } from '../contexts/SoundContext';
-import WeeklyGoals from './WeeklyGoals';
 import History from './History';
 import { AVATARS, FRAMES } from '../data/cosmetics';
 
 interface ProfileProps {
   profile: UserProfile;
   updateProfile?: (updates: Partial<UserProfile>) => Promise<void>;
+  linkGuestToGoogle?: () => Promise<void>;
 }
 
-export default function Profile({ profile, updateProfile }: ProfileProps) {
+export default function Profile({ profile, updateProfile, linkGuestToGoogle }: ProfileProps) {
   const navigate = useNavigate();
   const { playSound } = useSound();
   const [equipModalOpen, setEquipModalOpen] = useState(false);
@@ -214,65 +214,78 @@ export default function Profile({ profile, updateProfile }: ProfileProps) {
             );
         })()}
 
-        <WeeklyGoals profile={profile} updateProfile={updateProfile} />
-
-        <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-             <span className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
-               <BarChart3 size={20} />
-             </span>
-             Reporte para Docentes/Padres
-          </h2>
-          
-          {(!profile.history || profile.history.length === 0) ? (
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Aún no hay datos suficientes para generar un reporte. ¡Completa lecciones!</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(() => {
-                const history = profile.history;
-                const totalAccuracy = history.reduce((sum, h) => sum + (h.accuracyPercentage || 0), 0);
-                const avgAccuracy = Math.round(totalAccuracy / history.length);
-                
-                const subjectStats = history.reduce((acc, h) => {
-                  if (!acc[h.subject]) {
-                    acc[h.subject] = { correct: 0, total: 0 };
-                  }
-                  acc[h.subject].correct += (h.accuracyPercentage || 0);
-                  acc[h.subject].total += 100;
-                  return acc;
-                }, {} as Record<string, { correct: number, total: number }>);
-
-                let strongest = { subject: '-', accuracy: 0 };
-                let weakest = { subject: '-', accuracy: 100 };
-
-                Object.entries(subjectStats).forEach(([subject, stats]) => {
-                   const accuracy = (stats.correct / stats.total) * 100;
-                   if (accuracy >= strongest.accuracy) strongest = { subject, accuracy: Math.round(accuracy) };
-                   if (accuracy <= weakest.accuracy) weakest = { subject, accuracy: Math.round(accuracy) };
-                });
-
-                return (
-                  <>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Precisión Media</p>
-                      <p className="text-2xl font-light text-slate-900 dark:text-white">{avgAccuracy}%</p>
-                    </div>
-                    <div className="bg-emerald-50 dark:bg-emerald-900/10 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">Fortaleza</p>
-                      <p className="text-lg font-medium text-slate-900 dark:text-white">{strongest.subject}</p>
-                    </div>
-                    <div className="bg-rose-50 dark:bg-rose-900/10 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/30">
-                      <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1">Área de Mejora</p>
-                      <p className="text-lg font-medium text-slate-900 dark:text-white">{weakest.subject}</p>
-                    </div>
-                  </>
-                );
-              })()}
+        {profile.uid === 'guest' ? (
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 text-center w-full mb-8">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="text-slate-400" size={32} />
             </div>
-          )}
-        </section>
+            <h3 className="font-black text-xl text-slate-900 dark:text-white mb-2">Reportes e Historial Bloqueados</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Crea una cuenta para desbloquear los reportes detallados y guardar todo tu historial de aprendizaje.</p>
+            <button onClick={linkGuestToGoogle} className="w-full sm:w-auto px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors cursor-pointer text-sm">
+              Crear Cuenta Gratis
+            </button>
+          </div>
+        ) : (
+          <>
+            <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 md:p-8 rounded-3xl shadow-sm mb-8">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                 <span className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
+                   <BarChart3 size={20} />
+                 </span>
+                 Reporte para Docentes/Padres
+              </h2>
+              
+              {(!profile.history || profile.history.length === 0) ? (
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Aún no hay datos suficientes para generar un reporte. ¡Completa lecciones!</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {(() => {
+                    const history = profile.history;
+                    const totalAccuracy = history.reduce((sum, h) => sum + (h.accuracyPercentage || 0), 0);
+                    const avgAccuracy = Math.round(totalAccuracy / history.length);
+                    
+                    const subjectStats = history.reduce((acc, h) => {
+                      if (!acc[h.subject]) {
+                        acc[h.subject] = { correct: 0, total: 0 };
+                      }
+                      acc[h.subject].correct += (h.accuracyPercentage || 0);
+                      acc[h.subject].total += 100;
+                      return acc;
+                    }, {} as Record<string, { correct: number, total: number }>);
 
-        <History profile={profile} />
+                    let strongest = { subject: '-', accuracy: 0 };
+                    let weakest = { subject: '-', accuracy: 100 };
+
+                    Object.entries(subjectStats).forEach(([subject, stats]) => {
+                       const accuracy = (stats.correct / stats.total) * 100;
+                       if (accuracy >= strongest.accuracy) strongest = { subject, accuracy: Math.round(accuracy) };
+                       if (accuracy <= weakest.accuracy) weakest = { subject, accuracy: Math.round(accuracy) };
+                    });
+
+                    return (
+                      <>
+                        <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
+                          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Precisión Media</p>
+                          <p className="text-2xl font-light text-slate-900 dark:text-white">{avgAccuracy}%</p>
+                        </div>
+                        <div className="bg-emerald-50 dark:bg-emerald-900/10 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                          <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">Fortaleza</p>
+                          <p className="text-lg font-medium text-slate-900 dark:text-white">{strongest.subject}</p>
+                        </div>
+                        <div className="bg-rose-50 dark:bg-rose-900/10 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/30">
+                          <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1">Área de Mejora</p>
+                          <p className="text-lg font-medium text-slate-900 dark:text-white">{weakest.subject}</p>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </section>
+
+            <History profile={profile} />
+          </>
+        )}
       </div>
 
       {/* Equip Modal */}

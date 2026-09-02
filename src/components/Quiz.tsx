@@ -226,12 +226,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         newStreak = 1;
       }
 
-      const weeklyGoals = profile.weeklyGoals ? { ...profile.weeklyGoals } : undefined;
-      if (weeklyGoals) {
-        weeklyGoals.currentXP += sessionPoints;
-        weeklyGoals.tasksCompleted = (weeklyGoals.tasksCompleted || 0) + 1;
-      }
-      
+
       const isPerfectLesson = errors === 0;
       let newPerfectStreak = profile.perfectLessonsStreak || 0;
       let earnedEmeraldFromStreak = false;
@@ -310,8 +305,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
           lastActive: new Date().toISOString(),
           history: newHistory,
           wallet: updatedWallet,
-          inventory: updatedInventory,
-          ...(weeklyGoals ? { weeklyGoals } : {})
+          inventory: updatedInventory
         });
       } catch (e) {
         console.error("Error saving gamification data", e);
