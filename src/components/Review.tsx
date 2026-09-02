@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, BookOpen, CheckCircle, XCircle, Sparkles, Lightbulb, 
   ShieldCheck, Award, Zap, RotateCcw, ChevronRight, CheckCircle2, 
-  Trash2, HelpCircle, Loader2, Play, Trophy
+  Trash2, HelpCircle, Loader2, Play, Trophy, Lock
 } from 'lucide-react';
 import { UserProfile, MistakeItem, Subject } from '../types';
 import { useSound } from '../contexts/SoundContext';
@@ -14,9 +14,10 @@ import BottomNav from './BottomNav';
 interface ReviewProps {
   profile: UserProfile;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  linkGuestToGoogle?: () => Promise<void>;
 }
 
-export default function Review({ profile, updateProfile }: ReviewProps) {
+export default function Review({ profile, updateProfile, linkGuestToGoogle }: ReviewProps) {
   const navigate = useNavigate();
   const { playSound } = useSound();
 
@@ -560,7 +561,7 @@ export default function Review({ profile, updateProfile }: ReviewProps) {
                 </div>
                 <h3 className="font-black text-2xl text-slate-900 dark:text-white mb-3">Baúl de Errores Bloqueado</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-base mb-8">Crea una cuenta para guardar tus errores automáticamente y repasarlos sin perder vidas.</p>
-                <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer text-lg">
+                <button onClick={linkGuestToGoogle} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer text-lg">
                   Crear Cuenta Gratis
                 </button>
               </div>

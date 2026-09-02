@@ -192,10 +192,10 @@ export default function App() {
             <Route path="/login" element={!isAuthenticated ? <Login setIsGuest={setIsGuest} /> : (needsDiagnostic ? <Navigate to="/" /> : <Navigate to="/home" />)} />
             <Route path="/register" element={!isAuthenticated ? <Register /> : (needsDiagnostic ? <Navigate to="/" /> : <Navigate to="/home" />)} />
             <Route path="/diagnostic" element={<Navigate to="/" replace />} />
-            <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
+            <Route path="/home" element={isAuthenticated && profile ? (!needsDiagnostic ? <Home profile={profile} updateProfile={handleUpdateProfile} linkGuestToGoogle={linkGuestToGoogle} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/shop" element={isAuthenticated && profile ? (!needsDiagnostic ? <Shop profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/quiz" element={isAuthenticated && profile ? (!needsDiagnostic ? <Quiz profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
-            <Route path="/review" element={isAuthenticated && profile ? (!needsDiagnostic ? <Review profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
+            <Route path="/review" element={isAuthenticated && profile ? (!needsDiagnostic ? <Review profile={profile} updateProfile={handleUpdateProfile} linkGuestToGoogle={linkGuestToGoogle} /> : <Navigate to="/" />) : <Navigate to="/login" />} />
             <Route path="/profile" element={isAuthenticated && profile ? <Profile profile={profile} updateProfile={handleUpdateProfile} /> : <Navigate to="/login" />} />
             <Route path="/settings" element={isAuthenticated && profile ? <Settings profile={profile} updateProfile={handleUpdateProfile} isGuest={isGuest} linkGuestToGoogle={linkGuestToGoogle} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/leaderboard" element={isAuthenticated && profile ? <Leaderboard currentUserId={profile.uid} /> : <Navigate to="/login" />} />

@@ -15,9 +15,10 @@ import { useLives } from '../hooks/useLives';
 interface HomeProps {
   profile: UserProfile;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  linkGuestToGoogle?: () => Promise<void>;
 }
 
-export default function Home({ profile, updateProfile }: HomeProps) {
+export default function Home({ profile, updateProfile, linkGuestToGoogle }: HomeProps) {
   const [subject, setSubject] = useState<Subject>(profile.lastSelectedCourse as Subject || 'Matemáticas');
   const [visibleNodesCount, setVisibleNodesCount] = useState(10);
   const [generatingState, setGeneratingState] = useState<'idle' | 'checking' | 'generating'>('idle');
@@ -498,7 +499,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                          <p className="text-slate-600 dark:text-slate-400 font-medium mb-6">
                            Como invitado solo puedes jugar los primeros 15 niveles. ¡Regístrate ahora para desbloquear cientos de niveles y guardar tu progreso en la nube!
                          </p>
-                         <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer">
+                         <button onClick={linkGuestToGoogle} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer">
                            Crear Cuenta Gratis
                          </button>
                         </div>
