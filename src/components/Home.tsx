@@ -245,7 +245,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
     <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
       <div className="w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0">
         <div 
-          className="absolute inset-0 pointer-events-none z-0 mix-blend-multiply dark:mix-blend-color-burn opacity-90"
+          className="fixed inset-0 pointer-events-none z-30 mix-blend-multiply opacity-90"
           style={{
             backgroundImage: 'url(/background.png)',
             backgroundSize: '100% auto',
