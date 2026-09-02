@@ -242,10 +242,10 @@ export default function Home({ profile, updateProfile }: HomeProps) {
   }, [dynamicCurriculum, subject, visibleNodesCount, profile.uid]);
 
   return (
-    <div className={`${t.bg} transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
-      <div className="w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0">
+    <div className={`transition-colors duration-500 overflow-y-auto no-scrollbar relative w-full`}>
+      <div className={`${t.bg} w-full mx-auto pb-24 min-h-screen flex flex-col relative z-0`}>
         <div 
-          className="fixed inset-0 pointer-events-none z-30 mix-blend-multiply opacity-90"
+          className="fixed inset-0 pointer-events-none z-30 mix-blend-multiply dark:mix-blend-color-burn opacity-90"
           style={{
             backgroundImage: 'url(/background.png)',
             backgroundSize: '100% auto',
@@ -344,7 +344,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           </motion.div>
         )}
 
-        {/* Level Path Map & Global Lives Column */}
+        {/* Level Path Map Only */}
         <div className="flex w-full relative z-10 px-0">
           <div className="flex-1 flex flex-col w-full">
             {loadingCurriculum ? (
@@ -497,39 +497,38 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                  </>
             )}
           </div>
-
-          {/* Global Lives Column - Fixed Position */}
-          <div className="fixed top-28 right-4 sm:right-10 z-40 flex flex-col items-center">
-            <div className="flex flex-col gap-3">
-              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-300 text-center uppercase tracking-wider mb-2 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-sm shadow-sm">Vidas</span>
-              {Array.from({ length: 5 }).map((_, i) => {
-                 const hasLife = i < currentLives;
-                 const isJustGained = justGainedLife && i === currentLives - 1;
-                 
-                 return (
-                   <motion.div 
-                     key={i} 
-                     animate={isJustGained ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : {}}
-                     transition={{ duration: 0.5 }}
-                     className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-300 ${
-                       hasLife 
-                         ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-800/40 shadow-sm shadow-rose-200/50 dark:shadow-rose-900/30' 
-                         : 'bg-slate-100 dark:bg-slate-800/50 text-slate-300 dark:text-slate-600 border border-slate-200 dark:border-slate-800'
-                     }`}
-                   >
-                     <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
-                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                     </svg>
-                   </motion.div>
-                 );
-              })}
-              {currentLives < 5 && timeUntilNext !== null && (
-                <div className="mt-1 text-center text-rose-500 font-bold font-mono text-sm bg-rose-100 dark:bg-rose-950/40 px-2 py-1 rounded-lg border border-rose-200 dark:border-rose-800/40">
-                  {Math.floor(timeUntilNext / 60000).toString().padStart(2, '0')}:
-                  {Math.floor((timeUntilNext % 60000) / 1000).toString().padStart(2, '0')}
-                </div>
-              )}
-            </div>
+        </div>
+        {/* Global Lives Column - Fixed Position */}
+        <div className="fixed top-28 right-4 sm:right-10 z-50 flex flex-col items-center">
+          <div className="flex flex-col gap-3">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-300 text-center uppercase tracking-wider mb-2 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-sm shadow-sm">Vidas</span>
+            {Array.from({ length: 5 }).map((_, i) => {
+               const hasLife = i < currentLives;
+               const isJustGained = justGainedLife && i === currentLives - 1;
+               
+               return (
+                 <motion.div 
+                   key={i} 
+                   animate={isJustGained ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : {}}
+                   transition={{ duration: 0.5 }}
+                   className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-300 ${
+                     hasLife 
+                       ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-800/40 shadow-sm shadow-rose-200/50 dark:shadow-rose-900/30' 
+                       : 'bg-slate-100 dark:bg-slate-800/50 text-slate-300 dark:text-slate-600 border border-slate-200 dark:border-slate-800'
+                   }`}
+                 >
+                   <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                   </svg>
+                 </motion.div>
+               );
+            })}
+            {currentLives < 5 && timeUntilNext !== null && (
+              <div className="mt-1 text-center text-rose-500 font-bold font-mono text-sm bg-rose-100 dark:bg-rose-950/40 px-2 py-1 rounded-lg border border-rose-200 dark:border-rose-800/40">
+                {Math.floor(timeUntilNext / 60000).toString().padStart(2, '0')}:
+                {Math.floor((timeUntilNext % 60000) / 1000).toString().padStart(2, '0')}
+              </div>
+            )}
           </div>
         </div>
       </div>
