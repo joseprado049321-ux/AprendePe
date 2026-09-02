@@ -1,44 +1,70 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { UserProfile } from '../types';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy, Loader2, ArrowLeft } from 'lucide-react';
+import { Trophy, Loader2, ArrowLeft, Shield } from 'lucide-react';
 import BottomNav from './BottomNav';
 
 interface LeaderboardProps {
-  currentUserId: string;
+  profile: UserProfile;
 }
 
-export default function Leaderboard({ currentUserId }: LeaderboardProps) {
+const LEAGUES = [
+  { id: 'bronce', name: 'Bronce', minXp: 0, maxXp: 199, icon: '🥉', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', border: 'border-orange-200 dark:border-orange-800' },
+  { id: 'plata', name: 'Plata', minXp: 200, maxXp: 499, icon: '🥈', color: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800', border: 'border-slate-200 dark:border-slate-700' },
+  { id: 'oro', name: 'Oro', minXp: 500, maxXp: 999, icon: '🥇', color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800' },
+  { id: 'zafiro', name: 'Zafiro', minXp: 1000, maxXp: 1999, icon: '💎', color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800' },
+  { id: 'diamante', name: 'Diamante', minXp: 2000, maxXp: Infinity, icon: '👑', color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30', border: 'border-purple-200 dark:border-purple-800' }
+];
+
+function getLeagueByXp(xp: number) {
+  return LEAGUES.find(l => xp >= l.minXp && xp <= l.maxXp) || LEAGUES[0];
+}
+
+export default function Leaderboard({ profile }: LeaderboardProps) {
+  const userLeague = getLeagueByXp(profile.xp || 0);
+  const [activeTab, setActiveTab] = useState(userLeague.id);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const activeLeague = LEAGUES.find(l => l.id === activeTab) || LEAGUES[0];
+  const isGuest = profile.uid === 'guest';
+
   useEffect(() => {
     async function fetchLeaderboard() {
-      if (currentUserId === 'guest') {
+      setLoading(true);
+      if (isGuest) {
         const mockData: UserProfile[] = [
           { uid: 'mock1', displayName: 'Estudiante Estrella', xp: 2500, level: 'Secundaria', streak: 5, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock2', displayName: 'Lector Veloz', xp: 1800, level: 'Primaria', streak: 3, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock3', displayName: 'Matemático Pro', xp: 1200, level: 'Secundaria', streak: 1, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock4', displayName: 'Científico', xp: 900, level: 'Secundaria', streak: 2, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
           { uid: 'mock5', displayName: 'Explorador', xp: 750, level: 'Primaria', streak: 1, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
-          { uid: 'mock6', displayName: 'Genio', xp: 600, level: 'Secundaria', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
-          { uid: 'mock7', displayName: 'Curioso', xp: 450, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
-          { uid: 'guest', displayName: 'Invitado (Tú)', xp: 0, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' }
+          { uid: 'mock6', displayName: 'Genio', xp: 350, level: 'Secundaria', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'mock7', displayName: 'Curioso', xp: 150, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' },
+          { uid: 'guest', displayName: 'Invitado (Tú)', xp: profile.xp || 0, level: 'Inicial', streak: 0, lastActive: '', points: 0, unlockedAchievements: [], email: '' }
         ];
-        // Sort descending by xp
-        mockData.sort((a, b) => b.xp - a.xp);
-        setUsers(mockData);
+        // Filter by league manually for mock data
+        let filteredMock = mockData.filter(u => u.xp >= activeLeague.minXp && u.xp <= activeLeague.maxXp);
+        filteredMock.sort((a, b) => b.xp - a.xp);
+        setUsers(filteredMock);
         setLoading(false);
         return;
       }
+
       try {
-        const q = query(collection(db, 'users'), orderBy('xp', 'desc'), limit(100));
+        let q;
+        if (activeLeague.maxXp === Infinity) {
+          q = query(collection(db, 'users'), where('xp', '>=', activeLeague.minXp), orderBy('xp', 'desc'), limit(100));
+        } else {
+          q = query(collection(db, 'users'), where('xp', '>=', activeLeague.minXp), where('xp', '<=', activeLeague.maxXp), orderBy('xp', 'desc'), limit(100));
+        }
+        
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({
-          ...doc.data(),
+          ...(doc.data() as Record<string, any>),
           uid: doc.id,
         })) as UserProfile[];
         setUsers(data);
@@ -48,8 +74,9 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
         setLoading(false);
       }
     }
+    
     fetchLeaderboard();
-  }, [currentUserId]);
+  }, [activeTab, activeLeague.minXp, activeLeague.maxXp, isGuest, profile.xp]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white pb-24 transition-colors duration-500">
@@ -58,24 +85,49 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
           <ArrowLeft size={24} />
         </Link>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors duration-500">
-          <Trophy className="text-amber-500" /> Ranking Global
+          <Shield className="text-indigo-500" /> Ligas Semanales
         </h1>
         <div className="w-6" /> {/* Placeholder for alignment */}
       </header>
 
+      {/* Tabs de Ligas */}
+      <div className="w-full overflow-x-auto bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-[61px] z-10 scrollbar-hide">
+        <div className="flex w-max min-w-full px-2 py-3">
+          {LEAGUES.map(league => (
+            <button
+              key={league.id}
+              onClick={() => setActiveTab(league.id)}
+              className={`flex-1 flex flex-col items-center justify-center min-w-[80px] px-2 py-2 rounded-xl transition-all mx-1 ${activeTab === league.id ? `${league.bg} ${league.color} scale-105 shadow-sm font-bold` : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+            >
+              <span className="text-2xl mb-1">{league.icon}</span>
+              <span className="text-[10px] uppercase tracking-wider">{league.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <main className="w-full max-w-md mx-auto px-4 py-6">
+        <div className={`mb-6 p-4 rounded-2xl border ${activeLeague.bg} ${activeLeague.border} text-center`}>
+          <h2 className={`font-black text-xl ${activeLeague.color} mb-1 flex items-center justify-center gap-2`}>
+             {activeLeague.icon} Liga {activeLeague.name}
+          </h2>
+          <p className="text-sm opacity-80 text-slate-700 dark:text-slate-300">
+             {activeLeague.maxXp === Infinity ? `De ${activeLeague.minXp} XP en adelante` : `De ${activeLeague.minXp} a ${activeLeague.maxXp} XP`}
+          </p>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 text-slate-400">
             <Loader2 className="animate-spin mb-4" size={32} />
-            <p className="font-bold">Cargando ranking...</p>
+            <p className="font-bold">Cargando la liga...</p>
           </div>
         ) : (
           <div className="flex flex-col relative">
             {users.map((u, index) => {
-              const isCurrentUser = u.uid === currentUserId;
-              const isGuestBlurred = currentUserId === 'guest' && index > 2;
+              const isCurrentUser = u.uid === profile.uid;
+              const isGuestBlurred = isGuest && index > 2;
               
-              // Top 3 styles
+              // Top 3 styles inside the league
               let cardBg = 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm';
               let badgeBg = 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
               if (index === 0) {
@@ -113,12 +165,12 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
               );
             })}
             
-            {currentUserId === 'guest' && (
-              <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 flex flex-col items-center justify-end pb-4">
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 text-center max-w-sm mx-auto w-full">
-                  <Trophy className="text-amber-500 mx-auto mb-3" size={32} />
-                  <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Desbloquea el Ranking</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Crea una cuenta para competir con otros estudiantes y ver tu posición real.</p>
+            {isGuest && (
+              <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 flex flex-col items-center justify-end pb-4 pointer-events-none">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 text-center max-w-sm mx-auto w-full pointer-events-auto">
+                  <Shield className="text-indigo-500 mx-auto mb-3" size={32} />
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Compite en Ligas</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Crea una cuenta para subir de rango y ver quiénes lideran cada liga.</p>
                   <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors cursor-pointer">
                     Crear Cuenta Gratis
                   </button>
@@ -128,7 +180,7 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
             
             {users.length === 0 && (
               <div className="text-center py-12 text-slate-400 font-bold">
-                Aún no hay usuarios en el ranking. ¡Sé el primero!
+                Nadie ha alcanzado esta liga todavía. ¡Conviértete en el primero!
               </div>
             )}
           </div>

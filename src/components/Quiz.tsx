@@ -41,6 +41,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
   const [reward, setReward] = useState<RewardDrop | null>(null);
   const [hasWatchedAdInLevel, setHasWatchedAdInLevel] = useState(false);
 
+  // Combo & Protectores
+  const [combo, setCombo] = useState(0);
+  const [showComboAlert, setShowComboAlert] = useState(false);
+  const [usedStreakProtector, setUsedStreakProtector] = useState(false);
+
   // AI Explanation State
   const [showAiModal, setShowAiModal] = useState(false);
   const [showInlineExplanation, setShowInlineExplanation] = useState(false);
@@ -96,9 +101,23 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
     
     if (index === question?.correctAnswerIndex) {
       playSound('success');
-      setSessionPoints(prev => prev + 10);
+      if (navigator.vibrate) navigator.vibrate(50);
+      
+      const newCombo = combo + 1;
+      setCombo(newCombo);
+      let multiplier = 1;
+      if (newCombo >= 3) {
+        multiplier = 1.5;
+        if (newCombo % 3 === 0) {
+          setShowComboAlert(true);
+          setTimeout(() => setShowComboAlert(false), 2000);
+        }
+      }
+      setSessionPoints(prev => prev + Math.floor(10 * multiplier));
     } else {
       playSound('fail');
+      if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+      setCombo(0);
       setErrors(prev => prev + 1);
       const newLives = Math.max(0, lives - 1);
 
@@ -207,6 +226,7 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       const today = new Date();
       const lastActiveStr = profile.lastActive;
       let newStreak = profile.streak || 0;
+      let consumedProtector = false;
       
       if (lastActiveStr) {
         const lastActive = new Date(lastActiveStr);
@@ -218,7 +238,12 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         if (diffDays === 1) {
           newStreak += 1;
         } else if (diffDays > 1) {
-          newStreak = 1;
+          if (profile.inventory?.streakProtectors && profile.inventory.streakProtectors > 0) {
+            newStreak += 1;
+            consumedProtector = true;
+          } else {
+            newStreak = 1;
+          }
         } else if (diffDays === 0 && newStreak === 0) {
           newStreak = 1;
         }
@@ -275,6 +300,11 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
       const rewardDrop = calculateDrop();
       const updatedWallet = profile.wallet ? { ...profile.wallet } : { oro: 0, esmeralda: 0, rubi: 0, diamante: 0 };
       const updatedInventory = profile.inventory ? { ...profile.inventory } : { streakProtectors: 0, xpMultipliers: 0 };
+      
+      if (consumedProtector) {
+        updatedInventory.streakProtectors = Math.max(0, updatedInventory.streakProtectors - 1);
+        setUsedStreakProtector(true);
+      }
       
       if (rewardDrop.type === 'oro') updatedWallet.oro += rewardDrop.amount;
       if (rewardDrop.type === 'esmeralda') updatedWallet.esmeralda += rewardDrop.amount;
@@ -337,6 +367,15 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
 
   return (
     <div className={`${theme.appBg} flex flex-col h-screen overflow-hidden relative`}>
+      {/* Combo Alert */}
+      {showComboAlert && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top fade-in duration-300 pointer-events-none">
+          <div className="bg-orange-500 text-white px-6 py-2 rounded-full shadow-lg shadow-orange-500/50 font-black flex items-center gap-2 border-2 border-orange-400">
+            🔥 ¡COMBO x{combo}!
+          </div>
+        </div>
+      )}
+
       {/* Rescue Modal */}
       <AnimatePresence>
           {showOutOfLivesModal && (
@@ -435,8 +474,13 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.5 }}
-                          className="mb-8"
+                          className="mb-8 w-full"
                       >
+                          {usedStreakProtector && (
+                              <div className="bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-800 rounded-xl p-3 mb-4 text-cyan-700 dark:text-cyan-400 text-sm font-bold flex items-center justify-center gap-2">
+                                <Shield size={18} /> ¡Protector de racha activado!
+                              </div>
+                          )}
                           <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">+{reward.amount} {getRewardName(reward.type)}</h3>
                           <p className="text-sm text-indigo-500 font-bold mt-2">+{sessionPoints} XP</p>
                       </motion.div>
