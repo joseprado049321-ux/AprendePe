@@ -103,16 +103,30 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
     }
   };
 
-  const handleBuyEmeraldPackage = (amount: number, price: number) => {
+  const handleCheckout = async (packageId: string) => {
     if (profile.uid === 'guest') return;
     setIsSimulatingPayment(true);
-    setTimeout(async () => {
-      await updateProfile({
-        wallet: { ...wallet, esmeralda: wallet.esmeralda + amount }
+    
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.uid, packageId })
       });
+      
+      const data = await response.json();
+      
+      if (data.init_point) {
+        // Redirect to MercadoPago checkout
+        window.location.href = data.init_point;
+      } else {
+        throw new Error(data.error || 'No se pudo iniciar el pago');
+      }
+    } catch (error) {
+      console.error("Checkout Error:", error);
+      showToast('Error al procesar el pago. Intenta nuevamente.', 'error');
       setIsSimulatingPayment(false);
-      showToast(`¡Compra exitosa! Recibiste ${amount} Esmeraldas.`, 'success');
-    }, 2000);
+    }
   };
 
   const handleWatchAd = () => {
@@ -271,8 +285,12 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                      <span className="text-lg font-bold text-slate-500">.00</span>
                    </div>
                    <p className="text-sm text-slate-500 mb-6">al mes</p>
-                   <button className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-transform hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
-                     <Sparkles size={18} /> Obtener PRO
+                   <button 
+                     onClick={() => handleCheckout('pro_monthly')}
+                     disabled={profile.uid === 'guest' || isSimulatingPayment || profile.isPro}
+                     className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-transform hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2"
+                   >
+                     <Sparkles size={18} /> {profile.isPro ? '¡Ya eres PRO!' : (isSimulatingPayment ? 'Procesando...' : 'Obtener PRO')}
                    </button>
                 </div>
               </div>
@@ -537,7 +555,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                   </div>
                   <div className="w-full mt-2">
                     <button 
-                      onClick={() => handleBuyEmeraldPackage(100, 5)}
+                      onClick={() => handleCheckout('gem_100')}
                       disabled={profile.uid === 'guest' || isSimulatingPayment} 
                       className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
                     >
@@ -572,7 +590,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                     </div>
                     <div className="w-full mt-2">
                       <button 
-                        onClick={() => handleBuyEmeraldPackage(1000, 20)}
+                        onClick={() => handleCheckout('gem_1000')}
                         disabled={profile.uid === 'guest' || isSimulatingPayment} 
                         className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
                       >
@@ -605,7 +623,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                   </div>
                   <div className="w-full mt-2">
                     <button 
-                      onClick={() => handleBuyEmeraldPackage(7000, 100)}
+                      onClick={() => handleCheckout('gem_7000')}
                       disabled={profile.uid === 'guest' || isSimulatingPayment} 
                       className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
                     >

@@ -3,9 +3,10 @@ import express from "express";
 import path from "path";
 import { GoogleGenAI, Type } from "@google/genai";
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import fs from 'fs';
 import { getRandomTopicsForStage, getTopicsForGrade, getNodeForGrade } from './src/lib/syllabusParser.js';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 // Initialize Firebase Admin SDK
 let db: FirebaseFirestore.Firestore | null = null;
@@ -27,6 +28,11 @@ app.use(express.json());
 // Use Gemini SDK
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
+});
+
+// Initialize MercadoPago
+const mpClient = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-YOUR-TOKEN',
 });
 
 app.post("/api/generate-questions", async (req, res) => {
@@ -386,6 +392,100 @@ app.post("/api/explain-mistake", async (req, res) => {
       tip: "Lee atentamente cada alternativa antes de seleccionar tu respuesta.",
       keyConcept: "Refuerzo pedagógico"
     });
+  }
+});
+
+// --- MERCADOPAGO PAYMENTS ---
+
+const PRODUCT_PRICES: Record<string, { title: string, price: number, emeralds?: number, isPro?: boolean }> = {
+  'gem_100': { title: '100 Esmeraldas', price: 5.00, emeralds: 100 },
+  'gem_1000': { title: '1,000 Esmeraldas', price: 20.00, emeralds: 1000 },
+  'gem_7000': { title: '7,000 Esmeraldas', price: 100.00, emeralds: 7000 },
+  'pro_monthly': { title: 'AprendePe PRO (1 Mes)', price: 20.00, isPro: true }
+};
+
+app.post('/api/checkout', async (req, res) => {
+  try {
+    const { userId, packageId } = req.body;
+    
+    if (!userId || !packageId || !PRODUCT_PRICES[packageId]) {
+      return res.status(400).json({ error: 'Invalid request' });
+    }
+
+    const product = PRODUCT_PRICES[packageId];
+
+    const preference = new Preference(mpClient);
+    const pref = await preference.create({
+      body: {
+        items: [
+          {
+            id: packageId,
+            title: product.title,
+            quantity: 1,
+            unit_price: product.price,
+            currency_id: 'PEN'
+          }
+        ],
+        // Append user ID and package ID to external reference to identify the payment later
+        external_reference: `${userId}___${packageId}`,
+        back_urls: {
+          success: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL}/home` : 'http://localhost:5173/home',
+          failure: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL}/shop` : 'http://localhost:5173/shop',
+          pending: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL}/shop` : 'http://localhost:5173/shop'
+        },
+        auto_return: 'approved',
+        notification_url: process.env.WEBHOOK_URL || undefined, // Set this in Vercel to point to /api/webhook
+      }
+    });
+
+    res.json({ init_point: pref.init_point });
+  } catch (error) {
+    console.error("MercadoPago Checkout Error:", error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
+
+app.post('/api/webhook', async (req, res) => {
+  try {
+    const { type, data } = req.query;
+
+    if (type === 'payment' && data && data.id) {
+      // You should verify the payment signature/status here using the MP SDK in production
+      // For brevity, assuming payment is successful if we get the webhook:
+      
+      const paymentId = data.id as string;
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+      });
+      const payment = await response.json();
+
+      if (payment.status === 'approved' && payment.external_reference) {
+        const [userId, packageId] = payment.external_reference.split('___');
+        const product = PRODUCT_PRICES[packageId];
+
+        if (db && userId && product) {
+          const userRef = db.collection('users').doc(userId);
+          
+          if (product.emeralds) {
+            // Give emeralds
+            await userRef.update({
+              'wallet.esmeralda': FieldValue.increment(product.emeralds)
+            });
+            console.log(`Granted ${product.emeralds} emeralds to ${userId}`);
+          } else if (product.isPro) {
+            // Give PRO
+            await userRef.update({
+              isPro: true
+            });
+            console.log(`Granted PRO status to ${userId}`);
+          }
+        }
+      }
+    }
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Webhook Error:", error);
+    res.sendStatus(500);
   }
 });
 
