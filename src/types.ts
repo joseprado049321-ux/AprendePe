@@ -13,6 +13,7 @@ export interface Biome {
   id: string;
   name: string;
   bgGradient: string;     // Tailwind gradient classes for procedural generation
+  fadeGradient?: string;  // Gradient for smooth transition at the bottom
   pathColor: string;      // Color for the path connecting nodes
   subThemes: SubTheme[];
 }

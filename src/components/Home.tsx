@@ -48,6 +48,14 @@ export default function Home({ profile, updateProfile }: HomeProps) {
           'from-fuchsia-200 to-cyan-100 dark:from-fuchsia-950 dark:to-slate-900'
         ];
 
+        const fadeGradients = [
+          'from-lime-100 to-transparent dark:from-lime-950 dark:to-transparent',
+          'from-amber-100 to-transparent dark:from-amber-950 dark:to-transparent',
+          'from-rose-200 to-transparent dark:from-rose-950 dark:to-transparent',
+          'from-fuchsia-200 to-transparent dark:from-fuchsia-950 dark:to-transparent',
+          'from-cyan-100 to-transparent dark:from-slate-900 dark:to-transparent'
+        ];
+
         const getCumulativeXP = (index: number) => {
           if (index === 0) return 100;
           let total = 100;
@@ -77,6 +85,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
             id: `dyn_biome_${i}`,
             name: unit.name,
             bgGradient: gradients[i % gradients.length],
+            fadeGradient: fadeGradients[i % fadeGradients.length],
             pathColor: '#ffffff',
             subThemes
           };
@@ -462,11 +471,13 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                    </div>
                  </div>
                );
-            })}
-                 
+                      })}
+                  
+             {/* Bottom Fade Gradient & Footer Elements */}
+             <div className={`w-full flex flex-col items-center bg-gradient-to-b ${paginatedMap.length > 0 ? paginatedMap[paginatedMap.length - 1].fadeGradient : ''} relative z-10`}>
                  {/* Load More Button */}
                  {hasMoreNodes && (
-                   <div className="w-full flex justify-center py-12 bg-slate-900 z-10 relative">
+                   <div className="w-full flex justify-center py-12">
                      <button
                        onClick={() => setVisibleNodesCount(prev => prev + 10)}
                        className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 cursor-pointer"
@@ -477,7 +488,7 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                  )}
                  
                  {profile.uid === 'guest' && (
-                   <div className="w-full max-w-lg mx-auto py-12 px-6 z-10 relative text-center">
+                   <div className="w-full max-w-lg mx-auto py-12 px-6 text-center">
                      <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1 rounded-3xl shadow-xl shadow-indigo-500/30">
                        <div className="bg-white dark:bg-slate-900 rounded-[22px] p-6 sm:p-8 flex flex-col items-center">
                          <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mb-4">
@@ -490,10 +501,11 @@ export default function Home({ profile, updateProfile }: HomeProps) {
                          <button onClick={() => navigate('/register')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer">
                            Crear Cuenta Gratis
                          </button>
-                       </div>
-                     </div>
-                   </div>
+                        </div>
+                      </div>
+                    </div>
                  )}
+             </div>
                  </>
             )}
           </div>
