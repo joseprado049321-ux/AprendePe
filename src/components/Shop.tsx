@@ -19,7 +19,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
   const unlockedAvatars = profile.unlockedAvatars || [];
   const unlockedFrames = profile.unlockedFrames || [];
 
-  const [activeTab, setActiveTab] = useState<'potenciadores' | 'avatares' | 'marcos' | 'recargas'>('potenciadores');
+  const [activeTab, setActiveTab] = useState<'pro' | 'potenciadores' | 'avatares' | 'marcos' | 'esmeraldas'>('pro');
   const [isSimulatingPayment, setIsSimulatingPayment] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -52,9 +52,9 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
         showToast('No tienes suficientes Esmeraldas.', 'error');
       }
     } else if (item === 'buyEmerald') {
-      if (wallet.oro >= 100) {
+      if (wallet.oro >= 250) {
         await updateProfile({
-          wallet: { ...wallet, oro: wallet.oro - 100, esmeralda: wallet.esmeralda + 1 }
+          wallet: { ...wallet, oro: wallet.oro - 250, esmeralda: wallet.esmeralda + 1 }
         });
         showToast('¡Has comprado 1 Esmeralda!', 'success');
       } else {
@@ -117,20 +117,24 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
 
   const handleWatchAd = () => {
     if (profile.uid === 'guest') return;
+    if (isLivesMax) {
+      showToast('¡Ya tienes el máximo de vidas!', 'error');
+      return;
+    }
     setIsSimulatingPayment(true);
     setTimeout(async () => {
       await updateProfile({
-        wallet: { ...wallet, esmeralda: wallet.esmeralda + 1 }
+        lives: currentLives + 1
       });
       setIsSimulatingPayment(false);
-      showToast(`¡Gracias por ver el anuncio! Recibiste 1 Esmeralda.`, 'success');
+      showToast(`¡Gracias por ver el anuncio! Recibiste 1 Corazón.`, 'success');
     }, 3000);
   };
 
   // Conditions for boosters
   const canBuyStreak = wallet.esmeralda >= 3;
   const canBuyMultiplier = wallet.esmeralda >= 50;
-  const canBuyEmerald = wallet.oro >= 100;
+  const canBuyEmerald = wallet.oro >= 250;
   const isLivesMax = currentLives >= 5;
   const canBuyLife = wallet.esmeralda >= 5 && !isLivesMax;
   const notEnoughForLife = !isLivesMax && wallet.esmeralda < 5;
@@ -174,28 +178,34 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
       <div className="max-w-4xl mx-auto px-4 mt-6">
         <div className="flex overflow-x-auto gap-2 pb-2 mb-6 scrollbar-hide">
           <button 
-            onClick={() => setActiveTab('potenciadores')}
-            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors ${activeTab === 'potenciadores' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+            onClick={() => setActiveTab('pro')}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'pro' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
           >
-            Potenciadores
+            <Sparkles size={16} /> AprendePe PRO
+          </button>
+          <button 
+            onClick={() => setActiveTab('potenciadores')}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'potenciadores' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+          >
+            <Zap size={16} /> Potenciadores
           </button>
           <button 
             onClick={() => setActiveTab('avatares')}
-            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'avatares' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'avatares' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
           >
             <UserCircle2 size={16} /> Avatares
           </button>
           <button 
             onClick={() => setActiveTab('marcos')}
-            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'marcos' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'marcos' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
           >
-            <Sparkles size={16} /> Marcos
+            <Diamond size={16} /> Marcos
           </button>
           <button 
-            onClick={() => setActiveTab('recargas')}
-            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'recargas' ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
+            onClick={() => setActiveTab('esmeraldas')}
+            className={`px-5 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === 'esmeraldas' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
           >
-            <Gem size={16} /> Recargas
+            <Gem size={16} /> Esmeraldas
           </button>
         </div>
 
@@ -208,6 +218,66 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
                Crear Cuenta
              </button>
            </div>
+        )}
+
+        {activeTab === 'pro' && (
+          <div className="bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 rounded-3xl p-1 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500 mb-6">
+            <div className="bg-white dark:bg-slate-900 rounded-[23px] p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center">
+              <div className="flex-1">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-3">
+                   AprendePe <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">PRO</span>
+                   <Sparkles className="text-amber-500" size={28} />
+                </h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-6 font-medium">Desbloquea todo tu potencial con la experiencia definitiva.</p>
+                
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Vidas ilimitadas <span className="line-through text-slate-400 text-sm ml-2 font-normal">5 vidas</span></span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Sin anuncios <span className="line-through text-slate-400 text-sm ml-2 font-normal">Publicidad</span></span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Tutor PRO y exclusivo</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Cosméticos, avatares y marcos exclusivos</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Respuestas más detalladas y personalizadas</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">10 corazones de límite <span className="line-through text-slate-400 text-sm ml-2 font-normal">5 corazones</span></span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="text-emerald-500 shrink-0" size={22} />
+                    <span className="text-slate-700 dark:text-slate-300 font-bold">Recarga rápida (5 min) <span className="line-through text-slate-400 text-sm ml-2 font-normal">30 minutos</span></span>
+                  </li>
+                </ul>
+              </div>
+              <div className="w-full md:w-72 shrink-0">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 border border-amber-200 dark:border-amber-900/30 text-center relative overflow-hidden">
+                   <div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">MÁS POPULAR</div>
+                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Mensual</h3>
+                   <div className="flex items-baseline justify-center gap-1 mb-1">
+                     <span className="text-lg font-bold text-slate-500">S/</span>
+                     <span className="text-5xl font-black text-slate-900 dark:text-white">20</span>
+                     <span className="text-lg font-bold text-slate-500">.00</span>
+                   </div>
+                   <p className="text-sm text-slate-500 mb-6">al mes</p>
+                   <button className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-transform hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                     <Sparkles size={18} /> Obtener PRO
+                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {activeTab === 'potenciadores' && (
@@ -288,43 +358,7 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
               </div>
             </div>
 
-            {/* 1 Esmeralda */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
-              <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                    <Gem className="text-emerald-500" size={32} />
-                  </div>
-                  <div className={`flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm transition-colors ${
-                    canBuyEmerald 
-                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' 
-                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40'
-                  }`}>
-                    <Diamond size={14} className={canBuyEmerald ? 'text-amber-500' : 'text-rose-500'} />
-                    <span>100</span>
-                  </div>
-                </div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">1 Esmeralda</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                  Compra una esmeralda utilizando tu oro acumulado.
-                </p>
-              </div>
 
-              <div className="w-full mt-2">
-                <button 
-                  onClick={() => handleBuy('buyEmerald')} 
-                  disabled={!canBuyEmerald || profile.uid === 'guest'} 
-                  className="w-full bg-emerald-50 hover:bg-emerald-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 disabled:text-slate-400 dark:disabled:text-slate-500 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                >
-                  Comprar
-                </button>
-                {!canBuyEmerald && (
-                  <p className="text-xs text-rose-500 dark:text-rose-400 font-medium text-center mt-2 flex items-center justify-center gap-1">
-                    <AlertCircle size={13} className="shrink-0" /> No tienes suficiente Oro
-                  </p>
-                )}
-              </div>
-            </div>
 
             {/* Recargar 1 Vida */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
@@ -471,120 +505,179 @@ export default function Shop({ profile, updateProfile }: ShopProps) {
       </div>
         )}
 
-        {activeTab === 'recargas' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Anuncio */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
-              <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                    <Zap className="text-purple-500" size={32} />
+        {activeTab === 'esmeraldas' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Paquetes */}
+            <div>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                <Gem className="text-emerald-500" /> Paquetes de esmeraldas recomendados
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                {/* Paquete Inicial */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold px-3 py-1 rounded-bl-lg">PAQUETE INICIAL</div>
+                  <div>
+                    <div className="flex items-start justify-between mb-4 mt-2">
+                      <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
+                        <Gem className="text-emerald-500" size={32} />
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                          <Gem size={14} className="text-emerald-500" />
+                          <span>100</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1 font-medium">S/ 0.050 c/u</span>
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white">100 Esmeraldas</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                      Ideal para probar artículos o comprar potenciadores ocasionales.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                    <Gem size={14} className="text-emerald-500" />
-                    <span>+1</span>
+                  <div className="w-full mt-2">
+                    <button 
+                      onClick={() => handleBuyEmeraldPackage(100, 5)}
+                      disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                      className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
+                    >
+                      {isSimulatingPayment ? 'Procesando...' : <>S/ 5.00</>}
+                    </button>
                   </div>
                 </div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Ver Anuncio</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                  Gana una esmeralda gratis apoyándonos viendo un corto video publicitario.
-                </p>
-              </div>
-              <div className="w-full mt-2">
-                <button 
-                  onClick={handleWatchAd}
-                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
-                  className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 disabled:text-slate-400 font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                >
-                  {isSimulatingPayment ? 'Cargando...' : 'Ver Video'}
-                </button>
+
+                {/* Paquete Inter / Popular */}
+                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-1 shadow-lg shadow-indigo-500/20 h-full relative group hover:-translate-y-1 transition-transform">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-md z-10 whitespace-nowrap">
+                    ⭐ Más Popular
+                  </div>
+                  <div className="bg-white dark:bg-slate-900 rounded-xl p-4 flex flex-col h-full justify-between pt-6">
+                    <div>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
+                          <Gem className="text-indigo-500" size={32} />
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                            <Gem size={14} className="text-indigo-500" />
+                            <span>1,000</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 mt-1 font-medium">S/ 0.020 c/u</span>
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white">1,000 Esmeraldas</h3>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                        El precio coincide con la suscripción PRO. Perfecto para cosméticos.
+                      </p>
+                    </div>
+                    <div className="w-full mt-2">
+                      <button 
+                        onClick={() => handleBuyEmeraldPackage(1000, 20)}
+                        disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
+                      >
+                        {isSimulatingPayment ? 'Procesando...' : 'S/ 20.00'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Paquete Premium / Ahorro */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-amber-200 dark:border-amber-900/30 flex flex-col h-full justify-between relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-bl-lg">🏆 MAYOR AHORRO</div>
+                  <div>
+                    <div className="flex items-start justify-between mb-4 mt-2">
+                      <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
+                        <Gem className="text-amber-500" size={32} />
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                          <Gem size={14} className="text-amber-500" />
+                          <span>7,000</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1 font-medium">S/ 0.014 c/u</span>
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white">7,000 Esmeraldas</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
+                      Para estudiantes muy dedicados. El mayor valor por tu dinero.
+                    </p>
+                  </div>
+                  <div className="w-full mt-2">
+                    <button 
+                      onClick={() => handleBuyEmeraldPackage(7000, 100)}
+                      disabled={profile.uid === 'guest' || isSimulatingPayment} 
+                      className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
+                    >
+                      {isSimulatingPayment ? 'Procesando...' : <>S/ 100.00</>}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
 
-            {/* Regular */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
-              <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                    <Gem className="text-emerald-500" size={32} />
+            {/* Ads & Exchange */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {/* Sección Inferior Izquierda: Anuncios */}
+               <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                      <Zap className="text-purple-500" /> Anuncios
+                    </h3>
+                    <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400 mb-6">
+                       <li className="flex gap-2 items-start"><Check size={16} className="text-purple-500 mt-0.5 shrink-0" /> Anuncios al terminar el nivel</li>
+                       <li className="flex gap-2 items-start"><Check size={16} className="text-purple-500 mt-0.5 shrink-0" /> Google Ads (Mundial) y Locales</li>
+                       <li className="flex gap-2 items-start"><Check size={16} className="text-purple-500 mt-0.5 shrink-0" /> Para cada corazón una sola vez se te permite ver un anuncio.</li>
+                    </ul>
                   </div>
-                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                    <Gem size={14} className="text-emerald-500" />
-                    <span>100</span>
-                  </div>
-                </div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Paquete Regular</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                  Ideal para probar artículos o comprar potenciadores ocasionales.
-                </p>
-              </div>
-              <div className="w-full mt-2">
-                <button 
-                  onClick={() => handleBuyEmeraldPackage(100, 5)}
-                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
-                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
-                >
-                  {isSimulatingPayment ? 'Procesando...' : <>S/ 5.00</>}
-                </button>
-              </div>
-            </div>
-
-            {/* Inter */}
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-1 shadow-lg shadow-indigo-500/20 h-full">
-              <div className="bg-white dark:bg-slate-900 rounded-xl p-4 flex flex-col h-full justify-between">
-                <div>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
-                      <Gem className="text-indigo-500" size={32} />
-                    </div>
-                    <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
-                      <Gem size={14} className="text-indigo-500" />
-                      <span>1,000</span>
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">Paquete Inter <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Popular</span></h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                    Perfecto para coleccionistas. Compra los mejores marcos y avatares.
-                  </p>
-                </div>
-                <div className="w-full mt-2">
-                  <button 
-                    onClick={() => handleBuyEmeraldPackage(1000, 20)}
-                    disabled={profile.uid === 'guest' || isSimulatingPayment} 
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                  >
-                    {isSimulatingPayment ? 'Procesando...' : 'S/ 20.00'}
+                  <button onClick={handleWatchAd} disabled={profile.uid === 'guest'} className="w-full bg-purple-50 text-purple-600 font-bold py-3 rounded-xl hover:bg-purple-100 transition-colors flex justify-center items-center gap-2 dark:bg-purple-500/20 dark:text-purple-400 dark:hover:bg-purple-500/30">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    Ver Anuncio por 1 Vida
                   </button>
-                </div>
-              </div>
-            </div>
+               </div>
 
-            {/* Premium */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full justify-between">
-              <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
-                    <Gem className="text-amber-500" size={32} />
+               {/* Sección Derecha: Tipo de cambio */}
+               <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                      <Diamond className="text-amber-500" /> Tipo de cambio
+                    </h3>
+                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
+                      <ul className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                         <li className="flex items-center justify-between">
+                           <span className="font-medium">Moneda Oficial:</span>
+                           <span className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400"><Gem size={14} /> Esmeralda</span>
+                         </li>
+                         <li className="flex items-center justify-between border-t border-slate-200 dark:border-slate-600 pt-3">
+                           <span className="font-medium">Moneda Gratuita:</span>
+                           <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400"><Diamond size={14} /> Oro</span>
+                         </li>
+                      </ul>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                       <div className="flex items-center gap-1 font-bold text-emerald-600"><Gem size={18}/> 1</div>
+                       <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                       <div className="flex items-center gap-1 font-bold text-amber-500"><Diamond size={18}/> 250</div>
+                    </div>
+                    <p className="text-[11px] text-center text-rose-500 dark:text-rose-400 font-medium mb-4">* Solo se puede intercambiar Oro por Esmeraldas, no al revés.</p>
                   </div>
-                  <div className="flex items-center gap-1 font-bold px-3 py-1 rounded-full text-sm bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                    <Gem size={14} className="text-amber-500" />
-                    <span>100K</span>
+                  
+                  <div className="w-full">
+                    <button 
+                      onClick={() => handleBuy('buyEmerald')} 
+                      disabled={!canBuyEmerald || profile.uid === 'guest'} 
+                      className="w-full bg-amber-50 text-amber-600 font-bold py-3 rounded-xl hover:bg-amber-100 transition-colors flex justify-center items-center gap-2 dark:bg-amber-500/20 dark:text-amber-400 dark:hover:bg-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Diamond size={16} /> Intercambiar 250 Oro por 1 <Gem size={16} className="text-emerald-500 ml-1" />
+                    </button>
+                    {!canBuyEmerald && (
+                      <p className="text-xs text-rose-500 dark:text-rose-400 font-medium text-center mt-2 flex items-center justify-center gap-1">
+                        <AlertCircle size={13} className="shrink-0" /> No tienes suficiente Oro
+                      </p>
+                    )}
                   </div>
-                </div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Paquete Premium</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">
-                  Esmeraldas ilimitadas para desbloquear la experiencia completa sin restricciones.
-                </p>
-              </div>
-              <div className="w-full mt-2">
-                <button 
-                  onClick={() => handleBuyEmeraldPackage(100000, 100)}
-                  disabled={profile.uid === 'guest' || isSimulatingPayment} 
-                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex justify-center items-center gap-2"
-                >
-                  {isSimulatingPayment ? 'Procesando...' : <>S/ 100.00</>}
-                </button>
-              </div>
+               </div>
             </div>
           </div>
         )}
