@@ -129,4 +129,5 @@ export interface UserProfile {
     streakProtectors: number;
     xpMultipliers: number;
   };
+  isPro?: boolean;
 }
