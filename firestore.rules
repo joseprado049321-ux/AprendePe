@@ -10,29 +10,32 @@ service cloud.firestore {
 
     // 2. Reglas para la colección de usuarios (Perfiles)
     match /users/{userId} {
-      // Cualquier usuario autenticado puede leer los perfiles (Necesario para el Leaderboard)
-      allow read: if request.auth != null || isSuperAdmin();
+      // Solo el dueño de la cuenta puede leer su perfil (Privacidad de datos y Leaderboard seguro)
+      allow read: if isSuperAdmin() || (request.auth != null && request.auth.uid == userId);
       
-      // Un usuario solo puede crear o actualizar su propia cuenta
-      allow create, update: if isSuperAdmin() || (request.auth != null && request.auth.uid == userId);
+      // Solo el dueño puede crear su cuenta
+      allow create: if isSuperAdmin() || (request.auth != null && request.auth.uid == userId);
+      
+      // Solo el dueño puede actualizar su cuenta, PERO no puede modificar isPro.
+      allow update: if isSuperAdmin() || (request.auth != null && request.auth.uid == userId && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['isPro'])));
       
       // Solo el Súper Administrador puede borrar cuentas directamente desde la base de datos
       allow delete: if isSuperAdmin();
+
+      // 3. Subcolección de caché de IA (preguntasGeneradas)
+      match /preguntasGeneradas/{docId} {
+         allow read, write: if isSuperAdmin() || (request.auth != null && request.auth.uid == userId);
+      }
     }
 
-    // 3. Reglas para la colección de preguntas (Historial)
+    // 4. Reglas para la colección de preguntas
     match /questions/{questionId} {
-      // El usuario solo puede leer sus propias respuestas
       allow read: if isSuperAdmin() || (request.auth != null && request.auth.uid == resource.data.userId);
-      
-      // El usuario solo puede crear respuestas a su nombre
       allow create: if isSuperAdmin() || (request.auth != null && request.auth.uid == request.resource.data.userId);
-      
-      // No se pueden editar ni borrar las respuestas históricas (A menos que seas Súper Admin)
       allow update, delete: if isSuperAdmin();
     }
 
-    // 4. Bloquear cualquier otra colección por defecto (Blindaje total)
+    // 5. Bloquear cualquier otra colección por defecto (Blindaje total)
     match /{document=**} {
       allow read, write: if isSuperAdmin();
     }

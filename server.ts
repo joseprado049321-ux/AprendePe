@@ -34,6 +34,43 @@ const ai = new GoogleGenAI({
 const mpClient = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-YOUR-TOKEN',
 });
+app.get("/api/leaderboard", async (req, res) => {
+  if (!db) {
+    return res.status(500).json({ error: "Firestore no inicializado" });
+  }
+  try {
+    const minXp = parseInt(req.query.minXp as string) || 0;
+    const maxXpString = req.query.maxXp as string;
+    
+    let usersQuery = db.collection("users").where("xp", ">=", minXp);
+    
+    if (maxXpString && maxXpString !== "Infinity") {
+      const maxXp = parseInt(maxXpString);
+      usersQuery = usersQuery.where("xp", "<=", maxXp);
+    }
+    
+    const usersSnapshot = await usersQuery
+      .orderBy("xp", "desc")
+      .limit(100)
+      .get();
+      
+    const leaderboard = usersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        uid: doc.id,
+        displayName: data.displayName || "Estudiante",
+        xp: data.xp || 0,
+        level: data.level || "Inicial",
+        isPro: data.isPro || false
+      };
+    });
+    
+    return res.json(leaderboard);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
 
 app.post("/api/generate-questions", async (req, res) => {
   try {

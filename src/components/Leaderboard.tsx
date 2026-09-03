@@ -55,19 +55,12 @@ export default function Leaderboard({ profile }: LeaderboardProps) {
       }
 
       try {
-        let q;
-        if (activeLeague.maxXp === Infinity) {
-          q = query(collection(db, 'users'), where('xp', '>=', activeLeague.minXp), orderBy('xp', 'desc'), limit(100));
-        } else {
-          q = query(collection(db, 'users'), where('xp', '>=', activeLeague.minXp), where('xp', '<=', activeLeague.maxXp), orderBy('xp', 'desc'), limit(100));
-        }
+        const url = `/api/leaderboard?minXp=${activeLeague.minXp}&maxXp=${activeLeague.maxXp === Infinity ? 'Infinity' : activeLeague.maxXp}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error fetching leaderboard');
         
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          ...(doc.data() as Record<string, any>),
-          uid: doc.id,
-        })) as UserProfile[];
-        setUsers(data);
+        const data = await response.json();
+        setUsers(data as UserProfile[]);
       } catch (err) {
         console.error('Error fetching leaderboard', err);
       } finally {

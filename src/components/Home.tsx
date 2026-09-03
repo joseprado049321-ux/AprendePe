@@ -190,24 +190,6 @@ export default function Home({ profile, updateProfile, linkGuestToGoogle }: Home
 
       const data = await response.json();
       const generatedQuestions = data.questions || [];
-      
-      // 3. Save to Cache in Subcollection
-      if (profile.uid !== 'guest' && generatedQuestions.length > 0 && !data.isFallback) {
-         try {
-           const docRef = doc(db, 'users', profile.uid, 'preguntasGeneradas', `${subject}_${nodeId}`);
-           await setDoc(docRef, {
-             userId: profile.uid,
-             theme: subject,
-             level: profile.diagnosticLevel || profile.level,
-             nodeId,
-             questions: generatedQuestions,
-             createdAt: serverTimestamp()
-           });
-           console.log("SAVED TO CACHE via Client SDK");
-         } catch (e) {
-           console.warn("Could not save to cache", e);
-         }
-      }
 
       setGeneratingState('idle');
       navigate('/quiz', { 
