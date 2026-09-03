@@ -37,7 +37,7 @@ const mpClient = new MercadoPagoConfig({
 
 app.post("/api/generate-questions", async (req, res) => {
   try {
-    const { subject, level, userId, userHistory, nodeId, promptTopic, cnebCompetence, lastAccuracy, lastLivesLost } = req.body;
+    const { subject, level, userId, userHistory, nodeId, promptTopic, cnebCompetence, lastAccuracy, lastLivesLost, difficultyModifier } = req.body;
     const diagnosticLevel = userHistory?.diagnosticLevel || level;
     const educationalStage = userHistory?.educationalStage || "Primaria";
     const grade = userHistory?.grade || "Desconocido";
@@ -67,6 +67,14 @@ app.post("/api/generate-questions", async (req, res) => {
     console.log(`Calling Gemini for ${subject} at level ${diagnosticLevel} with XP ${xp}`);
     if (lastAccuracy !== undefined && lastAccuracy < 50 || (lastLivesLost !== undefined && lastLivesLost >= 4)) {
       ddaInstruction = "IMPORTANTE: El estudiante está teniendo dificultades con este tema. Reduce silenciosamente la dificultad de las preguntas, utiliza un lenguaje más accesible y enfócate en los conceptos base para ayudarlo a recuperar la confianza, sin decírselo directamente.";
+    }
+
+    if (difficultyModifier !== undefined && difficultyModifier !== 0) {
+      if (difficultyModifier < 0) {
+        ddaInstruction += `\nAJUSTE DINÁMICO DE DIFICULTAD: El estudiante tiene un modificador de ${difficultyModifier} puntos. Las preguntas deben ser obligatoriamente más fáciles, introductorias y muy accesibles, explicando conceptos base.`;
+      } else {
+        ddaInstruction += `\nAJUSTE DINÁMICO DE DIFICULTAD: El estudiante tiene un modificador de +${difficultyModifier} puntos. Aumenta progresivamente el nivel de exigencia, abstracción, y pensamiento crítico en los problemas.`;
+      }
     }
 
     const prompt = `

@@ -324,6 +324,14 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
         setReward(rewardDrop);
       }
 
+      // Calculate difficulty modifier based on accuracy
+      let newDifficultyModifier = profile.difficultyModifier || 0;
+      if (accuracy >= 70) {
+        newDifficultyModifier += 3;
+      } else if (accuracy <= 40) {
+        newDifficultyModifier -= 3;
+      }
+
       try {
         await updateProfile({
           points: newPoints,
@@ -335,7 +343,8 @@ export default function Quiz({ profile, updateProfile }: QuizProps) {
           lastActive: new Date().toISOString(),
           history: newHistory,
           wallet: updatedWallet,
-          inventory: updatedInventory
+          inventory: updatedInventory,
+          difficultyModifier: newDifficultyModifier
         });
       } catch (e) {
         console.error("Error saving gamification data", e);

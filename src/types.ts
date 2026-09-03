@@ -130,4 +130,5 @@ export interface UserProfile {
     xpMultipliers: number;
   };
   isPro?: boolean;
+  difficultyModifier?: number;
 }

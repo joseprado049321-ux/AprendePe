@@ -96,7 +96,8 @@ export default function Diagnostic({ profile, updateProfile }: DiagnosticProps =
         diagnosticScore: percentage,
         diagnosticLevel: calculatedLevel, 
         level: calculatedLevel,
-        xp: currentXp + 100 // +100 XP por completar el diagnóstico
+        xp: currentXp + 100, // +100 XP por completar el diagnóstico
+        difficultyModifier: percentage <= 40 ? -3 : 0
       };
 
       if (updateProfile && profile) {

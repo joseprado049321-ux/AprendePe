@@ -177,7 +177,8 @@ export default function Home({ profile, updateProfile, linkGuestToGoogle }: Home
           userId: profile.uid,
           userHistory,
           lastAccuracy,
-          lastLivesLost
+          lastLivesLost,
+          difficultyModifier: profile.difficultyModifier
         })
       });
 
